@@ -4,16 +4,18 @@ ARCH ?= x86_64
 TAG ?= v0.local
 DOCKER_IMAGE ?= arch-bundle-builder
 
-.PHONY: arch arch-docker arch-image binary deps clean-bundles
+.PHONY: arch arch-docker arch-image binary deps release-deps clean-bundles
 
 deps:
 	./script/linux/install_build_deps
+
+release-deps:
 	./script/install_cargo_release_deps
 
 binary:
 	GIT_RELEASE_TAG=$(TAG) ./script/bundle --channel $(CHANNEL) --artifact $(ARTIFACT) --packages none
 
-arch:
+arch: release-deps
 	GIT_RELEASE_TAG=$(TAG) ./script/bundle --channel $(CHANNEL) --artifact $(ARTIFACT) --packages arch --arch $(ARCH)
 
 arch-image:
