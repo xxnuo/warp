@@ -1,0 +1,61 @@
+name: Build Arch Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact:
+        type: choice
+        options:
+          - app
+          - cli
+        default: app
+        required: true
+      channel:
+        type: choice
+        options:
+          - oss
+        default: oss
+        required: true
+
+env:
+  CARGO_TERM_COLOR: always
+  SETTINGS_SCHEMA_CACHE: ${{ github.workspace }}/.settings_schema_cache.json
+
+jobs:
+  build:
+    name: Build Arch Package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          lfs: true
+
+      - uses: ./.github/actions/prepare_environment
+        with:
+          target_os: linux
+          is_self_hosted: false
+          install_release_deps: true
+
+      - name: Build binary
+        run: |
+          script/bundle \
+            --channel "${{ inputs.channel }}" \
+            --artifact "${{ inputs.artifact }}" \
+            --packages none
+        env:
+          GIT_RELEASE_TAG: v0.${{ github.sha }}
+
+      - name: Bundle Arch package
+        uses: ./.github/actions/bundle_arch_package
+        with:
+          channel: ${{ inputs.channel }}
+          release-tag: v0.${{ github.sha }}
+          arch: x86_64
+          artifact: ${{ inputs.artifact }}
+
+      - name: Upload Arch package
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: arch-${{ inputs.artifact }}-${{ inputs.channel }}-x86_64
+          path: target/*/bundle/linux/*.pkg.tar.zst
