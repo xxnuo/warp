@@ -26,6 +26,7 @@ use pathfinder_geometry::vector::vec2f;
 use ui_components::{button, Component as _, Options as _};
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::WarpTheme;
+use warp_i18n::tr;
 use warpui_core::elements::{
     CacheOption, ChildAnchor, Container, Empty, Image, OffsetPositioning, ParentAnchor,
     ParentElement, ParentOffsetBounds, Rect, Shrinkable, Stack,
@@ -457,7 +458,7 @@ impl View for AgentOnboardingView {
             let close_button = self.close_button.render(
                 appearance,
                 button::Params {
-                    content: button::Content::Label("Skip".into()),
+                    content: button::Content::Label(tr("common.skip").into()),
                     theme: &button::themes::Naked,
                     options: button::Options {
                         size: button::Size::Small,

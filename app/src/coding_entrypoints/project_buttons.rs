@@ -7,6 +7,7 @@ use warp_core::ui::appearance::Appearance;
 use warp_core::ui::color::blend::Blend as _;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::Icon;
+use warp_i18n::tr;
 use warpui::elements::{
     ChildAnchor, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, DropShadow, Expanded,
     Flex, Hoverable, MouseStateHandle, OffsetPositioning, ParentAnchor, ParentElement as _,
@@ -31,7 +32,7 @@ pub fn init(app: &mut AppContext) {
     app.register_editable_bindings([
         EditableBinding::new(
             "project_buttons:open_repository",
-            "Open repository",
+            tr("code.open_repository"),
             ProjectButtonsAction::OpenRepository,
         )
         .with_context_predicate(id!("ProjectButons"))
@@ -39,7 +40,7 @@ pub fn init(app: &mut AppContext) {
         .with_custom_action(CustomAction::OpenRepository),
         EditableBinding::new(
             "project_buttons:create_new_project",
-            "Create new project",
+            tr("project_buttons.create_new_project"),
             ProjectButtonsAction::CreateProject,
         )
         .with_context_predicate(id!("ProjectButons"))
@@ -224,11 +225,11 @@ impl View for ProjectButtons {
         if FeatureFlag::CreateProjectFlow.is_enabled() {
             row.add_children([
                 Container::new(self.glowing_button(
-                    "Create new project",
+                    tr("project_buttons.create_new_project"),
                     Icon::Plus,
                     ProjectButtonsAction::CreateProject,
                     TooltipData {
-                        text: "Create and initialize a brand new project".to_string(),
+                        text: tr("project_buttons.create_new_project_tooltip"),
                         keybinding: keybinding_name_to_display_string(
                             "project_buttons:create_new_project",
                             app,
@@ -240,11 +241,11 @@ impl View for ProjectButtons {
                 .with_margin_right(16.)
                 .finish(),
                 Container::new(self.glowing_button(
-                    "Open repository",
+                    tr("code.open_repository"),
                     Icon::Folder,
                     ProjectButtonsAction::OpenRepository,
                     TooltipData {
-                        text: "Open an existing local folder or repository".to_string(),
+                        text: tr("project_buttons.open_repository_tooltip"),
                         keybinding: keybinding_name_to_display_string(
                             "project_buttons:open_repository",
                             app,
@@ -256,11 +257,11 @@ impl View for ProjectButtons {
                 .with_margin_right(16.)
                 .finish(),
                 self.glowing_button(
-                    "Clone repository",
+                    tr("project_buttons.clone_repository"),
                     Icon::Duplicate,
                     ProjectButtonsAction::CloneRepository,
                     TooltipData {
-                        text: "Clone a repo from GitHub or another source".to_string(),
+                        text: tr("project_buttons.clone_repository_tooltip"),
                         keybinding: None,
                     },
                     self.state_handles.clone_repo_button.clone(),
@@ -272,11 +273,11 @@ impl View for ProjectButtons {
                 Expanded::new(
                     1.,
                     self.glowing_button(
-                        "Open repository",
+                        tr("code.open_repository"),
                         Icon::Plus,
                         ProjectButtonsAction::CreateProject,
                         TooltipData {
-                            text: "Open an existing local folder or repository".to_string(),
+                            text: tr("project_buttons.open_repository_tooltip"),
                             keybinding: keybinding_name_to_display_string(
                                 "project_buttons:open_repository",
                                 app,

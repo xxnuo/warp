@@ -8,6 +8,7 @@ use itertools::Itertools as _;
 use pathfinder_geometry::vector::vec2f;
 use warp_core::context_flag::ContextFlag;
 use warp_core::features::FeatureFlag;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Border, ChildView, Clipped, ClippedScrollStateHandle, ClippedScrollable, ConstrainedBox,
     Container, CornerRadius, Fill, Flex, MainAxisAlignment, MainAxisSize, MouseStateHandle,
@@ -269,7 +270,7 @@ impl WelcomePalette {
             SearchBar::new(
                 mixer.clone(),
                 search_bar_state.clone(),
-                "Code, build, or search for anything...",
+                tr("welcome_palette.search_placeholder"),
                 Self::create_query_result_renderer,
                 ctx,
             )
@@ -286,7 +287,7 @@ impl WelcomePalette {
         });
 
         let placeholder_element = QueryResultRenderer::new(
-            MatchedBinding::placeholder("No results found".into()).into(),
+            MatchedBinding::placeholder(tr("command_palette.no_results")).into(),
             "welcome_palette:no_results".into(),
             |_, _, _| {},
             *styles::QUERY_RESULT_RENDERER_STYLES,
@@ -700,8 +701,14 @@ impl WelcomePalette {
             .with_text_and_icon_label(TextAndIcon::new(
                 TextAndIconAlignment::IconFirst,
                 match &self.open_project_keybinding {
-                    Some(keystroke) => format!("Add repository {keystroke}"),
-                    None => "Add repository".to_string(),
+                    Some(keystroke) => {
+                        let keybinding = keystroke.to_string();
+                        tr_with(
+                            "welcome_palette.add_repository_with_keybinding",
+                            &[("keybinding", &keybinding)],
+                        )
+                    }
+                    None => tr("welcome_palette.add_repository"),
                 },
                 Icon::Plus.to_warpui_icon(theme.foreground()),
                 MainAxisSize::Max,
@@ -723,8 +730,14 @@ impl WelcomePalette {
             .with_text_and_icon_label(TextAndIcon::new(
                 TextAndIconAlignment::IconFirst,
                 match &self.terminal_session_keybinding {
-                    Some(keystroke) => format!("Terminal session {keystroke}"),
-                    None => "Terminal session".to_string(),
+                    Some(keystroke) => {
+                        let keybinding = keystroke.to_string();
+                        tr_with(
+                            "welcome_palette.terminal_session_with_keybinding",
+                            &[("keybinding", &keybinding)],
+                        )
+                    }
+                    None => tr("welcome_palette.terminal_session"),
                 },
                 Icon::Terminal.to_warpui_icon(theme.foreground()),
                 MainAxisSize::Max,

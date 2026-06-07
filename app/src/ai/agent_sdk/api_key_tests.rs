@@ -16,6 +16,10 @@ fn key_with_uid(uid: &str, name: &str, scope: &str, created_at: DateTime<Utc>) -
     }
 }
 
+fn use_english() {
+    warp_i18n::set_locale("en-US");
+}
+
 #[test]
 fn sort_api_keys_sorts_by_name_ascending() {
     let created_at = Utc::now();
@@ -81,6 +85,8 @@ fn resolve_api_key_identifier_falls_back_to_name_match() {
 
 #[test]
 fn resolve_api_key_identifier_errors_for_ambiguous_name_matches() {
+    use_english();
+
     let created_at = Utc::now();
     let keys = vec![
         key_with_uid("uid-1", "deploy-key", "Team", created_at),
@@ -96,6 +102,8 @@ fn resolve_api_key_identifier_errors_for_ambiguous_name_matches() {
 
 #[test]
 fn resolve_api_key_identifier_errors_when_not_found() {
+    use_english();
+
     let created_at = Utc::now();
     let keys = vec![key_with_uid("uid-1", "deploy-key", "Team", created_at)];
     let err = resolve_api_key_identifier(&keys, "missing-key").unwrap_err();
@@ -105,6 +113,8 @@ fn resolve_api_key_identifier_errors_when_not_found() {
 
 #[test]
 fn api_key_display_includes_creation_date() {
+    use_english();
+
     let created_at = "2026-01-02T03:04:05Z".parse().unwrap();
     let key = key_with_uid("uid-1", "deploy-key", "Team", created_at);
 

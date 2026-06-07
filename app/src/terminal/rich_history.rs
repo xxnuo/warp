@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 use std::ops::Sub;
 
+use warp_i18n::tr_with;
 use warpui::elements::{
     Align, ConstrainedBox, Container, CrossAxisAlignment, Flex, Icon, ParentElement, Shrinkable,
 };
@@ -38,10 +39,14 @@ pub fn render_rich_history(entry: &HistoryEntry, ctx: &AppContext) -> Box<dyn El
         } else {
             UiIcon::AlertTriangle
         };
+        let code = exit_code.value().to_string();
         flex_column.add_child(
             Container::new(render_row_with_icon_and_paragraph(
                 icon.into(),
-                format!("Exit code {}", exit_code.value()),
+                tr_with(
+                    "terminal.rich_history.exit_code",
+                    &[("code", code.as_str())],
+                ),
                 appearance,
             ))
             .with_margin_top(DETAILS_PARAGRAPH_SPACING)
@@ -74,12 +79,13 @@ pub fn render_rich_history(entry: &HistoryEntry, ctx: &AppContext) -> Box<dyn El
     }
 
     if let (Some(start_ts), Some(completed_ts)) = (entry.start_ts, entry.completed_ts) {
+        let duration = human_readable_precise_duration((completed_ts).sub(start_ts));
         flex_column.add_child(
             Container::new(
                 ui_builder
-                    .paragraph(format!(
-                        "Finished in {}",
-                        human_readable_precise_duration((completed_ts).sub(start_ts))
+                    .paragraph(tr_with(
+                        "terminal.rich_history.finished_in",
+                        &[("duration", duration.as_str())],
                     ))
                     .build()
                     .finish(),
@@ -90,12 +96,13 @@ pub fn render_rich_history(entry: &HistoryEntry, ctx: &AppContext) -> Box<dyn El
     }
 
     if let Some(start_ts) = entry.start_ts {
+        let time = format_approx_duration_from_now(start_ts);
         flex_column.add_child(
             Container::new(
                 ui_builder
-                    .paragraph(format!(
-                        "Last ran {}",
-                        format_approx_duration_from_now(start_ts)
+                    .paragraph(tr_with(
+                        "terminal.rich_history.last_ran",
+                        &[("time", time.as_str())],
                     ))
                     .build()
                     .finish(),
@@ -134,13 +141,14 @@ pub(crate) fn render_ai_query_rich_history(
         );
     }
 
+    let time = format_approx_duration_from_now(entry.start_time);
     details_column.add_child(
         Container::new(
             appearance
                 .ui_builder()
-                .paragraph(format!(
-                    "Ran {}",
-                    format_approx_duration_from_now(entry.start_time)
+                .paragraph(tr_with(
+                    "terminal.rich_history.ran",
+                    &[("time", time.as_str())],
                 ))
                 .build()
                 .finish(),

@@ -36,6 +36,7 @@ pub use telemetry::AIIdentifiers;
 use uuid::Uuid;
 use warp_core::features::FeatureFlag;
 use warp_editor::render::model::LineCount;
+use warp_i18n::tr;
 use warp_multi_agent_api::{diff_hunk as diff_hunk_api, AgentEvent, AgentType};
 
 pub use self::api::{MaybeAIAgentOutputMessage, MessageToAIAgentOutputMessageError};
@@ -2698,7 +2699,7 @@ impl AIAgentInput {
             } => Some(url.query.clone()),
             Self::InitProjectRules { display_query, .. }
             | Self::CreateEnvironment { display_query, .. } => display_query.clone(),
-            Self::CodeReview { .. } => Some("Address these comments".to_string()),
+            Self::CodeReview { .. } => Some(tr("ai.agent.code_review.address_comments")),
             Self::FetchReviewComments { .. } => Some(commands::PR_COMMENTS.name.to_string()),
             Self::InvokeSkill {
                 skill, user_query, ..

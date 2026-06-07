@@ -13,6 +13,7 @@ mod editor;
 mod emacs_bindings;
 pub mod font;
 mod gpu;
+mod i18n;
 pub mod import;
 mod init;
 pub mod initializer;
@@ -34,6 +35,8 @@ mod ssh;
 mod theme;
 mod vim_banner;
 
+use warp_i18n::{tr, tr_with};
+
 #[cfg(test)]
 #[path = "schema_validation_tests.rs"]
 mod schema_validation_tests;
@@ -50,6 +53,7 @@ pub use editor::*;
 pub use emacs_bindings::*;
 pub use font::*;
 pub use gpu::*;
+pub use i18n::*;
 pub use init::*;
 pub use input::*;
 pub use input_mode::*;
@@ -99,19 +103,34 @@ impl SettingsFileError {
     /// footer (`render_settings_error_alert`) so the two UIs stay in sync.
     pub fn heading_and_description(&self) -> (String, String) {
         match self {
-            Self::FileParseFailed(_) => (
-                "Your settings file contains an error.".to_owned(),
-                format!("{self}. Open the file to fix it."),
-            ),
+            Self::FileParseFailed(_) => {
+                let error = self.to_string();
+                (
+                    tr("settings.file_error.heading_one"),
+                    tr_with("settings.file_error.open_to_fix", &[("error", &error)]),
+                )
+            }
             Self::InvalidSettings(keys) => match keys.len() {
-                1 => (
-                    "Your settings file contains an error.".to_owned(),
-                    format!("{self}. The default value is being used."),
-                ),
-                _ => (
-                    "Your settings file contains errors.".to_owned(),
-                    format!("{self}. Default values are being used."),
-                ),
+                1 => {
+                    let error = self.to_string();
+                    (
+                        tr("settings.file_error.heading_one"),
+                        tr_with(
+                            "settings.file_error.default_value_used",
+                            &[("error", &error)],
+                        ),
+                    )
+                }
+                _ => {
+                    let error = self.to_string();
+                    (
+                        tr("settings.file_error.heading_many"),
+                        tr_with(
+                            "settings.file_error.default_values_used",
+                            &[("error", &error)],
+                        ),
+                    )
+                }
             },
         }
     }

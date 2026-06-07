@@ -5,6 +5,7 @@ use anyhow::{bail, Context as _, Result};
 use channel_versions::VersionInfo;
 use instant::Duration;
 use warp_core::channel::{Channel, ChannelState};
+use warp_i18n::{tr, tr_with};
 use warp_terminal::shell::ShellType;
 use warpui::ViewContext;
 
@@ -200,24 +201,24 @@ mod package_manager {
                 FormattedTextLine::Heading(FormattedTextHeader {
                     // Make this an <h3>
                     heading_size: 3,
-                    text: vec![FormattedTextFragment::bold(format!(
-                        "Run {package_manager_name} to update"
+                    text: vec![FormattedTextFragment::bold(tr_with(
+                        "autoupdate.linux.heading",
+                        &[("package_manager", package_manager_name.as_str())],
                     ))],
                 }),
                 FormattedTextLine::Line(vec![
-                    FormattedTextFragment::plain_text("If you installed Warp using "),
-                    FormattedTextFragment::bold(package_manager_name),
-                    FormattedTextFragment::plain_text(
-                        " or a compatible tool, the pre-filled command will update Warp for you.",
-                    ),
+                    FormattedTextFragment::plain_text(tr("autoupdate.linux.installed_prefix")),
+                    FormattedTextFragment::bold(package_manager_name.clone()),
+                    FormattedTextFragment::plain_text(tr("autoupdate.linux.installed_suffix")),
                 ]),
             ];
 
             if self.package_manager.needs_repository_configuration() {
                 lines.push(FormattedTextLine::Line(vec![
-                    FormattedTextFragment::plain_text(
-                        "\nThe command below includes a one-time configuration of the Warp package repository and PGP signing key.",
-                    ),
+                    FormattedTextFragment::plain_text(format!(
+                        "\n{}",
+                        tr("autoupdate.linux.repository_configuration")
+                    )),
                 ]));
             }
 
@@ -226,22 +227,24 @@ mod package_manager {
                 .distribution_update_disabled_repository()
             {
                 lines.push(FormattedTextLine::Line(vec![
-                    FormattedTextFragment::plain_text(
-                        "\nThe ",
-                    ),
+                    FormattedTextFragment::plain_text(format!(
+                        "\n{}",
+                        tr("autoupdate.linux.dist_upgrade_prefix")
+                    )),
                     FormattedTextFragment::inline_code("warp_handle_dist_upgrade"),
-                    FormattedTextFragment::plain_text(
-                        " function ensures the Warp package repository is enabled, as we've detected you recently upgraded your distribution.",
-                    ),
+                    FormattedTextFragment::plain_text(tr("autoupdate.linux.dist_upgrade_suffix")),
                 ]));
             }
 
             lines.push(FormattedTextLine::Line(vec![
-                FormattedTextFragment::plain_text("\nReview the command below, then "),
-                FormattedTextFragment::bold("press enter"),
-                FormattedTextFragment::plain_text(" to install the update and re-launch Warp.  "),
+                FormattedTextFragment::plain_text(format!(
+                    "\n{}",
+                    tr("autoupdate.linux.review_prefix")
+                )),
+                FormattedTextFragment::bold(tr("autoupdate.linux.press_enter")),
+                FormattedTextFragment::plain_text(tr("autoupdate.linux.review_suffix")),
                 FormattedTextFragment::hyperlink(
-                    "Please report any issues",
+                    tr("autoupdate.linux.report_issues"),
                     "https://github.com/warpdotdev/Warp/issues/new/choose",
                 ),
             ]));

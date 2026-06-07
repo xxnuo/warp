@@ -3,6 +3,7 @@ use uuid::Uuid;
 use warp_core::ui::external_product_icon::ExternalProductIcon;
 use warp_core::ui::icons::Icon;
 use warp_core::ui::theme::color::internal_colors;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Align, Border, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Empty,
     Flex, Hoverable, MainAxisAlignment, MouseStateHandle, Padding, ParentElement, Radius,
@@ -57,14 +58,14 @@ pub struct UpdateModalBody {
 impl UpdateModalBody {
     pub fn new(ctx: &mut ViewContext<Self>) -> Self {
         let cancel_button = ctx.add_typed_action_view(|_ctx| {
-            ActionButton::new("Cancel", NakedTheme).on_click(|ctx| {
+            ActionButton::new(tr("common.cancel"), NakedTheme).on_click(|ctx| {
                 ctx.dispatch_typed_action(UpdateModalBodyAction::Cancel);
             })
         });
 
         let enter_keystroke = Keystroke::parse("enter").expect("valid keystroke");
         let update_button = ctx.add_typed_action_view(|ctx| {
-            let mut button = ActionButton::new("Update", PrimaryTheme)
+            let mut button = ActionButton::new(tr("common.update"), PrimaryTheme)
                 .with_keybinding(KeystrokeSource::Fixed(enter_keystroke), ctx)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(UpdateModalBodyAction::Update);
@@ -123,7 +124,8 @@ impl UpdateModalBody {
 
     fn render_title(&self, appearance: &Appearance) -> Box<dyn Element> {
         let theme = appearance.theme();
-        let name = self.server_name.as_deref().unwrap_or("Server");
+        let fallback_name = tr("settings.mcp.server");
+        let name = self.server_name.as_deref().unwrap_or(&fallback_name);
 
         // Renders MCP avatar icon
         let avatar_content = if let Some(icon) = ExternalProductIcon::from_string(name) {
@@ -153,7 +155,7 @@ impl UpdateModalBody {
 
         // Renders MCP title text
         let title = Text::new(
-            format!("Update {name}"),
+            tr_with("settings.mcp.update_named_server", &[("name", name)]),
             appearance.ui_font_family(),
             appearance.header_font_size(),
         )
@@ -220,9 +222,10 @@ impl UpdateModalBody {
 
     fn render_description(&self, appearance: &Appearance) -> Box<dyn Element> {
         // Modal appears only when multiple updates are available
-        let description = format!(
-            "This server has {} updates available, which would you like to proceed with?",
-            self.update_options.len()
+        let count = self.update_options.len().to_string();
+        let description = tr_with(
+            "settings.mcp.update_options_description",
+            &[("count", count.as_str())],
         );
 
         Text::new(
@@ -257,9 +260,9 @@ impl UpdateModalBody {
                 ..
             } => {
                 let publisher_string = match publisher {
-                    Author::CurrentUser => "another device",
-                    Author::OtherUser { name } => name,
-                    Author::Unknown => "a team member",
+                    Author::CurrentUser => tr("settings.mcp.another_device"),
+                    Author::OtherUser { name } => name.to_string(),
+                    Author::Unknown => tr("settings.mcp.team_member"),
                 };
                 let datetime = Local
                     .timestamp_opt(*new_version_ts, 0)
@@ -267,16 +270,22 @@ impl UpdateModalBody {
                     .unwrap_or_else(Local::now);
                 let formatted_time = format_approx_duration_from_now(datetime);
                 (
-                    format!("Update from {publisher_string}"),
+                    tr_with(
+                        "settings.mcp.update_from",
+                        &[("source", publisher_string.as_str())],
+                    ),
                     formatted_time.to_string(),
                 )
             }
             MCPServerUpdate::Gallery {
                 name, new_version, ..
-            } => (
-                format!("Update from {name}"),
-                format!("Version {new_version}"),
-            ),
+            } => {
+                let version = new_version.to_string();
+                (
+                    tr_with("settings.mcp.update_from", &[("source", name.as_str())]),
+                    tr_with("settings.mcp.version", &[("version", version.as_str())]),
+                )
+            }
         };
 
         let content = Flex::column()
@@ -391,7 +400,7 @@ impl View for UpdateModalBody {
         // Add update options
         if self.update_options.is_empty() {
             let no_updates_text = Text::new(
-                "No updates available",
+                tr("settings.mcp.no_updates_available"),
                 appearance.ui_font_family(),
                 appearance.ui_font_size(),
             )

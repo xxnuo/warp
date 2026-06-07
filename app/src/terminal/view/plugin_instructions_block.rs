@@ -2,6 +2,7 @@ use std::iter;
 
 use markdown_parser::{FormattedText, FormattedTextFragment, FormattedTextLine};
 use pathfinder_geometry::vector::vec2f;
+use warp_i18n::tr;
 use warpui::clipboard::ClipboardContent;
 use warpui::elements::{
     Border, ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
@@ -95,13 +96,14 @@ impl PluginInstructionsBlock {
     ) -> Box<dyn Element> {
         let appearance = Appearance::handle(app).as_ref(app);
         let theme = appearance.theme();
+        let description = tr(description);
 
         let step_number = render_step_number(index + 1, appearance);
 
         let desc_element: Box<dyn Element> = if let Some(url) = link {
             let fragments = vec![
                 FormattedTextFragment::plain_text(format!("{description} ")),
-                FormattedTextFragment::hyperlink("Learn more", url),
+                FormattedTextFragment::hyperlink(tr("common.learn_more"), url),
             ];
             let formatted = FormattedText::new(vec![FormattedTextLine::Line(fragments)]);
             FormattedTextElement::new(
@@ -187,7 +189,7 @@ impl View for PluginInstructionsBlock {
         let theme = appearance.theme();
 
         let title = Text::new(
-            self.instructions.title.to_owned(),
+            tr(self.instructions.title),
             appearance.ui_font_family(),
             20.,
         )
@@ -195,14 +197,13 @@ impl View for PluginInstructionsBlock {
         .with_color(theme.main_text_color(theme.background()).into_solid())
         .finish();
 
-        let subtitle_text = if self.is_remote_session {
-            format!(
-                "{} Be sure to run these commands on your remote machine.",
-                self.instructions.subtitle
-            )
-        } else {
-            self.instructions.subtitle.to_owned()
-        };
+        let mut subtitle_text = tr(self.instructions.subtitle);
+        if self.is_remote_session {
+            subtitle_text.push(' ');
+            subtitle_text.push_str(&tr(
+                "terminal.cli_agent.plugin.instructions.remote_session_note",
+            ));
+        }
 
         let subtitle = Text::new(subtitle_text, appearance.ui_font_family(), 14.)
             .with_color(theme.nonactive_ui_text_color().into_solid())
@@ -238,7 +239,7 @@ impl View for PluginInstructionsBlock {
         }
 
         for note in self.instructions.post_install_notes {
-            let post_note = Text::new((*note).to_owned(), appearance.ui_font_family(), 14.)
+            let post_note = Text::new(tr(note), appearance.ui_font_family(), 14.)
                 .with_color(theme.nonactive_ui_text_color().into_solid())
                 .finish();
             content.add_child(post_note);
@@ -293,7 +294,7 @@ impl TypedActionView for PluginInstructionsBlock {
                     let window_id = ctx.window_id();
                     ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                         toast_stack.add_ephemeral_toast(
-                            DismissibleToast::success("Copied to clipboard".to_owned()),
+                            DismissibleToast::success(tr("common.copied_to_clipboard")),
                             window_id,
                             ctx,
                         );

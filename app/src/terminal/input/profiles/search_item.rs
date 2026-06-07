@@ -2,6 +2,7 @@ use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
 use warp_core::ui::theme::Fill;
 use warp_core::ui::Icon;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{ConstrainedBox, Container, Flex, Highlight, ParentElement as _, Text};
 use warpui::fonts::{Properties, Style, Weight};
 use warpui::prelude::CrossAxisAlignment;
@@ -13,8 +14,6 @@ use crate::appearance::Appearance;
 use crate::search::{ItemHighlightState, SearchItem};
 use crate::terminal::input::inline_menu::styles as inline_styles;
 use crate::terminal::input::profiles::data_source::SelectProfileMenuItem;
-
-const MANAGE_PROFILES_LABEL: &str = "Manage profiles";
 
 #[derive(Debug, Clone)]
 enum ProfileSearchItemKind {
@@ -108,7 +107,9 @@ impl SearchItem for ProfileSearchItem {
                 is_selected,
                 ..
             } => (profile_name.clone(), *is_selected),
-            ProfileSearchItemKind::ManageProfiles => (MANAGE_PROFILES_LABEL.to_owned(), false),
+            ProfileSearchItemKind::ManageProfiles => {
+                (tr("terminal.profile_selector.manage_profiles"), false)
+            }
         };
 
         let mut label = Text::new_inline(label_text, appearance.ui_font_family(), font_size)
@@ -181,9 +182,11 @@ impl SearchItem for ProfileSearchItem {
     fn accessibility_label(&self) -> String {
         match &self.kind {
             ProfileSearchItemKind::Profile { profile_name, .. } => {
-                format!("Profile: {profile_name}")
+                tr_with("search.a11y.profile", &[("name", profile_name)])
             }
-            ProfileSearchItemKind::ManageProfiles => MANAGE_PROFILES_LABEL.to_string(),
+            ProfileSearchItemKind::ManageProfiles => {
+                tr("terminal.profile_selector.manage_profiles")
+            }
         }
     }
 }

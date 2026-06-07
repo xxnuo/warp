@@ -2,6 +2,7 @@ use ai::skills::SkillProvider;
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
 use warp_core::ui::icons::Icon;
+use warp_i18n::tr_with;
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, Highlight, ParentElement, Shrinkable, Text,
 };
@@ -129,6 +130,6 @@ impl SearchItem for SkillSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("Skill: {}", self.name)
+        tr_with("search.a11y.skill", &[("name", self.name.as_str())])
     }
 }

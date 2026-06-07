@@ -1,6 +1,7 @@
 use instant::Instant;
 use markdown_parser::{FormattedText, FormattedTextFragment, FormattedTextLine};
 use warp_core::features::FeatureFlag;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, CacheOption, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Element,
     Flex, FormattedTextElement, HighlightedHyperlink, Icon, Image, MouseStateHandle, ParentElement,
@@ -29,9 +30,6 @@ struct ChangelogMouseStateHandles {
     top_bar_mouse_state: MouseStateHandle,
     view_changelogs_mouse_state: MouseStateHandle,
 }
-
-const CHANGELOG_FETCH_ERROR_MSG: &str = "Unable to fetch the latest changelog.";
-const CHANGELOG_LOADING_MSG: &str = "Loading...";
 
 pub struct ChangelogSectionView {
     changelog_model_handle: ModelHandle<ChangelogModel>,
@@ -96,10 +94,12 @@ impl ChangelogSectionView {
             new_features_highlighted_link: Default::default(),
             improvements_highlighted_link: Default::default(),
             bug_fixes_highlighted_link: Default::default(),
-            changelog_fetch_error: create_formatted_text_from_string(
-                CHANGELOG_FETCH_ERROR_MSG.to_string(),
-            ),
-            changelog_loading: create_formatted_text_from_string(CHANGELOG_LOADING_MSG.to_string()),
+            changelog_fetch_error: create_formatted_text_from_string(tr(
+                "resource_center.changelog.fetch_error",
+            )),
+            changelog_loading: create_formatted_text_from_string(tr(
+                "resource_center.changelog.loading",
+            )),
         }
     }
 
@@ -118,9 +118,10 @@ impl ChangelogSectionView {
         model: &ChangelogModel,
         appearance: &Appearance,
     ) {
-        let title = ChangelogHeader::NewFeatures.to_string();
+        let lookup_title = ChangelogHeader::NewFeatures.to_string();
+        let title = ChangelogHeader::NewFeatures.localized_title();
         let icon = icons::Icon::Gift;
-        let Some(markdown) = model.parsed_changelog.get(&title) else {
+        let Some(markdown) = model.parsed_changelog.get(&lookup_title) else {
             return;
         };
 
@@ -200,13 +201,14 @@ impl ChangelogSectionView {
 
         for (section, icon, link) in additional_sections {
             let title = section.to_string();
+            let display_title = section.localized_title();
             let Some(markdown) = model.parsed_changelog.get(&title) else {
                 continue;
             };
 
             // Title
             content.add_child(render_basic_changelog_header(
-                &title,
+                &display_title,
                 render_icon(
                     icon,
                     appearance
@@ -366,7 +368,7 @@ impl SectionView for ChangelogSectionView {
             appearance
                 .ui_builder()
                 .link(
-                    "Read all changelogs".into(),
+                    tr("resource_center.changelog.read_all"),
                     Some("https://docs.warp.dev/changelog".into()),
                     None,
                     self.changelog_button_mouse_states

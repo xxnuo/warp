@@ -1,6 +1,7 @@
 //! Components for the notebook header.
 
 use warp_core::features::FeatureFlag;
+use warp_i18n::tr;
 use warpui::elements::{
     Container, CrossAxisAlignment, Flex, Highlight, MainAxisAlignment, MainAxisSize,
     MouseStateHandle, ParentElement, Shrinkable,
@@ -130,7 +131,7 @@ impl DetailsBar {
             let ui_builder = appearance.ui_builder().clone();
             edit_button = edit_button.with_tooltip(move || {
                 ui_builder
-                    .tool_tip("Sign in to edit".to_string())
+                    .tool_tip(tr("common.sign_in_to_edit"))
                     .build()
                     .finish()
             });
@@ -167,13 +168,13 @@ impl DetailsBar {
         match editor.state {
             EditorState::None => appearance
                 .ui_builder()
-                .span("Viewing")
+                .span(tr("common.viewing"))
                 .with_style(base_text_styles)
                 .build()
                 .finish(),
             EditorState::CurrentUser => appearance
                 .ui_builder()
-                .span("Editing")
+                .span(tr("common.editing"))
                 .with_style(base_text_styles)
                 .build()
                 .finish(),
@@ -202,7 +203,7 @@ fn editor_display_name(email: Option<&str>, app: &AppContext) -> String {
         Some(email) => UserProfiles::as_ref(app)
             .displayable_identifier_for_email(email)
             .unwrap_or_else(|| email.to_string()),
-        None => "Other user".to_string(),
+        None => tr("notebooks.other_user"),
     }
 }
 

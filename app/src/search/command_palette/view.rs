@@ -5,6 +5,7 @@ use std::sync::Arc;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use warp_core::send_telemetry_from_app_ctx;
+use warp_i18n::tr;
 use warp_util::path::LineAndColumnArg;
 use warpui::elements::{
     Align, Border, ChildView, Clipped, ClippedScrollStateHandle, ClippedScrollable, ConstrainedBox,
@@ -279,7 +280,7 @@ impl View {
             SearchBar::new(
                 mixer.clone(),
                 search_bar_state.clone(),
-                "Search for a command",
+                tr("command_palette.search_placeholder"),
                 Self::create_query_result_renderer,
                 ctx,
             )
@@ -291,7 +292,7 @@ impl View {
         });
 
         let placeholder_element = QueryResultRenderer::new(
-            MatchedBinding::placeholder("No results found".into()).into(),
+            MatchedBinding::placeholder(tr("command_palette.no_results")).into(),
             "command_palette:no_results".into(),
             |_, _, _| {},
             *styles::QUERY_RESULT_RENDERER_STYLES,
@@ -835,10 +836,9 @@ impl View {
                     if let Some(window_id) = window_id {
                         ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                             toast_stack.add_ephemeral_toast(
-                                DismissibleToast::error(
-                                    "Cannot switch conversations while agent is monitoring a command."
-                                        .to_string(),
-                                ),
+                                DismissibleToast::error(tr(
+                                    "command_palette.toast.cannot_switch_while_agent_monitoring",
+                                )),
                                 window_id,
                                 ctx,
                             );
@@ -976,9 +976,9 @@ impl View {
                 if can_start_new_conversation {
                     ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                         toast_stack.add_ephemeral_toast(
-                            DismissibleToast::error(
-                                "Cannot start a new conversation while agent is monitoring a command.".to_string(),
-                            ),
+                            DismissibleToast::error(tr(
+                                "command_palette.toast.cannot_start_while_agent_monitoring",
+                            )),
                             window_id,
                             ctx,
                         );

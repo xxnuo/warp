@@ -16,6 +16,8 @@ use itertools::Itertools;
 #[cfg(not(target_family = "wasm"))]
 use repo_metadata::repositories::DetectedRepositories;
 #[cfg(not(target_family = "wasm"))]
+use warp_i18n::tr;
+#[cfg(not(target_family = "wasm"))]
 use warp_util::local_or_remote_path::LocalOrRemotePath;
 use warpui::AppContext;
 #[cfg(not(target_family = "wasm"))]
@@ -232,7 +234,7 @@ struct CodeSearchError;
 #[cfg(not(target_family = "wasm"))]
 impl DataSourceRunError for CodeSearchError {
     fn user_facing_error(&self) -> String {
-        "Code search failed".to_string()
+        tr("ai_context_menu.code.search_failed")
     }
 
     fn telemetry_payload(&self) -> serde_json::Value {

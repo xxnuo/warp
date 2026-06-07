@@ -1,4 +1,5 @@
 use warp_core::features::FeatureFlag;
+use warp_i18n::tr;
 use warpui::{SingletonEntity, ViewContext};
 
 use super::rich_content::RichContentMetadata;
@@ -39,7 +40,7 @@ impl TerminalView {
         let auth_state = AuthStateProvider::as_ref(ctx).get().clone();
         let user_display_name = auth_state
             .username_for_display()
-            .unwrap_or_else(|| "User".to_owned());
+            .unwrap_or_else(|| tr("terminal.pending_user_query.user"));
         let profile_image_path = auth_state.user_photo_url();
 
         let prompt_for_send_now = prompt.clone();

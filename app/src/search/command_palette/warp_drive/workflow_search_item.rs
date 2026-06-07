@@ -1,4 +1,5 @@
 use ordered_float::OrderedFloat;
+use warp_i18n::tr_with;
 use warpui::elements::{Clipped, Container, Flex, Highlight, ParentElement, Shrinkable, Text};
 use warpui::fonts::{Properties, Weight};
 use warpui::{AppContext, Element, SingletonEntity};
@@ -149,6 +150,9 @@ impl SearchItem for WorkflowSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("Workflow: {}", self.cloud_workflow.model().data.name())
+        tr_with(
+            "search.a11y.workflow",
+            &[("name", self.cloud_workflow.model().data.name())],
+        )
     }
 }

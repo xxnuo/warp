@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use markdown_parser::{FormattedText, FormattedTextFragment, FormattedTextLine};
 use warp_core::ui::theme::WarpTheme;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, Container, CrossAxisAlignment, Flex, FormattedTextElement, HighlightedHyperlink,
     Hoverable, Icon, MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement,
@@ -262,7 +263,7 @@ impl SshInstallTmuxBlock {
                 content: tmux_system_install_script.to_string(),
             },
             TitledScript {
-                title: "Install to ~/.warp".to_string(),
+                title: tr("terminal.ssh.install_to_warp"),
                 content: self.tmux_local_install_script.clone(),
             },
             *is_first_script_active,
@@ -378,14 +379,17 @@ impl View for SshInstallTmuxBlock {
         );
 
         let explanation = if self.outdated_version {
-            "In order to Warpify your SSH session, a more recent version of tmux (>=3.0) must be installed. "
+            tr("terminal.ssh.tmux.outdated_explanation")
         } else {
-            "In order to Warpify your SSH session, tmux must be installed. "
+            tr("terminal.ssh.tmux.missing_explanation")
         };
 
         let warpify_description = vec![
             FormattedTextFragment::plain_text(explanation),
-            FormattedTextFragment::hyperlink("Why do I need tmux?", WHY_INSTALL_TMUX_URL),
+            FormattedTextFragment::hyperlink(
+                tr("terminal.ssh.tmux.why_needed"),
+                WHY_INSTALL_TMUX_URL,
+            ),
         ];
 
         let text_color =

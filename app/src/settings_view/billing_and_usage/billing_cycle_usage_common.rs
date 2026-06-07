@@ -5,6 +5,7 @@ use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::vec2f;
 use thousands::Separable;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, DropShadow, Empty,
     Flex, MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement, Radius, Shrinkable,
@@ -91,26 +92,30 @@ pub fn cost_type_color(cost_type: &AiCreditsUsageAndCostType) -> ColorU {
     }
 }
 
-fn cost_type_label(cost_type: &AiCreditsUsageAndCostType) -> &'static str {
+fn cost_type_label(cost_type: &AiCreditsUsageAndCostType) -> String {
     match cost_type {
-        AiCreditsUsageAndCostType::BaseLimit => "Base",
-        AiCreditsUsageAndCostType::BonusGrant => "Add-ons",
-        AiCreditsUsageAndCostType::Payg => "Pay-as-you-go",
-        AiCreditsUsageAndCostType::AmbientBonusGrant => "Cloud-only",
-        AiCreditsUsageAndCostType::Aggregate => "Combined",
-        AiCreditsUsageAndCostType::Other(_) => "Other",
+        AiCreditsUsageAndCostType::BaseLimit => tr("settings.billing.usage_type.base"),
+        AiCreditsUsageAndCostType::BonusGrant => tr("settings.billing.usage_type.addons"),
+        AiCreditsUsageAndCostType::Payg => tr("settings.billing.usage_type.pay_as_you_go"),
+        AiCreditsUsageAndCostType::AmbientBonusGrant => {
+            tr("settings.billing.usage_type.cloud_only")
+        }
+        AiCreditsUsageAndCostType::Aggregate => tr("settings.billing.usage_type.combined"),
+        AiCreditsUsageAndCostType::Other(_) => tr("settings.billing.usage_type.other"),
     }
 }
 
-fn bucket_label(bucket: &AiCreditsUsageBucket) -> &'static str {
+fn bucket_label(bucket: &AiCreditsUsageBucket) -> String {
     match bucket {
-        AiCreditsUsageBucket::Ai => "AI",
-        AiCreditsUsageBucket::Compute => "Compute",
-        AiCreditsUsageBucket::Platform => "Platform",
-        AiCreditsUsageBucket::SuggestedCodeDiffs => "Suggested code diffs",
-        AiCreditsUsageBucket::Voice => "Voice",
-        AiCreditsUsageBucket::Aggregate => "Total",
-        AiCreditsUsageBucket::Other(_) => "Other",
+        AiCreditsUsageBucket::Ai => "AI".to_string(),
+        AiCreditsUsageBucket::Compute => tr("settings.billing.bucket.compute"),
+        AiCreditsUsageBucket::Platform => tr("settings.billing.bucket.platform"),
+        AiCreditsUsageBucket::SuggestedCodeDiffs => {
+            tr("settings.billing.bucket.suggested_code_diffs")
+        }
+        AiCreditsUsageBucket::Voice => tr("settings.billing.bucket.voice"),
+        AiCreditsUsageBucket::Aggregate => tr("settings.billing.bucket.total"),
+        AiCreditsUsageBucket::Other(_) => tr("settings.billing.bucket.other"),
     }
 }
 
@@ -286,7 +291,7 @@ pub fn render_breakdown_tooltip(
 
     column.add_child(render_tooltip_row(
         /* no swatch on the total row */ None,
-        "Total usage".to_string(),
+        tr("settings.billing.total_usage"),
         total_credits,
         total_cost_cents,
         main,

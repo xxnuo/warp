@@ -1,6 +1,7 @@
 use pathfinder_color::ColorU;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ClippedScrollStateHandle, ClippedScrollable, ConstrainedBox, Container, CornerRadius,
     CrossAxisAlignment, Dismiss, DropShadow, Empty, Expanded, Flex, MainAxisSize, ParentElement,
@@ -133,7 +134,7 @@ impl AgentTodosPopupView {
 
         let mut header_row = Flex::row().with_cross_axis_alignment(CrossAxisAlignment::Center);
         let mut header = Text::new(
-            "Tasks".to_string(),
+            tr("ai_block.todos.tasks"),
             appearance.header_font_family(),
             styles.detail_font_size + 2.,
         )

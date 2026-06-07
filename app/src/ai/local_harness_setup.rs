@@ -1,21 +1,26 @@
 use warp_cli::agent::Harness;
+use warp_i18n::tr;
 
 #[cfg(not(target_family = "wasm"))]
 use crate::util::path::resolve_executable;
 
-/// Tooltip shown when a local harness is product-enabled but its CLI is missing.
-pub(crate) const LOCAL_HARNESS_INSTALLATION_REQUIRED_TOOLTIP: &str =
-    "Install Claude Code to use this local harness.";
+pub(crate) fn local_harness_installation_required_tooltip() -> String {
+    tr("ai.local_harness.install_claude_code")
+}
+
+pub(crate) fn local_harness_codex_disabled_message() -> String {
+    tr("ai.local_harness.codex_disabled")
+}
 
 /// Client-side readiness for using a harness in local orchestration.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum LocalHarnessSetupState {
     /// The harness is product-enabled and its required local CLI is installed.
     Ready,
     /// The harness is intentionally unavailable in the product.
-    ProductDisabled { message: &'static str },
+    ProductDisabled { message: String },
     /// The harness is product-enabled but the required local CLI is missing.
-    MissingHarness { tooltip: &'static str },
+    MissingHarness { tooltip: String },
 }
 
 impl LocalHarnessSetupState {
@@ -26,9 +31,9 @@ impl LocalHarnessSetupState {
 }
 
 /// Returns the product-level disabled reason for a local harness.
-pub(crate) fn local_harness_product_disabled_message(harness: Harness) -> Option<&'static str> {
+pub(crate) fn local_harness_product_disabled_message(harness: Harness) -> Option<String> {
     match harness {
-        Harness::Codex => Some("Local Codex child agents are temporarily disabled."),
+        Harness::Codex => Some(local_harness_codex_disabled_message()),
         Harness::Oz | Harness::Claude | Harness::OpenCode | Harness::Gemini | Harness::Unknown => {
             None
         }
@@ -55,7 +60,7 @@ fn local_harness_setup_state_with_cli_resolver(
 
     match harness {
         Harness::Claude if !cli_is_installed("claude") => LocalHarnessSetupState::MissingHarness {
-            tooltip: LOCAL_HARNESS_INSTALLATION_REQUIRED_TOOLTIP,
+            tooltip: local_harness_installation_required_tooltip(),
         },
         Harness::Oz | Harness::Claude | Harness::OpenCode | Harness::Gemini | Harness::Unknown => {
             LocalHarnessSetupState::Ready

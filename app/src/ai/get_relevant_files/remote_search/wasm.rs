@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use warp_i18n::tr;
 use warpui::{AppContext, ModelContext};
 
 use crate::ai::agent::{AIAgentActionId, SearchCodebaseFailureReason, SearchCodebaseResult};
@@ -28,6 +29,6 @@ pub(super) fn send_request(
 ) -> RemoteSearchRequest {
     RemoteSearchRequest::Ready(SearchCodebaseResult::Failed {
         reason: SearchCodebaseFailureReason::CodebaseNotIndexed,
-        message: "Remote codebase search is not available in this environment.".to_string(),
+        message: tr("ai.remote_search.not_available_environment"),
     })
 }

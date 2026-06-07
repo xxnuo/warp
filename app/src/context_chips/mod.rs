@@ -21,6 +21,7 @@ use std::time::Duration;
 use context_chip::PromptGenerator;
 use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
+use warp_i18n::tr;
 use warpui::color::ColorU;
 use warpui::elements::Text;
 use warpui::fonts::{Properties, Weight};
@@ -383,7 +384,7 @@ impl ContextChipKind {
             Self::VirtualEnvironment => ChipValue::Text("pyenv".to_string()),
             Self::CondaEnvironment => ChipValue::Text("condaenv".to_string()),
             Self::NodeVersion => ChipValue::Text("v18.17.0".to_string()),
-            Self::Date => ChipValue::Text("July 12, 2023".to_string()),
+            Self::Date => ChipValue::Text(tr("context_chips.placeholder.date")),
             Self::Time12 => ChipValue::Text("03:48 pm".to_string()),
             Self::Time24 => ChipValue::Text("15:48".to_string()),
             Self::Custom { .. } => ChipValue::Text("custom chip".to_string()),
@@ -392,7 +393,9 @@ impl ContextChipKind {
             Self::SvnDirtyItems => ChipValue::Text("3".to_string()),
             Self::Ssh => ChipValue::Text("alice@127.0.0.1".to_string()),
             Self::Subshell => ChipValue::Text("bash".to_string()),
-            Self::AgentPlanAndTodoList => ChipValue::Text("Plan and Todo List".to_string()),
+            Self::AgentPlanAndTodoList => {
+                ChipValue::Text(tr("context_chips.placeholder.plan_and_todo_list"))
+            }
         }
     }
 

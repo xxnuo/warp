@@ -4,6 +4,7 @@ use ordered_float::OrderedFloat;
 use warp_core::ui::color::coloru_with_opacity;
 use warp_core::ui::theme::Fill;
 use warp_core::ui::Icon;
+use warp_i18n::tr_with;
 use warpui::elements::{ConstrainedBox, Container, Highlight, ParentElement, Shrinkable, Text};
 use warpui::fonts::{Properties, Weight};
 use warpui::prelude::{Align, CrossAxisAlignment, Flex, MainAxisAlignment, MainAxisSize};
@@ -278,9 +279,15 @@ impl SearchItem for InlineHistoryItem {
 
     fn accessibility_label(&self) -> String {
         match &self.item_type {
-            HistoryItemType::Conversation { title, .. } => format!("Conversation: {title}"),
-            HistoryItemType::Command { command, .. } => format!("Command: {command}"),
-            HistoryItemType::AIPrompt { query_text } => format!("AI prompt: {query_text}"),
+            HistoryItemType::Conversation { title, .. } => {
+                tr_with("search.a11y.conversation", &[("title", title.as_str())])
+            }
+            HistoryItemType::Command { command, .. } => {
+                tr_with("search.a11y.command", &[("command", command.as_str())])
+            }
+            HistoryItemType::AIPrompt { query_text } => {
+                tr_with("search.a11y.ai_prompt", &[("prompt", query_text.as_str())])
+            }
         }
     }
 }

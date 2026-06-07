@@ -5,6 +5,7 @@ use std::{env, fs, io};
 
 use async_trait::async_trait;
 use serde_json::Value;
+use warp_i18n::tr;
 
 use super::{
     compare_versions, run_cli_command_logged, CliAgentPluginManager, PluginInstallError,
@@ -126,19 +127,19 @@ impl CliAgentPluginManager for CodexPluginManager {
         if still_outdated {
             log.push_str("Post-update version check: plugin is still outdated\n");
             return Err(PluginInstallError {
-                message: "Plugin update did not take effect".to_owned(),
+                message: tr("terminal.cli_agent.plugin.update_no_effect"),
                 log,
             });
         }
         Ok(())
     }
 
-    fn install_success_message(&self) -> &'static str {
-        "Warp plugin installed. Please restart Codex to activate."
+    fn install_success_message(&self) -> String {
+        tr("terminal.cli_agent.plugin.installed_restart_codex")
     }
 
-    fn update_success_message(&self) -> &'static str {
-        "Warp plugin updated. Please restart Codex to activate."
+    fn update_success_message(&self) -> String {
+        tr("terminal.cli_agent.plugin.updated_restart_codex")
     }
 
     fn install_instructions(&self) -> &'static PluginInstructions {
@@ -179,46 +180,46 @@ impl CliAgentPluginManager for CodexPluginManager {
 
 static PLUGIN_INSTALL_INSTRUCTIONS: LazyLock<PluginInstructions> =
     LazyLock::new(|| PluginInstructions {
-        title: "Install Warp Plugin for Codex",
-        subtitle: "Run the following commands, then restart Codex.",
+        title: "terminal.cli_agent.plugin.codex.install.title",
+        subtitle: "terminal.cli_agent.plugin.codex.install.subtitle",
         steps: &[
             PluginInstructionStep {
-                description: "Add the Warp plugin marketplace repository",
+                description: "terminal.cli_agent.plugin.codex.install.step.add_marketplace",
                 command: "codex plugin marketplace add warpdotdev/codex-warp",
                 executable: true,
                 link: None,
             },
             PluginInstructionStep {
-                description: "Install the Warp plugin",
+                description: "terminal.cli_agent.plugin.codex.install.step.install_plugin",
                 command: "codex plugin add warp@codex-warp",
                 executable: true,
                 link: None,
             },
         ],
-        post_install_notes: &["Restart Codex to activate the plugin."],
+        post_install_notes: &["terminal.cli_agent.plugin.codex.install.note.restart"],
     });
 
-static NATIVE_INSTALL_INSTRUCTIONS: LazyLock<PluginInstructions> = LazyLock::new(|| {
-    PluginInstructions {
-        title: "Enable Warp Notifications for Codex",
-        subtitle: "Update Codex to the latest version, then enable in-focus notifications so Warp can display them while you work.",
+static NATIVE_INSTALL_INSTRUCTIONS: LazyLock<PluginInstructions> =
+    LazyLock::new(|| PluginInstructions {
+        title: "terminal.cli_agent.plugin.codex.native_install.title",
+        subtitle: "terminal.cli_agent.plugin.codex.native_install.subtitle",
         steps: &[
             PluginInstructionStep {
-                description: "Update Codex to the latest version.",
+                description: "terminal.cli_agent.plugin.codex.native_install.step.update_codex",
                 command: "",
                 executable: false,
                 link: Some("https://developers.openai.com/codex/cli#upgrade"),
             },
             PluginInstructionStep {
-                description: "Set the notification condition to \"always\" in your Codex config. Open or create ~/.codex/config.toml and add:",
+                description:
+                    "terminal.cli_agent.plugin.codex.native_install.step.notification_condition",
                 command: "[tui]\nnotification_condition = \"always\"",
                 executable: false,
                 link: None,
             },
         ],
-        post_install_notes: &["Restart Codex to apply the changes."],
-    }
-});
+        post_install_notes: &["terminal.cli_agent.plugin.codex.native_install.note.restart"],
+    });
 
 static EMPTY_INSTRUCTIONS: LazyLock<PluginInstructions> = LazyLock::new(|| PluginInstructions {
     title: "",
@@ -229,23 +230,23 @@ static EMPTY_INSTRUCTIONS: LazyLock<PluginInstructions> = LazyLock::new(|| Plugi
 
 static PLUGIN_UPDATE_INSTRUCTIONS: LazyLock<PluginInstructions> =
     LazyLock::new(|| PluginInstructions {
-        title: "Update Warp Plugin for Codex",
-        subtitle: "Run the following commands, then restart Codex.",
+        title: "terminal.cli_agent.plugin.codex.update.title",
+        subtitle: "terminal.cli_agent.plugin.codex.update.subtitle",
         steps: &[
             PluginInstructionStep {
-                description: "Upgrade the marketplace",
+                description: "terminal.cli_agent.plugin.codex.update.step.upgrade_marketplace",
                 command: "codex plugin marketplace upgrade codex-warp",
                 executable: true,
                 link: None,
             },
             PluginInstructionStep {
-                description: "Reinstall the Warp plugin",
+                description: "terminal.cli_agent.plugin.codex.update.step.reinstall_plugin",
                 command: "codex plugin add warp@codex-warp",
                 executable: true,
                 link: None,
             },
         ],
-        post_install_notes: &["Restart Codex to activate the update."],
+        post_install_notes: &["terminal.cli_agent.plugin.codex.update.note.restart"],
     });
 
 fn check_installed(codex_dir: &Path) -> bool {

@@ -5,6 +5,7 @@ pub use content_section::ContentSectionView;
 use warp_core::features::FeatureFlag;
 pub mod changelog_section;
 pub use changelog_section::ChangelogSectionView;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ConstrainedBox, Container, CrossAxisAlignment, Element, Flex, Hoverable, Icon,
     MouseStateHandle, ParentElement, ScrollbarWidth, Shrinkable,
@@ -91,7 +92,7 @@ pub trait SectionView {
                 Align::new(
                     appearance
                         .ui_builder()
-                        .wrappable_text(section_name.section_name_string().to_string(), false)
+                        .wrappable_text(tr(section_name.section_name_key()), false)
                         .with_style(UiComponentStyles {
                             font_family_id: Some(appearance.ui_font_family()),
                             font_size: Some(SECTION_HEADER_FONT_SIZE),

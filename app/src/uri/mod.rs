@@ -13,6 +13,7 @@ use anyhow::{anyhow, ensure, Result};
 use itertools::Itertools;
 use session_sharing_protocol::common::SessionId;
 use url::Url;
+use warp_i18n::tr;
 use warp_util::path::LineAndColumnArg;
 use warpui::notification::UserNotification;
 use warpui::platform::TerminationMode;
@@ -944,8 +945,7 @@ impl Action {
                 if let Err(err) = open_docker_container(url, ctx) {
                     if let Some(window_id) = primary_window_id {
                         ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
-                            let toast =
-                                DismissibleToast::error("Custom URI is invalid.".to_owned());
+                            let toast = DismissibleToast::error(tr("uri.custom_uri_invalid"));
                             toast_stack.add_ephemeral_toast(toast, window_id, ctx);
                         });
                     }
@@ -1145,8 +1145,8 @@ impl Action {
             | Self::FocusCloudMode
             | Self::AutoHandoffToCloud { .. } => W::default(),
             Self::NewTab => W::ShowPrimaryWindow(WindowActivationFallbackBehavior::Notify {
-                title: "New tab created".to_owned(),
-                description: "Go to Warp to see your new tab.".to_owned(),
+                title: tr("uri.new_tab_created"),
+                description: tr("uri.new_tab_created_description"),
             }),
             Self::NewWindow => W::Nothing,
         }

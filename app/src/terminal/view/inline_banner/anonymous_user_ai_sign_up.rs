@@ -1,3 +1,4 @@
+use warp_i18n::tr;
 use warpui::elements::{
     Container, CornerRadius, CrossAxisAlignment, Flex, Icon, MainAxisAlignment, MainAxisSize,
     MouseStateHandle, ParentElement, Radius, Shrinkable, Text,
@@ -14,11 +15,6 @@ use crate::appearance::Appearance;
 use crate::terminal::view::{InlineBannerId, TerminalAction};
 use crate::ui_components::buttons::icon_button;
 use crate::ui_components::icons::Icon as UiIcon;
-
-const TITLE: &str = "Login for AI";
-const CONTENT: &str =
-    "AI features are unavailable for logged-out users. Create an account to use AI.";
-const SIGN_UP_BUTTON_TEXT: &str = "Sign Up";
 
 // Layout constants for three-column banner
 const ICON_SIZE_OFFSET: f32 = 3.0;
@@ -51,9 +47,9 @@ impl AnonymousUserAISignUpBannerState {
     pub fn render(&self, appearance: &Appearance) -> Box<dyn Element> {
         render_three_column_inline_banner(
             appearance,
-            TITLE,
-            CONTENT,
-            SIGN_UP_BUTTON_TEXT,
+            tr("terminal.inline_banner.anonymous_ai.title"),
+            tr("terminal.inline_banner.anonymous_ai.content"),
+            tr("auth.sign_up"),
             self.sign_up_button_mouse_state.clone(),
             self.close_button_mouse_state.clone(),
         )
@@ -66,9 +62,9 @@ impl AnonymousUserAISignUpBannerState {
 /// - Column 3: Buttons (Sign Up + Close)
 fn render_three_column_inline_banner(
     appearance: &Appearance,
-    title: &str,
-    content: &str,
-    button_text: &str,
+    title: String,
+    content: String,
+    button_text: String,
     button_mouse_state: MouseStateHandle,
     close_button_mouse_state: MouseStateHandle,
 ) -> Box<dyn Element> {
@@ -137,14 +133,10 @@ fn render_three_column_inline_banner(
 
     // Row 1: Title
     let title_row = Container::new(
-        Text::new(
-            title.to_owned(),
-            appearance.ui_font_family(),
-            title_font_size,
-        )
-        .with_color(active_text_color)
-        .soft_wrap(true)
-        .finish(),
+        Text::new(title, appearance.ui_font_family(), title_font_size)
+            .with_color(active_text_color)
+            .soft_wrap(true)
+            .finish(),
     )
     .with_padding_left(TEXT_COLUMN_LEFT_PADDING)
     .finish();
@@ -152,14 +144,10 @@ fn render_three_column_inline_banner(
 
     // Row 2: Content
     let content_row = Container::new(
-        Text::new(
-            content.to_owned(),
-            appearance.ui_font_family(),
-            content_font_size,
-        )
-        .with_color(content_text_color)
-        .soft_wrap(true)
-        .finish(),
+        Text::new(content, appearance.ui_font_family(), content_font_size)
+            .with_color(content_text_color)
+            .soft_wrap(true)
+            .finish(),
     )
     .with_padding_left(TEXT_COLUMN_LEFT_PADDING)
     .with_padding_top(CONTENT_TOP_PADDING)
@@ -198,7 +186,7 @@ fn render_three_column_inline_banner(
             Some(hovered_and_clicked_styles),
             Some(hovered_and_clicked_styles),
         )
-        .with_text_label(button_text.to_string())
+        .with_text_label(button_text)
         .with_style(button_styles)
         .build()
         .on_click(move |ctx, _, _| {

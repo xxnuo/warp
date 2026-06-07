@@ -6,6 +6,7 @@ use instant::Instant;
 use num_traits::SaturatingSub;
 use regex::escape;
 use string_offset::ByteOffset;
+use warp_i18n::tr;
 use warp_ripgrep::search::{Match as RipgrepMatch, Submatch};
 use warpui::r#async::SpawnedFutureHandle;
 use warpui::{Entity, ModelContext, ModelSpawner};
@@ -108,7 +109,7 @@ impl GlobalSearch {
                     log::error!("GlobalSearch: warp_ripgrep CLI search failed or aborted: {err}");
                     ctx.emit(GlobalSearchEvent::Failed {
                         search_id,
-                        error: "Global search failed.".to_string(),
+                        error: tr("workspace.global_search.failed"),
                     });
                 }
             },

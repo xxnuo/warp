@@ -6,6 +6,7 @@ use pathfinder_color::ColorU;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{ChildView, MainAxisSize};
 use warpui::{
     AppContext, Element, Entity, EntityId, ModelHandle, SingletonEntity as _, View, ViewContext,
@@ -76,13 +77,13 @@ static TAB_CONFIGS: LazyLock<Vec<InlineMenuTabConfig<InlineModelSelectorTab>>> =
     LazyLock::new(|| {
         let mut configs = vec![InlineMenuTabConfig {
             id: InlineModelSelectorTab::BaseAgent,
-            label: "Base".to_string(),
+            label: tr("terminal.input_models.base"),
             filters: HashSet::from([QueryFilter::BaseModels]),
         }];
         if FeatureFlag::InlineMenuHeaders.is_enabled() {
             configs.push(InlineMenuTabConfig {
                 id: InlineModelSelectorTab::FullTerminalUse,
-                label: "Full Terminal Use".to_string(),
+                label: tr("terminal.input_models.full_terminal_use"),
                 filters: HashSet::from([QueryFilter::FullTerminalUseModels]),
             });
         }
@@ -147,15 +148,18 @@ impl InlineModelSelectorView {
 
         let menu_view = if FeatureFlag::InlineMenuHeaders.is_enabled() {
             let manage_defaults_button = ctx.add_view(|_| {
-                ActionButton::new("Manage defaults", ManageDefaultsTheme)
-                    .with_icon(Icon::Settings)
-                    .with_size(ButtonSize::Small)
-                    .on_click(|ctx| {
-                        ctx.dispatch_typed_action(WorkspaceAction::ShowSettingsPageWithSearch {
-                            search_query: String::new(),
-                            section: Some(SettingsSection::WarpAgent),
-                        });
-                    })
+                ActionButton::new(
+                    tr("terminal.input_models.manage_defaults"),
+                    ManageDefaultsTheme,
+                )
+                .with_icon(Icon::Settings)
+                .with_size(ButtonSize::Small)
+                .on_click(|ctx| {
+                    ctx.dispatch_typed_action(WorkspaceAction::ShowSettingsPageWithSearch {
+                        search_query: String::new(),
+                        section: Some(SettingsSection::WarpAgent),
+                    });
+                })
             });
             let header_config = InlineMenuHeaderConfig {
                 label: "/model".to_string(),
@@ -191,11 +195,15 @@ impl InlineModelSelectorView {
                     let is_cli_agent_in_control_or_tagged_in =
                         cli_ctrl.as_ref(app).is_agent_in_control_or_tagged_in();
                     let message = match active_tab {
-                        InlineModelSelectorTab::FullTerminalUse if main_agent_in_progress && !is_cli_agent_in_control_or_tagged_in => {
-                            Some("You're using the base agent. Full terminal use models only apply to the full terminal use agent.")
+                        InlineModelSelectorTab::FullTerminalUse
+                            if main_agent_in_progress && !is_cli_agent_in_control_or_tagged_in =>
+                        {
+                            Some(tr("terminal.input_models.full_terminal_use_warning"))
                         }
-                        InlineModelSelectorTab::BaseAgent if is_cli_agent_in_control_or_tagged_in => {
-                            Some("You're using the full terminal use agent. Base models only apply to the base agent.")
+                        InlineModelSelectorTab::BaseAgent
+                            if is_cli_agent_in_control_or_tagged_in =>
+                        {
+                            Some(tr("terminal.input_models.base_warning"))
                         }
                         _ => None,
                     };
@@ -203,8 +211,7 @@ impl InlineModelSelectorView {
                     message.map(|msg| {
                         let appearance = Appearance::as_ref(app);
                         Alert::new().render(
-                            AlertConfig::warning(msg.to_string())
-                                .with_main_axis_size(MainAxisSize::Max),
+                            AlertConfig::warning(msg).with_main_axis_size(MainAxisSize::Max),
                             appearance,
                         )
                     })

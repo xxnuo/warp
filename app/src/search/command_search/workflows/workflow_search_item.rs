@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use ordered_float::OrderedFloat;
+use warp_i18n::tr_with;
 use warpui::elements::{
     Border, Clipped, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Flex, Highlight,
     MainAxisAlignment, MainAxisSize, ParentElement, Radius, Shrinkable, Text,
@@ -258,7 +259,8 @@ impl SearchItem for WorkflowSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("Workflow: {}", self.workflow_data().name())
+        let name = self.workflow_data().name().to_string();
+        tr_with("search.a11y.workflow", &[("name", &name)])
     }
 }
 

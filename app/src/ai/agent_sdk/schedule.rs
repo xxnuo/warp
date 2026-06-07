@@ -9,6 +9,7 @@ use warp_cli::schedule::{
 };
 use warp_cli::GlobalOptions;
 use warp_graphql::queries::get_scheduled_agent_history::ScheduledAgentHistory;
+use warp_i18n::{tr, tr_with};
 use warpui::platform::TerminationMode;
 use warpui::{AppContext, SingletonEntity};
 
@@ -76,7 +77,7 @@ fn create(ctx: &mut AppContext, args: CreateScheduleArgs) -> anyhow::Result<()> 
             let environment_id = match EnvironmentChoice::resolve_for_create(environment_args, ctx)
             {
                 Ok(EnvironmentChoice::None) => {
-                    eprintln!("Scheduling agent to run without an environment.");
+                    eprintln!("{}", tr("ai.agent_sdk.schedule.no_environment_warning"));
                     None
                 }
                 Ok(EnvironmentChoice::Environment { id, .. }) => Some(id),
@@ -149,11 +150,23 @@ fn create(ctx: &mut AppContext, args: CreateScheduleArgs) -> anyhow::Result<()> 
             config.agent_config = agent_config;
 
             // Print something here because scheduling an agent can take a while.
-            println!("Scheduling agent {}...", config.name);
+            println!(
+                "{}",
+                tr_with(
+                    "ai.agent_sdk.schedule.scheduling_agent",
+                    &[("name", &config.name)]
+                )
+            );
             let create_future = manager.create_schedule(config, owner, ctx);
             ctx.spawn(create_future, |_manager, result, ctx| match result {
                 Ok(sync_id) => {
-                    println!("Scheduled agent: {sync_id}");
+                    println!(
+                        "{}",
+                        tr_with(
+                            "ai.agent_sdk.schedule.scheduled_agent",
+                            &[("id", &sync_id.to_string())]
+                        )
+                    );
                     ctx.terminate_app(TerminationMode::ForceTerminate, None);
                 }
                 Err(err) => {
@@ -228,18 +241,22 @@ impl ScheduleInfo {
 impl TableFormat for ScheduleInfo {
     fn header() -> Vec<Cell> {
         vec![
-            Cell::new("ID"),
-            Cell::new("Name"),
-            Cell::new("Schedule"),
-            Cell::new("Paused"),
-            Cell::new("Last ran"),
-            Cell::new("Next run"),
-            Cell::new("Scope"),
+            Cell::new(tr("ai.agent_sdk.schedule.table.id")),
+            Cell::new(tr("ai.agent_sdk.schedule.table.name")),
+            Cell::new(tr("ai.agent_sdk.schedule.table.schedule")),
+            Cell::new(tr("ai.agent_sdk.schedule.table.paused")),
+            Cell::new(tr("ai.agent_sdk.schedule.table.last_ran")),
+            Cell::new(tr("ai.agent_sdk.schedule.table.next_run")),
+            Cell::new(tr("ai.agent_sdk.schedule.table.scope")),
         ]
     }
 
     fn row(&self) -> Vec<Cell> {
-        let paused_display = if self.paused { "Yes" } else { "No" };
+        let paused_display = if self.paused {
+            tr("common.yes")
+        } else {
+            tr("common.no")
+        };
         vec![
             Cell::new(&self.id),
             Cell::new(&self.name),
@@ -253,7 +270,11 @@ impl TableFormat for ScheduleInfo {
 }
 
 fn print_schedule_info(info: &ScheduleInfo, output_format: OutputFormat) -> anyhow::Result<()> {
-    let paused_display = if info.paused { "Yes" } else { "No" };
+    let paused_display = if info.paused {
+        tr("common.yes")
+    } else {
+        tr("common.no")
+    };
 
     match output_format {
         OutputFormat::Json => {
@@ -262,71 +283,161 @@ fn print_schedule_info(info: &ScheduleInfo, output_format: OutputFormat) -> anyh
         }
         OutputFormat::Ndjson => output::write_json_line(info, std::io::stdout()),
         OutputFormat::Text => {
-            println!("Name: {}", info.name);
-            println!("Cron schedule: {}", info.cron_schedule);
-            println!("Paused: {paused_display}");
+            println!(
+                "{}",
+                tr_with("ai.agent_sdk.schedule.name_line", &[("name", &info.name)])
+            );
+            println!(
+                "{}",
+                tr_with(
+                    "ai.agent_sdk.schedule.cron_schedule_line",
+                    &[("schedule", &info.cron_schedule)]
+                )
+            );
+            println!(
+                "{}",
+                tr_with(
+                    "ai.agent_sdk.schedule.paused_line",
+                    &[("paused", &paused_display)]
+                )
+            );
 
             let last_ran = info.last_ran_display();
             let next_run = info.next_run_display();
-            println!("Last ran: {last_ran}");
+            println!(
+                "{}",
+                tr_with(
+                    "ai.agent_sdk.schedule.last_ran_line",
+                    &[("time", &last_ran)]
+                )
+            );
             if let Some(error) = &info.last_spawn_error {
-                println!("Last error: {error}");
+                println!(
+                    "{}",
+                    tr_with("ai.agent_sdk.schedule.last_error_line", &[("error", error)])
+                );
             }
-            println!("Next run: {next_run}");
+            println!(
+                "{}",
+                tr_with(
+                    "ai.agent_sdk.schedule.next_run_line",
+                    &[("time", &next_run)]
+                )
+            );
 
-            println!("Prompt: {}", info.prompt);
+            println!(
+                "{}",
+                tr_with(
+                    "ai.agent_sdk.schedule.prompt_line",
+                    &[("prompt", &info.prompt)]
+                )
+            );
 
             if let Some(environment_id) = &info.agent_config.environment_id {
-                println!("Environment ID: {environment_id}");
+                println!(
+                    "{}",
+                    tr_with(
+                        "ai.agent_sdk.schedule.environment_id_line",
+                        &[("id", environment_id)]
+                    )
+                );
             }
             if let Some(model_id) = &info.agent_config.model_id {
-                println!("Model ID: {model_id}");
+                println!(
+                    "{}",
+                    tr_with("ai.agent_sdk.schedule.model_id_line", &[("id", model_id)])
+                );
             }
             if let Some(agent_name) = &info.agent_config.name {
-                println!("Agent name: {agent_name}");
+                println!(
+                    "{}",
+                    tr_with(
+                        "ai.agent_sdk.schedule.agent_name_line",
+                        &[("name", agent_name)]
+                    )
+                );
             }
             if let Some(skill_spec) = &info.agent_config.skill_spec {
-                println!("Skill: {skill_spec}");
+                println!(
+                    "{}",
+                    tr_with("ai.agent_sdk.schedule.skill_line", &[("skill", skill_spec)])
+                );
             }
             if let Some(worker_host) = &info.agent_config.worker_host {
-                println!("Host: {worker_host}");
+                println!(
+                    "{}",
+                    tr_with("ai.agent_sdk.schedule.host_line", &[("host", worker_host)])
+                );
             }
 
             Ok(())
         }
         OutputFormat::Pretty => {
             let mut table = output::standard_table();
-            table.add_row(vec![Cell::new("Name"), Cell::new(&info.name)]);
             table.add_row(vec![
-                Cell::new("Cron schedule"),
+                Cell::new(tr("ai.agent_sdk.schedule.field.name")),
+                Cell::new(&info.name),
+            ]);
+            table.add_row(vec![
+                Cell::new(tr("ai.agent_sdk.schedule.field.cron_schedule")),
                 Cell::new(&info.cron_schedule),
             ]);
-            table.add_row(vec![Cell::new("Paused"), Cell::new(paused_display)]);
+            table.add_row(vec![
+                Cell::new(tr("ai.agent_sdk.schedule.field.paused")),
+                Cell::new(paused_display),
+            ]);
 
             let last_ran = info.last_ran_display();
             let next_run = info.next_run_display();
-            table.add_row(vec![Cell::new("Last ran"), Cell::new(last_ran)]);
+            table.add_row(vec![
+                Cell::new(tr("ai.agent_sdk.schedule.field.last_ran")),
+                Cell::new(last_ran),
+            ]);
             if let Some(error) = &info.last_spawn_error {
-                table.add_row(vec![Cell::new("Last error"), Cell::new(error)]);
+                table.add_row(vec![
+                    Cell::new(tr("ai.agent_sdk.schedule.field.last_error")),
+                    Cell::new(error),
+                ]);
             }
-            table.add_row(vec![Cell::new("Next run"), Cell::new(next_run)]);
+            table.add_row(vec![
+                Cell::new(tr("ai.agent_sdk.schedule.field.next_run")),
+                Cell::new(next_run),
+            ]);
 
-            table.add_row(vec![Cell::new("Prompt"), Cell::new(&info.prompt)]);
+            table.add_row(vec![
+                Cell::new(tr("ai.agent_sdk.schedule.field.prompt")),
+                Cell::new(&info.prompt),
+            ]);
 
             if let Some(environment_id) = &info.agent_config.environment_id {
-                table.add_row(vec![Cell::new("Environment ID"), Cell::new(environment_id)]);
+                table.add_row(vec![
+                    Cell::new(tr("ai.agent_sdk.schedule.field.environment_id")),
+                    Cell::new(environment_id),
+                ]);
             }
             if let Some(model_id) = &info.agent_config.model_id {
-                table.add_row(vec![Cell::new("Model ID"), Cell::new(model_id)]);
+                table.add_row(vec![
+                    Cell::new(tr("ai.agent_sdk.schedule.field.model_id")),
+                    Cell::new(model_id),
+                ]);
             }
             if let Some(agent_name) = &info.agent_config.name {
-                table.add_row(vec![Cell::new("Agent name"), Cell::new(agent_name)]);
+                table.add_row(vec![
+                    Cell::new(tr("ai.agent_sdk.schedule.field.agent_name")),
+                    Cell::new(agent_name),
+                ]);
             }
             if let Some(skill_spec) = &info.agent_config.skill_spec {
-                table.add_row(vec![Cell::new("Skill"), Cell::new(skill_spec)]);
+                table.add_row(vec![
+                    Cell::new(tr("ai.agent_sdk.schedule.field.skill")),
+                    Cell::new(skill_spec),
+                ]);
             }
             if let Some(worker_host) = &info.agent_config.worker_host {
-                table.add_row(vec![Cell::new("Host"), Cell::new(worker_host)]);
+                table.add_row(vec![
+                    Cell::new(tr("ai.agent_sdk.schedule.field.host")),
+                    Cell::new(worker_host),
+                ]);
             }
 
             println!("{table}");
@@ -346,11 +457,11 @@ fn pause(ctx: &mut AppContext, args: PauseScheduleArgs) -> anyhow::Result<()> {
                 return;
             }
 
-            println!("Pausing agent...");
+            println!("{}", tr("ai.agent_sdk.schedule.pausing_agent"));
             let pause_future = manager.pause_schedule(schedule_id, ctx);
             ctx.spawn(pause_future, |_manager, result, ctx| match result {
                 Ok(()) => {
-                    println!("Schedule paused");
+                    println!("{}", tr("ai.agent_sdk.schedule.paused"));
                     ctx.terminate_app(TerminationMode::ForceTerminate, None);
                 }
                 Err(err) => {
@@ -374,11 +485,11 @@ fn unpause(ctx: &mut AppContext, args: UnpauseScheduleArgs) -> anyhow::Result<()
                 return;
             }
 
-            println!("Resuming agent...");
+            println!("{}", tr("ai.agent_sdk.schedule.resuming_agent"));
             let unpause_future = manager.unpause_schedule(schedule_id, ctx);
             ctx.spawn(unpause_future, |_manager, result, ctx| match result {
                 Ok(()) => {
-                    println!("Schedule unpaused");
+                    println!("{}", tr("ai.agent_sdk.schedule.unpaused"));
                     ctx.terminate_app(TerminationMode::ForceTerminate, None);
                 }
                 Err(err) => {
@@ -499,7 +610,7 @@ fn update(ctx: &mut AppContext, args: UpdateScheduleArgs) -> anyhow::Result<()> 
                 args.skill.map(|s| Some(s.to_string()))
             };
 
-            println!("Updating agent...");
+            println!("{}", tr("ai.agent_sdk.schedule.updating_agent"));
             let update_future = manager.update_schedule(
                 schedule_id,
                 UpdateScheduleParams {
@@ -518,7 +629,7 @@ fn update(ctx: &mut AppContext, args: UpdateScheduleArgs) -> anyhow::Result<()> 
             );
             ctx.spawn(update_future, |_manager, result, ctx| match result {
                 Ok(()) => {
-                    println!("Schedule updated");
+                    println!("{}", tr("ai.agent_sdk.schedule.updated"));
                     ctx.terminate_app(TerminationMode::ForceTerminate, None);
                 }
                 Err(err) => {
@@ -564,7 +675,7 @@ fn list(ctx: &mut AppContext, output_format: OutputFormat) -> anyhow::Result<()>
 
                     let id = match sync_id {
                         SyncId::ServerId(server_id) => server_id.to_string(),
-                        SyncId::ClientId(_) => "Unsynced".to_string(),
+                        SyncId::ClientId(_) => tr("ai.agent_sdk.unsynced"),
                     };
 
                     ScheduleInfo::new(id, scope, config, history.as_ref())
@@ -602,13 +713,16 @@ fn get(
             }
 
             let Some(schedule) = CloudScheduledAmbientAgent::get_by_id(&schedule_id, ctx) else {
-                super::report_fatal_error(anyhow::anyhow!("Schedule not found"), ctx);
+                super::report_fatal_error(
+                    anyhow::anyhow!("{}", tr("ai.agent_sdk.schedule.not_found")),
+                    ctx,
+                );
                 return;
             };
 
             let id = match &schedule_id {
                 SyncId::ServerId(server_id) => server_id.to_string(),
-                SyncId::ClientId(_) => "Unsynced".to_string(),
+                SyncId::ClientId(_) => tr("ai.agent_sdk.unsynced"),
             };
             let scope = super::common::format_owner(&schedule.permissions().owner).to_string();
             let config = schedule.model().string_model.clone();
@@ -650,11 +764,11 @@ fn delete(ctx: &mut AppContext, args: DeleteScheduleArgs) -> anyhow::Result<()> 
                 return;
             }
 
-            println!("Deleting agent...");
+            println!("{}", tr("ai.agent_sdk.schedule.deleting_agent"));
             let delete_future = manager.delete_schedule(schedule_id, ctx);
             ctx.spawn(delete_future, |_manager, result, ctx| match result {
                 Ok(()) => {
-                    println!("Schedule deleted");
+                    println!("{}", tr("ai.agent_sdk.schedule.deleted"));
                     ctx.terminate_app(TerminationMode::ForceTerminate, None);
                 }
                 Err(err) => {

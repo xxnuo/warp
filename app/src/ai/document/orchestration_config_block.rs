@@ -11,6 +11,7 @@ use pathfinder_geometry::vector::vec2f;
 use warp_cli::agent::Harness;
 use warp_core::send_telemetry_from_ctx;
 use warp_core::ui::theme::WarpTheme;
+use warp_i18n::tr;
 use warpui::elements::{
     ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Empty,
     Flex, Hoverable, MainAxisAlignment, MainAxisSize, MouseStateHandle, OffsetPositioning,
@@ -104,11 +105,6 @@ fn render_pill_toggle(is_on: bool, theme: &WarpTheme) -> Box<dyn Element> {
     .with_height(18.)
     .finish()
 }
-
-const CONFIG_BLOCK_HEADER: &str = "Use orchestration";
-const CONFIG_BLOCK_DESCRIPTION: &str =
-    "Break this work into coordinated streams with multiple agents.";
-const BASE_MODEL_HELPER: &str = "The primary model all agents will use.";
 
 // ── Action type ─────────────────────────────────────────────────────
 
@@ -606,7 +602,7 @@ impl View for OrchestrationConfigBlockView {
 
         // Header row: "Use orchestration" + pill toggle switch
         let header_label = Text::new(
-            CONFIG_BLOCK_HEADER.to_string(),
+            tr("ai.orchestration_config.use_orchestration"),
             appearance.ui_font_family(),
             16.,
         )
@@ -634,7 +630,7 @@ impl View for OrchestrationConfigBlockView {
 
         // Description
         let description = Text::new(
-            CONFIG_BLOCK_DESCRIPTION.to_string(),
+            tr("ai.orchestration_config.description"),
             appearance.ui_font_family(),
             appearance.monospace_font_size(),
         )
@@ -662,7 +658,7 @@ impl View for OrchestrationConfigBlockView {
             };
             let disabled_text_color = blended_colors::text_disabled(theme, theme.background());
             let details_text = Text::new(
-                "View details".to_string(),
+                tr("ai.orchestration_config.view_details"),
                 appearance.ui_font_family(),
                 appearance.monospace_font_size() + 1.,
             )
@@ -722,7 +718,7 @@ impl View for OrchestrationConfigBlockView {
 
                 // Helper text
                 let helper = Text::new(
-                    BASE_MODEL_HELPER.to_string(),
+                    tr("ai.orchestration_config.base_model_helper"),
                     appearance.ui_font_family(),
                     appearance.monospace_font_size() - 1.,
                 )

@@ -5,6 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::color::internal_colors;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Border, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Flex,
     FormattedTextElement, Hoverable, MainAxisAlignment, MainAxisSize, MouseStateHandle,
@@ -145,14 +146,14 @@ impl OnboardingAgenticSuggestionsBlock {
         let matrix_save_directory = themes_dir()
             .into_os_string()
             .into_string()
-            .unwrap_or("the Warp themes directory.".to_string());
+            .unwrap_or_else(|_| tr("onboarding.agentic_suggestions.matrix.themes_directory"));
 
         let agent_suggestions = vec![
             (
                 AgenticSuggestionsContent {
-                    title: "Create a snake game in Python from scratch".to_string(),
-                    description: "Have Agent Mode walk you through creating a snake game from end-to-end".to_string(),
-                    prompt: "Make a snake game for playing in the terminal using python. Use the code tool and requested commands to do it for me. Before deciding on a solution, make sure I have all the prerequisites installed. At the end of our conversation, the app should run without any additional steps.".to_string(),
+                    title: tr("onboarding.agentic_suggestions.snake.title"),
+                    description: tr("onboarding.agentic_suggestions.snake.description"),
+                    prompt: tr("onboarding.agentic_suggestions.snake.prompt"),
                     chip_type: OnboardingChipType::PythonSnakeGame,
                     icon: UIIcon::Icon::GamingPad,
                 },
@@ -160,9 +161,15 @@ impl OnboardingAgenticSuggestionsBlock {
             ),
             (
                 AgenticSuggestionsContent {
-                    title: format!("Explore git history in {git_repo_trimmed}"),
-                    description: "Work with Agent Mode to understand recent changes to a git repository".to_string(),
-                    prompt: format!("Explore my git history in {git_repo_path} and provide me a summary."),
+                    title: tr_with(
+                        "onboarding.agentic_suggestions.git.title",
+                        &[("repo", git_repo_trimmed.as_str())],
+                    ),
+                    description: tr("onboarding.agentic_suggestions.git.description"),
+                    prompt: tr_with(
+                        "onboarding.agentic_suggestions.git.prompt",
+                        &[("path", &git_repo_path)],
+                    ),
                     chip_type: OnboardingChipType::ExploreGitHistory,
                     icon: UIIcon::Icon::BookOpen,
                 },
@@ -170,9 +177,12 @@ impl OnboardingAgenticSuggestionsBlock {
             ),
             (
                 AgenticSuggestionsContent {
-                    title: "Create a Matrix-styled custom theme".to_string(),
-                    description: "Make your terminal look like you entered the Matrix".to_string(),
-                    prompt: format!("First check if {matrix_save_directory} exists, and create this path if it doesn't already exist. Then create a matrix theme for my Warp terminal without a background image field, following exact YAML structure on the warp website without any extra or missing fields. Call it matrix.yaml and save it in the directory we previously created. Once you've verified that the theme is correct and ready to be applied, let me know by only saying 'The matrix theme is now available at <path>.'."),
+                    title: tr("onboarding.agentic_suggestions.matrix.title"),
+                    description: tr("onboarding.agentic_suggestions.matrix.description"),
+                    prompt: tr_with(
+                        "onboarding.agentic_suggestions.matrix.prompt",
+                        &[("directory", &matrix_save_directory)],
+                    ),
                     chip_type: OnboardingChipType::MatrixThemePicker,
                     icon: UIIcon::Icon::PaintBrush,
                 },
@@ -180,9 +190,9 @@ impl OnboardingAgenticSuggestionsBlock {
             ),
             (
                 AgenticSuggestionsContent {
-                    title: "Something else?".to_string(),
-                    description: "Pair with an Agent to accomplish another task".to_string(),
-                    prompt: "What can you help with me on?".to_string(),
+                    title: tr("onboarding.agentic_suggestions.other.title"),
+                    description: tr("onboarding.agentic_suggestions.other.description"),
+                    prompt: tr("onboarding.agentic_suggestions.other.prompt"),
                     chip_type: OnboardingChipType::Other,
                     icon: UIIcon::Icon::Stars,
                 },
@@ -581,25 +591,26 @@ impl OnboardingAgenticSuggestionsBlock {
         let font_size = appearance.monospace_font_size();
         let font_color = current_theme.main_text_color(current_theme.background());
 
-        const WELCOME_TEXT_LINE_ONE: &str = "Welcome to Warp!";
-        const WELCOME_TEXT_LINE_TWO_PART_ONE: &str =
-            "Here are a few examples of how to leverage the power of AI in your terminal using";
-        const WELCOME_TEXT_LINE_TWO_PART_TWO: &str = " Agent Mode";
-
         Flex::column()
             .with_children(vec![
                 Container::new(
-                    Text::new(WELCOME_TEXT_LINE_ONE, font_family, font_size)
-                        .with_color(font_color.into_solid())
-                        .finish(),
+                    Text::new(
+                        tr("onboarding.agentic_suggestions.welcome"),
+                        font_family,
+                        font_size,
+                    )
+                    .with_color(font_color.into_solid())
+                    .finish(),
                 )
                 .with_margin_bottom(10.)
                 .finish(),
                 FormattedTextElement::new(
                     FormattedText::new([FormattedTextLine::Line(vec![
-                        FormattedTextFragment::plain_text(WELCOME_TEXT_LINE_TWO_PART_ONE),
+                        FormattedTextFragment::plain_text(tr(
+                            "onboarding.agentic_suggestions.intro_prefix",
+                        )),
                         FormattedTextFragment::weighted(
-                            WELCOME_TEXT_LINE_TWO_PART_TWO,
+                            tr("onboarding.agentic_suggestions.agent_mode"),
                             Some(CustomWeight::Bold),
                         ),
                     ])]),
@@ -642,7 +653,7 @@ impl OnboardingAgenticSuggestionsBlock {
                     )
                     .with_child(
                         Text::new(
-                            "Thinking...".to_owned(),
+                            tr("onboarding.agentic_suggestions.thinking"),
                             appearance.ui_font_family(),
                             appearance.monospace_font_size(),
                         )

@@ -3,6 +3,7 @@ use voice_input::{StartListeningError, VoiceInput, VoiceSessionResult};
 use warp_core::send_telemetry_from_ctx;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::AnsiColorIdentifier;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{Container, CornerRadius, Icon, Radius};
 use warpui::platform::Cursor;
 use warpui::r#async::SpawnedFutureHandle;
@@ -68,9 +69,9 @@ impl EditorView {
         ctx: &mut ViewContext<EditorView>,
     ) -> ViewHandle<FeaturePopup> {
         let voice_new_feature_popup = ctx.add_typed_action_view(|_| {
-            FeaturePopup::new_feature(NewFeaturePopupLabel::FromString(
-                "Try Voice Input".to_string(),
-            ))
+            FeaturePopup::new_feature(NewFeaturePopupLabel::FromString(tr(
+                "editor.voice.try_voice_input",
+            )))
         });
 
         ctx.subscribe_to_view(&voice_new_feature_popup, |_me, _, event, ctx| {
@@ -263,7 +264,7 @@ impl EditorView {
                     .as_ref(ctx)
                     .can_request_voice()
                 {
-                    self.voice_error_toast(super::VOICE_LIMIT_HIT_TOAST_TEXT, ctx);
+                    self.voice_error_toast(&tr("editor.voice.limit_hit"), ctx);
                     return false;
                 }
 
@@ -497,11 +498,11 @@ impl EditorView {
             }
             Err(e) => match e {
                 TranscribeError::QuotaLimit => {
-                    self.voice_error_toast(super::VOICE_LIMIT_HIT_TOAST_TEXT, ctx)
+                    self.voice_error_toast(&tr("editor.voice.limit_hit"), ctx)
                 }
                 _ => {
                     log::error!("Failed to transcribe voice input: {e:?}");
-                    self.voice_error_toast(super::VOICE_ERROR_TOAST_TEXT, ctx)
+                    self.voice_error_toast(&tr("editor.voice.error"), ctx)
                 }
             },
         }
@@ -529,13 +530,13 @@ impl EditorView {
 
         let modifier_key = AISettings::handle(app).as_ref(app).voice_input_toggle_key;
         let tooltip_text = if mic_access_denied {
-            "Voice transcription is disabled because Microphone access was not granted.".to_string()
+            tr("editor.voice.mic_access_denied")
         } else if modifier_key == VoiceInputToggleKey::None {
-            "Voice transcription".to_string()
+            tr("editor.voice.title")
         } else {
-            format!(
-                "Voice transcription (hold `{}` key)",
-                modifier_key.display_name().to_lowercase()
+            tr_with(
+                "editor.voice.title_hold_key",
+                &[("key", &modifier_key.display_name().to_lowercase())],
             )
         };
 

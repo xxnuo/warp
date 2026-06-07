@@ -3,6 +3,7 @@
 use anyhow::{Context, Result};
 use serde::Serialize;
 use warp_cli::agent::OutputFormat;
+use warp_i18n::{tr, tr_with};
 use warpui::platform::TerminationMode;
 use warpui::{AppContext, SingletonEntity};
 
@@ -33,19 +34,31 @@ pub fn login(ctx: &mut AppContext) -> Result<()> {
                     let auth_state = AuthStateProvider::as_ref(ctx).get();
                     match (auth_state.username_for_display(), auth_state.user_email()) {
                         (Some(username), Some(email)) if username != email => {
-                            println!("You are already logged in as {username} ({email}).")
+                            println!(
+                                "{}",
+                                tr_with(
+                                    "ai.agent_sdk.admin.already_logged_in_with_email",
+                                    &[("username", &username), ("email", &email)]
+                                )
+                            )
                         }
                         (Some(name), _) | (None, Some(name)) => {
-                            println!("You are already logged in as {name}.")
+                            println!(
+                                "{}",
+                                tr_with(
+                                    "ai.agent_sdk.admin.already_logged_in_as",
+                                    &[("name", &name)]
+                                )
+                            )
                         }
                         (None, None) => {
-                            println!("You are already logged in.")
+                            println!("{}", tr("ai.agent_sdk.admin.already_logged_in"))
                         }
                     }
                     ctx.terminate_app(TerminationMode::ForceTerminate, None);
                 } else {
                     // Device auth succeeded.
-                    println!("Logged in successfully");
+                    println!("{}", tr("ai.agent_sdk.admin.logged_in_successfully"));
                     ctx.terminate_app(TerminationMode::ForceTerminate, None);
                 }
             }
@@ -59,10 +72,11 @@ pub fn login(ctx: &mut AppContext) -> Result<()> {
                 } else {
                     // Device auth failed.
                     let err_msg = match event {
-                        AuthManagerEvent::AuthFailed(err) => {
-                            format!("Authentication failed: {err:#}")
-                        }
-                        _ => "Authentication failed".to_string(),
+                        AuthManagerEvent::AuthFailed(err) => tr_with(
+                            "ai.agent_sdk.admin.authentication_failed_with_error",
+                            &[("error", &format!("{err:#}"))],
+                        ),
+                        _ => tr("ai.agent_sdk.admin.authentication_failed"),
                     };
                     ctx.terminate_app(
                         TerminationMode::ForceTerminate,
@@ -76,10 +90,17 @@ pub fn login(ctx: &mut AppContext) -> Result<()> {
                 user_code,
             } => {
                 if let Some(url) = verification_url_complete {
-                    println!("To log in, open this URL in your browser:\n{url}");
+                    println!(
+                        "{}",
+                        tr_with("ai.agent_sdk.admin.open_login_url", &[("url", &url)])
+                    );
                 } else {
                     println!(
-                        "To log in, visit {verification_url} and enter this code: {user_code}"
+                        "{}",
+                        tr_with(
+                            "ai.agent_sdk.admin.enter_login_code",
+                            &[("url", verification_url), ("code", user_code),],
+                        )
                     );
                 }
             }
@@ -136,7 +157,7 @@ pub fn whoami(ctx: &mut AppContext, output_format: OutputFormat) -> Result<()> {
                 .map(String::from)
                 .unwrap_or(s)
         })
-        .ok_or_else(|| anyhow::anyhow!("Could not determine user ID. Are you logged in?"))?;
+        .ok_or_else(|| anyhow::anyhow!("{}", tr("ai.agent_sdk.admin.user_id_missing")))?;
 
     let mut info = WhoamiOutput {
         uid,
@@ -182,22 +203,43 @@ pub fn whoami(ctx: &mut AppContext, output_format: OutputFormat) -> Result<()> {
                 }
                 OutputFormat::Pretty => {
                     match principal_type {
-                        PrincipalType::User => println!("User ID: {}", info.uid),
+                        PrincipalType::User => println!(
+                            "{}",
+                            tr_with("ai.agent_sdk.admin.user_id_line", &[("uid", &info.uid)])
+                        ),
                         PrincipalType::ServiceAccount => {
-                            println!("Service account ID: {}", info.uid)
+                            println!(
+                                "{}",
+                                tr_with(
+                                    "ai.agent_sdk.admin.service_account_id_line",
+                                    &[("uid", &info.uid)]
+                                )
+                            )
                         }
                     }
                     if let Some(name) = &info.display_name {
-                        println!("Display Name: {name}");
+                        println!(
+                            "{}",
+                            tr_with("ai.agent_sdk.admin.display_name_line", &[("name", name)])
+                        );
                     }
                     if let Some(email) = &info.email {
-                        println!("Email: {email}");
+                        println!(
+                            "{}",
+                            tr_with("ai.agent_sdk.admin.email_line", &[("email", email)])
+                        );
                     }
                     if let Some(team_uid) = &info.team_uid {
-                        println!("Team ID: {team_uid}");
+                        println!(
+                            "{}",
+                            tr_with("ai.agent_sdk.admin.team_id_line", &[("uid", team_uid)])
+                        );
                     }
                     if let Some(team_name) = &info.team_name {
-                        println!("Team Name: {team_name}");
+                        println!(
+                            "{}",
+                            tr_with("ai.agent_sdk.admin.team_name_line", &[("name", team_name)])
+                        );
                     }
                 }
                 OutputFormat::Text => {
@@ -207,7 +249,8 @@ pub fn whoami(ctx: &mut AppContext, output_format: OutputFormat) -> Result<()> {
                     ctx.terminate_app(
                         TerminationMode::ForceTerminate,
                         Some(Err(anyhow::anyhow!(
-                            "`whoami` does not support `--output-format ndjson`"
+                            "{}",
+                            tr("ai.agent_sdk.admin.whoami_ndjson_unsupported")
                         ))),
                     );
                     return;
@@ -225,13 +268,13 @@ pub fn whoami(ctx: &mut AppContext, output_format: OutputFormat) -> Result<()> {
 pub fn logout(ctx: &mut AppContext) -> Result<()> {
     let auth_state = AuthStateProvider::as_ref(ctx).get();
     if !auth_state.is_logged_in() {
-        println!("You are not logged in.");
+        println!("{}", tr("ai.agent_sdk.admin.not_logged_in"));
         ctx.terminate_app(TerminationMode::ForceTerminate, None);
         return Ok(());
     }
 
     crate::auth::log_out(ctx);
-    println!("Logged out successfully.");
+    println!("{}", tr("ai.agent_sdk.admin.logged_out_successfully"));
     ctx.terminate_app(TerminationMode::ForceTerminate, None);
     Ok(())
 }

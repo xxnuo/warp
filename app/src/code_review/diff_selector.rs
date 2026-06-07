@@ -2,6 +2,7 @@
 //! target in the code review header.
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Element,
     Flex, MouseStateHandle, OffsetPositioning, ParentAnchor, ParentElement, ParentOffsetBounds,
@@ -162,7 +163,7 @@ impl View for DiffSelector {
         let font_size = appearance.ui_font_size();
 
         let label = if self.trigger_label.is_empty() {
-            "Uncommitted changes".to_string()
+            tr("code_review.uncommitted_changes")
         } else {
             self.trigger_label.clone()
         };

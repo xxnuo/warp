@@ -22,6 +22,7 @@ use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use warp_core::execution_mode::AppExecutionMode;
 use warp_core::features::FeatureFlag;
+use warp_i18n::{tr, tr_with};
 use warpui::platform::keyboard::KeyCode;
 use warpui::platform::OperatingSystem;
 use warpui::{AppContext, Entity, ModelContext, SingletonEntity, UpdateModel};
@@ -253,20 +254,23 @@ impl VoiceInputToggleKey {
                     VoiceInputToggleKey::AltLeft
                     | VoiceInputToggleKey::ControlLeft
                     | VoiceInputToggleKey::SuperLeft
-                    | VoiceInputToggleKey::ShiftLeft => Some("Left"),
+                    | VoiceInputToggleKey::ShiftLeft => Some(tr("common.left")),
                     VoiceInputToggleKey::AltRight
                     | VoiceInputToggleKey::ControlRight
                     | VoiceInputToggleKey::SuperRight
-                    | VoiceInputToggleKey::ShiftRight => Some("Right"),
+                    | VoiceInputToggleKey::ShiftRight => Some(tr("common.right")),
                     VoiceInputToggleKey::None | VoiceInputToggleKey::Fn => None,
                 };
                 let key_name = match side {
                     Some(side) => format!("{side} {symbol}"),
                     None => symbol,
                 };
-                format!("Voice input (hold {key_name} key)")
+                tr_with(
+                    "agent_input_footer.voice_input_hold_key_tooltip",
+                    &[("key", &key_name)],
+                )
             }
-            None => "Voice input".to_string(),
+            None => tr("agent_input_footer.voice_input"),
         }
     }
 
@@ -370,19 +374,21 @@ settings::macros::implement_setting_for_enum!(
 
 impl ThinkingDisplayMode {
     /// Display name for the settings dropdown.
-    pub fn display_name(&self) -> &'static str {
+    pub fn display_name(&self) -> String {
         match self {
-            ThinkingDisplayMode::ShowAndCollapse => "Show & collapse",
-            ThinkingDisplayMode::AlwaysShow => "Always show",
-            ThinkingDisplayMode::NeverShow => "Never show",
+            ThinkingDisplayMode::ShowAndCollapse => tr("settings.ai.thinking.show_and_collapse"),
+            ThinkingDisplayMode::AlwaysShow => tr("settings.ai.thinking.always_show"),
+            ThinkingDisplayMode::NeverShow => tr("settings.ai.thinking.never_show"),
         }
     }
 
-    pub fn command_palette_description(&self) -> &'static str {
+    pub fn command_palette_description(&self) -> String {
         match self {
-            ThinkingDisplayMode::ShowAndCollapse => "Set agent thinking display: show & collapse",
-            ThinkingDisplayMode::AlwaysShow => "Set agent thinking display: always show",
-            ThinkingDisplayMode::NeverShow => "Set agent thinking display: never show",
+            ThinkingDisplayMode::ShowAndCollapse => {
+                tr("settings.ai.thinking.command_show_and_collapse")
+            }
+            ThinkingDisplayMode::AlwaysShow => tr("settings.ai.thinking.command_always_show"),
+            ThinkingDisplayMode::NeverShow => tr("settings.ai.thinking.command_never_show"),
         }
     }
 
@@ -515,19 +521,19 @@ settings::macros::implement_setting_for_enum!(
 
 impl PromptSubmissionMode {
     /// Display name for the settings dropdown.
-    pub fn display_name(&self) -> &'static str {
+    pub fn display_name(&self) -> String {
         match self {
-            PromptSubmissionMode::Interrupt => "Interrupt response",
-            PromptSubmissionMode::Queue => "Queue until response finishes",
+            PromptSubmissionMode::Interrupt => tr("settings.ai.prompt_submission.interrupt"),
+            PromptSubmissionMode::Queue => tr("settings.ai.prompt_submission.queue"),
         }
     }
 
-    pub fn command_palette_description(&self) -> &'static str {
+    pub fn command_palette_description(&self) -> String {
         match self {
-            PromptSubmissionMode::Interrupt => "Set default prompt submission: interrupt response",
-            PromptSubmissionMode::Queue => {
-                "Set default prompt submission: queue until response finishes"
+            PromptSubmissionMode::Interrupt => {
+                tr("settings.ai.prompt_submission.command_interrupt")
             }
+            PromptSubmissionMode::Queue => tr("settings.ai.prompt_submission.command_queue"),
         }
     }
 }

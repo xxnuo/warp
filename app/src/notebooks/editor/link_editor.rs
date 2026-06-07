@@ -1,6 +1,7 @@
 use warp_editor::editor::NavigationKey;
 use warp_editor::model::RichTextEditorModel;
 use warp_editor::render::model::RenderState;
+use warp_i18n::tr;
 use warpui::elements::{
     AnchorPair, Container, Flex, MouseStateHandle, OffsetPositioning, OffsetType, ParentElement,
     PositionedElementOffsetBounds, PositioningAxis, XAxisAnchor, YAxisAnchor,
@@ -52,7 +53,7 @@ impl LinkEditor {
 
         let tag_editor = ctx.add_typed_action_view(|ctx| {
             let mut editor = EditorView::single_line(editor_options.clone(), ctx);
-            editor.set_placeholder_text("Text", ctx);
+            editor.set_placeholder_text(tr("notebooks.link_editor.text_placeholder"), ctx);
             editor
         });
 
@@ -62,7 +63,7 @@ impl LinkEditor {
 
         let url_editor = ctx.add_typed_action_view(|ctx| {
             let mut editor = EditorView::single_line(editor_options.clone(), ctx);
-            editor.set_placeholder_text("Link (web or file)", ctx);
+            editor.set_placeholder_text(tr("notebooks.link_editor.link_placeholder"), ctx);
             editor
         });
 
@@ -251,7 +252,7 @@ impl View for LinkEditor {
         let mut link_button = appearance
             .ui_builder()
             .button(ButtonVariant::Accent, self.apply_link_mouse_state.clone())
-            .with_centered_text_label("Apply link".to_string());
+            .with_centered_text_label(tr("notebooks.link_editor.apply_link"));
 
         // Disable the link button if either of the editors are empty.
         if !self.is_valid(app) {

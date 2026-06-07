@@ -4,6 +4,7 @@ use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::Fill;
 use warp_core::ui::Icon;
+use warp_i18n::tr;
 use warpui_core::elements::{
     Border, ClippedScrollStateHandle, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
     DropShadow, Flex, FormattedTextElement, Hoverable, MainAxisAlignment, MainAxisSize,
@@ -26,15 +27,15 @@ use crate::slides::{bottom_nav, layout, slide_content};
 use crate::telemetry::OnboardingEvent;
 use crate::OnboardingIntention;
 
-const SUBSCRIBE_ITEMS: &[&str] = &[
-    "1,500 credits per month",
-    "Access to frontier OpenAI, Anthropic, and Google models",
-    "Access to Reload credits and volume-based discounts",
-    "Extended cloud agents access",
-    "Highest codebase indexing limits",
-    "Unlimited Warp Drive objects and collaboration",
-    "Private email support",
-    "Unlimited cloud conversation storage",
+const SUBSCRIBE_ITEM_KEYS: &[&str] = &[
+    "onboarding.free_user_no_ai.subscribe_item.credits",
+    "onboarding.free_user_no_ai.subscribe_item.frontier_models",
+    "onboarding.free_user_no_ai.subscribe_item.reload_credits",
+    "onboarding.free_user_no_ai.subscribe_item.cloud_agents",
+    "onboarding.free_user_no_ai.subscribe_item.indexing_limits",
+    "onboarding.free_user_no_ai.subscribe_item.warp_drive",
+    "onboarding.free_user_no_ai.subscribe_item.email_support",
+    "onboarding.free_user_no_ai.subscribe_item.cloud_storage",
 ];
 
 #[derive(Debug, Clone)]
@@ -103,7 +104,7 @@ impl FreeUserNoAiSlide {
     fn render_header(&self, appearance: &Appearance) -> Box<dyn Element> {
         appearance
             .ui_builder()
-            .paragraph("Let's get started.")
+            .paragraph(tr("onboarding.free_user_no_ai.title"))
             .with_style(UiComponentStyles {
                 font_size: Some(36.),
                 font_weight: Some(Weight::Medium),
@@ -123,8 +124,8 @@ impl FreeUserNoAiSlide {
             appearance,
             0,
             Icon::Code2,
-            "Agent driven development with Warp's built-in agent",
-            "Iterate, plan, and build with Oz: Warp's built-in agent. Available locally or in the cloud.",
+            tr("onboarding.free_user_no_ai.agent_option.title"),
+            tr("onboarding.free_user_no_ai.agent_option.description"),
             agent_price_badge.to_string(),
             true, // badge is green
             self.agent_mouse_state.clone(),
@@ -135,9 +136,9 @@ impl FreeUserNoAiSlide {
             appearance,
             1,
             Icon::Terminal,
-            "Classic terminal with third-party agents",
-            "A modern terminal that supports third-party agents (Claude Code, Codex, Gemini CLI) and classic terminal workflows.",
-            "Free".to_string(),
+            tr("onboarding.free_user_no_ai.terminal_option.title"),
+            tr("onboarding.free_user_no_ai.terminal_option.description"),
+            tr("common.free"),
             false, // badge is gray
             self.classic_terminal_mouse_state.clone(),
             selected_index,
@@ -192,8 +193,8 @@ impl FreeUserNoAiSlide {
         appearance: &Appearance,
         index: usize,
         icon: Icon,
-        label: &'static str,
-        description: &'static str,
+        label: String,
+        description: String,
         badge_text: String,
         badge_green: bool,
         mouse_state: MouseStateHandle,
@@ -249,7 +250,7 @@ impl FreeUserNoAiSlide {
 
             let label_el = appearance
                 .ui_builder()
-                .paragraph(label)
+                .paragraph(label.clone())
                 .with_style(UiComponentStyles {
                     font_size: Some(14.),
                     font_weight: Some(Weight::Normal),
@@ -259,12 +260,13 @@ impl FreeUserNoAiSlide {
                 .build()
                 .finish();
 
-            let description_el = FormattedTextElement::from_str(description, ui_font_family, 12.)
-                .with_color(text_color)
-                .with_weight(Weight::Normal)
-                .with_alignment(TextAlignment::Left)
-                .with_line_height_ratio(1.4)
-                .finish();
+            let description_el =
+                FormattedTextElement::from_str(description.clone(), ui_font_family, 12.)
+                    .with_color(text_color)
+                    .with_weight(Weight::Normal)
+                    .with_alignment(TextAlignment::Left)
+                    .with_line_height_ratio(1.4)
+                    .finish();
 
             let content = Flex::column()
                 .with_main_axis_size(MainAxisSize::Min)
@@ -302,7 +304,7 @@ impl FreeUserNoAiSlide {
         let back_button = self.back_button.render(
             appearance,
             button::Params {
-                content: button::Content::Label("Back".into()),
+                content: button::Content::Label(tr("common.back").into()),
                 theme: &button::themes::Naked,
                 options: button::Options {
                     on_click: Some(Box::new(|ctx, _app, _pos| {
@@ -318,7 +320,7 @@ impl FreeUserNoAiSlide {
             self.next_button.render(
                 appearance,
                 button::Params {
-                    content: button::Content::Label("Get Warping".into()),
+                    content: button::Content::Label(tr("common.get_warping").into()),
                     theme: &button::themes::Primary,
                     options: button::Options {
                         keystroke: Some(enter),
@@ -333,7 +335,7 @@ impl FreeUserNoAiSlide {
             self.subscribe_nav_button.render(
                 appearance,
                 button::Params {
-                    content: button::Content::Label("Subscribe".into()),
+                    content: button::Content::Label(tr("common.subscribe").into()),
                     theme: &button::themes::Primary,
                     options: button::Options {
                         on_click: Some(Box::new(|ctx, _app, _pos| {
@@ -347,7 +349,7 @@ impl FreeUserNoAiSlide {
             self.next_button.render(
                 appearance,
                 button::Params {
-                    content: button::Content::Label("Next".into()),
+                    content: button::Content::Label(tr("common.next").into()),
                     theme: &button::themes::Primary,
                     options: button::Options {
                         disabled: true,
@@ -370,7 +372,7 @@ impl FreeUserNoAiSlide {
         let text_sub = internal_colors::text_sub(theme, internal_colors::neutral_2(theme));
 
         let title = FormattedTextElement::from_str(
-            "Subscribe to access agent driven development in Warp.",
+            tr("onboarding.free_user_no_ai.subscribe_title"),
             ui_font_family,
             24.,
         )
@@ -385,10 +387,10 @@ impl FreeUserNoAiSlide {
             .with_cross_axis_alignment(CrossAxisAlignment::Start)
             .with_spacing(8.);
 
-        for item_text in SUBSCRIBE_ITEMS {
+        for item_key in SUBSCRIBE_ITEM_KEYS {
             let bullet = appearance
                 .ui_builder()
-                .paragraph(format!("\u{2022} {item_text}"))
+                .paragraph(format!("\u{2022} {}", tr(item_key)))
                 .with_style(UiComponentStyles {
                     font_size: Some(14.),
                     font_weight: Some(Weight::Normal),
@@ -418,7 +420,7 @@ impl FreeUserNoAiSlide {
                     .with_cross_axis_alignment(CrossAxisAlignment::Center)
                     .with_child(
                         warpui_core::elements::Text::new_inline(
-                            "Subscribe",
+                            tr("common.subscribe"),
                             appearance.ui_font_family(),
                             14.,
                         )

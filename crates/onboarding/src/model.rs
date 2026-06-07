@@ -1,5 +1,6 @@
 use ai::LLMId;
 use warp_core::send_telemetry_from_ctx;
+use warp_i18n::tr_with;
 use warpui_core::{Entity, ModelContext};
 
 use crate::slides::{
@@ -298,7 +299,8 @@ impl OnboardingStateModel {
     pub(crate) fn agent_price_badge(&self) -> String {
         const DEFAULT_AGENT_PRICE_CENTS: i32 = 1800;
         let cents = self.agent_price_cents.unwrap_or(DEFAULT_AGENT_PRICE_CENTS);
-        format!("Starting at ${}/mo", cents / 100)
+        let price = format!("${}", cents / 100);
+        tr_with("onboarding.model.starting_at", &[("price", &price)])
     }
 
     pub(crate) fn set_agent_price_cents(

@@ -3,6 +3,7 @@
 use std::collections::HashSet;
 use std::sync::LazyLock;
 
+use warp_i18n::tr;
 use warpui::elements::ChildView;
 use warpui::{Element, Entity, ModelHandle, SingletonEntity, View, ViewContext, ViewHandle};
 
@@ -36,13 +37,13 @@ static TAB_CONFIGS: LazyLock<Vec<InlineMenuTabConfig<InlineConversationMenuTab>>
     LazyLock::new(|| {
         let mut configs = vec![InlineMenuTabConfig {
             id: InlineConversationMenuTab::All,
-            label: "All".to_string(),
+            label: tr("common.all"),
             filters: HashSet::new(),
         }];
         if FeatureFlag::InlineMenuHeaders.is_enabled() {
             configs.push(InlineMenuTabConfig {
                 id: InlineConversationMenuTab::CurrentDirectory,
-                label: "Current Directory".to_string(),
+                label: tr("terminal.input.conversations.current_directory"),
                 filters: HashSet::from([QueryFilter::CurrentDirectoryConversations]),
             });
         }

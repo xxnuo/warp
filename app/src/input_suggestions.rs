@@ -14,6 +14,7 @@ use warp_completer::completer::{
 };
 use warp_core::features::FeatureFlag;
 use warp_core::ui::theme::AnsiColorIdentifier;
+use warp_i18n::{tr, tr_with};
 use warpui::accessibility::{AccessibilityContent, WarpA11yRole};
 use warpui::elements::{
     Align, AnchorPair, Border, ChildAnchor, ConstrainedBox, Container, CornerRadius,
@@ -537,14 +538,18 @@ impl InputSuggestions {
         self.get_selected_item()
             .and_then(|item| item.details.as_ref())
             .and_then(|details| match details {
-                DetailContent::RichHistory(entry) => entry
-                    .start_ts
-                    .map(|ts| format!("Last ran {}", format_approx_duration_from_now(ts))),
+                DetailContent::RichHistory(entry) => entry.start_ts.map(|ts| {
+                    let time = format_approx_duration_from_now(ts);
+                    tr_with("input_suggestions.last_ran", &[("time", time.as_str())])
+                }),
                 DetailContent::Description(desc) => Some(desc.clone()),
-                DetailContent::AIQueryHistory(entry) => Some(format!(
-                    "Last ran {}",
-                    format_approx_duration_from_now(entry.start_time)
-                )),
+                DetailContent::AIQueryHistory(entry) => {
+                    let time = format_approx_duration_from_now(entry.start_time);
+                    Some(tr_with(
+                        "input_suggestions.last_ran",
+                        &[("time", time.as_str())],
+                    ))
+                }
             })
     }
 
@@ -588,14 +593,14 @@ impl InputSuggestions {
         ) {
             (Some(text), Some(desc)) => {
                 ctx.emit_a11y_content(AccessibilityContent::new(
-                    format!("Suggestion: {text}.\n"),
+                    tr_with("input_suggestions.a11y.suggestion", &[("text", text)]),
                     desc,
                     WarpA11yRole::MenuItemRole,
                 ));
             }
             (Some(text), None) => {
                 ctx.emit_a11y_content(AccessibilityContent::new_without_help(
-                    format!("Suggestion: {text}.\n"),
+                    tr_with("input_suggestions.a11y.suggestion", &[("text", text)]),
                     WarpA11yRole::MenuItemRole,
                 ));
             }
@@ -619,7 +624,7 @@ impl InputSuggestions {
 
         if let Some(text) = self.get_selected_item_text() {
             ctx.emit_a11y_content(AccessibilityContent::new_without_help(
-                format!("Selected: {text}"),
+                tr_with("input_suggestions.a11y.selected", &[("text", text)]),
                 WarpA11yRole::MenuItemRole,
             ));
         }
@@ -644,7 +649,7 @@ impl InputSuggestions {
         ctx: &mut ViewContext<Self>,
     ) {
         ctx.emit_a11y_content(AccessibilityContent::new_without_help(
-            "Closed suggestions.",
+            tr("input_suggestions.a11y.closed"),
             WarpA11yRole::UserAction,
         ));
         ctx.emit(Event::CloseSuggestion {
@@ -700,7 +705,7 @@ impl InputSuggestions {
                     Align::new(
                         Container::new(
                             Text::new_inline(
-                                String::from("No suggestions"),
+                                tr("input_suggestions.no_suggestions"),
                                 appearance.monospace_font_family(),
                                 appearance.monospace_font_size(),
                             )
@@ -884,7 +889,7 @@ impl InputSuggestions {
 
                                             let tooltip_element = appearance
                                                 .ui_builder()
-                                                .tool_tip("Ignore this suggestion".to_string())
+                                                .tool_tip(tr("input_suggestions.ignore_suggestion"))
                                                 .build()
                                                 .finish();
 

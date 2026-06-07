@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
+use warp_i18n::tr_with;
 use warpui::elements::{ConstrainedBox, Container, Icon};
 use warpui::{AppContext, Element};
 
@@ -79,9 +80,11 @@ impl SearchItem for FileSearchItem {
 
     fn accessibility_label(&self) -> String {
         if self.is_directory {
-            format!("Directory: {}", self.path.display())
+            let path = self.path.display().to_string();
+            tr_with("search.a11y.directory", &[("path", &path)])
         } else {
-            format!("File: {}", self.path.display())
+            let path = self.path.display().to_string();
+            tr_with("search.a11y.file", &[("path", &path)])
         }
     }
 }

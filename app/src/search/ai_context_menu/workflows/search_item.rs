@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
+use warp_i18n::tr_with;
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, Highlight, Icon, ParentElement, Text,
 };
@@ -179,9 +180,18 @@ impl SearchItem for WorkflowSearchItem {
 
     fn accessibility_label(&self) -> String {
         if let Some(description) = &self.workflow_description {
-            format!("Workflow: {} - {}", self.workflow_name, description)
+            tr_with(
+                "search.a11y.workflow_with_description",
+                &[
+                    ("name", self.workflow_name.as_str()),
+                    ("description", description.as_str()),
+                ],
+            )
         } else {
-            format!("Workflow: {}", self.workflow_name)
+            tr_with(
+                "search.a11y.workflow",
+                &[("name", self.workflow_name.as_str())],
+            )
         }
     }
 

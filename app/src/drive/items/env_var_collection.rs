@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use warp_core::context_flag::ContextFlag;
+use warp_i18n::tr;
 use warpui::elements::{Clipped, Container, Flex, MouseStateHandle, ParentElement};
 use warpui::fonts::Weight;
 use warpui::ui_components::components::{UiComponent, UiComponentStyles};
@@ -61,7 +62,7 @@ impl WarpDriveItem for WarpDriveEnvVarCollection {
         let title_to_render = if let Some(title) = title_text {
             title
         } else {
-            "Untitled".to_string()
+            tr("drive.untitled")
         };
         let title = appearance
             .ui_builder()

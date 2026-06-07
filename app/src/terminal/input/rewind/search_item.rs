@@ -6,6 +6,7 @@ use ordered_float::OrderedFloat;
 use warp_core::ui::color::coloru_with_opacity;
 use warp_core::ui::theme::Fill;
 use warp_core::ui::Icon;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, Highlight, ParentElement, Text,
 };
@@ -43,7 +44,7 @@ impl RewindSearchItem {
     pub fn new_current() -> Self {
         Self {
             exchange_id: None,
-            query_text: "Current".to_string(),
+            query_text: tr("terminal.rewind.current"),
             file_changes: FileChangesInfo::default(),
             query_match_result: None,
             score: OrderedFloat(0.0),
@@ -141,7 +142,7 @@ impl SearchItem for RewindSearchItem {
         let changes_element: Box<dyn Element> = if self.is_current {
             // "Current" item shows "No code to be restored"
             Text::new_inline(
-                "No code to be restored".to_string(),
+                tr("terminal.rewind.no_code_to_restore"),
                 appearance.ui_font_family(),
                 secondary_font_size,
             )
@@ -174,7 +175,7 @@ impl SearchItem for RewindSearchItem {
             row.finish()
         } else {
             Text::new_inline(
-                "No code to be restored".to_string(),
+                tr("terminal.rewind.no_code_to_restore"),
                 appearance.ui_font_family(),
                 secondary_font_size,
             )
@@ -218,14 +219,23 @@ impl SearchItem for RewindSearchItem {
 
     fn accessibility_label(&self) -> String {
         if self.is_current {
-            "Current state (no rewind)".to_string()
+            tr("terminal.rewind.current_state_no_rewind")
         } else if self.has_code_changes() {
-            format!(
-                "Rewind to: {} (+{} -{})",
-                self.query_text, self.file_changes.lines_added, self.file_changes.lines_removed
+            let added = self.file_changes.lines_added.to_string();
+            let removed = self.file_changes.lines_removed.to_string();
+            tr_with(
+                "terminal.rewind.a11y_with_changes",
+                &[
+                    ("query", &self.query_text),
+                    ("added", &added),
+                    ("removed", &removed),
+                ],
             )
         } else {
-            format!("Rewind to: {} (no code changes)", self.query_text)
+            tr_with(
+                "terminal.rewind.a11y_no_code_changes",
+                &[("query", &self.query_text)],
+            )
         }
     }
 }

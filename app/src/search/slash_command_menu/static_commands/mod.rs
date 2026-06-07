@@ -3,6 +3,7 @@ pub mod commands;
 
 use bitflags::bitflags;
 pub use commands::SlashCommandId;
+use warp_i18n::tr;
 
 bitflags! {
     /// Specifies the requirements for a slash command to be available.
@@ -46,6 +47,7 @@ bitflags! {
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Argument {
     pub hint_text: Option<&'static str>,
+    pub hint_text_is_i18n_key: bool,
     pub is_optional: bool,
     /// If `true`, selecting the slash command from the menu (or via keybinding) will execute the
     /// slash command with no arguments.
@@ -78,6 +80,22 @@ impl Argument {
         self
     }
 
+    pub(super) fn with_hint_text_key(mut self, key: &'static str) -> Self {
+        self.hint_text = Some(key);
+        self.hint_text_is_i18n_key = true;
+        self
+    }
+
+    pub fn localized_hint_text(&self) -> Option<String> {
+        self.hint_text.map(|hint_text| {
+            if self.hint_text_is_i18n_key {
+                tr(hint_text)
+            } else {
+                hint_text.to_string()
+            }
+        })
+    }
+
     pub(super) fn with_execute_on_selection(mut self) -> Self {
         self.should_execute_on_selection = true;
         self
@@ -98,6 +116,10 @@ pub struct StaticCommand {
 }
 
 impl StaticCommand {
+    pub fn description(&self) -> String {
+        tr(self.description)
+    }
+
     pub fn matches_filter(&self, filter_text: &str) -> bool {
         if filter_text.is_empty() {
             return true;

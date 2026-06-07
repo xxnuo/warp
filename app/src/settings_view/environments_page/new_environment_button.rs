@@ -1,4 +1,5 @@
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, Container, CornerRadius, DispatchEventResult, EventHandler, Flex, MainAxisAlignment,
     MouseStateHandle, ParentElement as _, Radius, Text,
@@ -96,7 +97,7 @@ impl View for NewEnvironmentButtonView {
                     .with_spacing(4.)
                     .with_child(
                         Text::new(
-                            "New environment",
+                            tr("settings.environments.new_environment"),
                             appearance.ui_font_family(),
                             appearance.ui_font_size(),
                         )

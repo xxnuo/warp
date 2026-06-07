@@ -1,3 +1,4 @@
+use warp_i18n::tr_with;
 use warpui::elements::{ChildView, Element, Empty};
 use warpui::{AppContext, Entity, SingletonEntity, TypedActionView, View, ViewContext, ViewHandle};
 
@@ -36,7 +37,10 @@ impl CreateEnvironmentModal {
             HandoffEnvironmentCreationModalEvent::CreationFailed { error_message } => {
                 me.visible = false;
                 me.show_error_toast(
-                    format!("Failed to create environment: {error_message}"),
+                    tr_with(
+                        "ai_block.create_environment_modal.failed_to_create_environment",
+                        &[("error", error_message)],
+                    ),
                     ctx,
                 );
                 ctx.notify();

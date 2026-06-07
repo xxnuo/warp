@@ -123,7 +123,7 @@ pub fn list_skills_if_changed(
 
 /// Renders an 'open skill' button for blocklist AI actions and the code diff view.
 pub fn render_skill_button<F>(
-    button_label: &str,
+    button_label: impl Into<String>,
     button_handle: MouseStateHandle,
     appearance: &Appearance,
     skill_provider: SkillProvider,

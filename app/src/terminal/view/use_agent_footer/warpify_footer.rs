@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use parking_lot::FairMutex;
+use warp_i18n::tr;
 use warpui::elements::{
     ChildView, Container, CrossAxisAlignment, Expanded, Flex, MainAxisSize, ParentElement,
 };
@@ -30,30 +31,36 @@ impl WarpifyFooterView {
         let button_size = ButtonSize::XSmall;
 
         let warpify_button = ctx.add_typed_action_view(|_ctx| {
-            ActionButton::new("Warpify subshell", AgentFooterButtonTheme::new(None))
-                .with_icon(Icon::Warp)
-                .with_size(button_size)
-                .with_tooltip("Enable Warp shell integration in this session")
-                .with_tooltip_alignment(TooltipAlignment::Left)
-                .on_click(|ctx| {
-                    ctx.dispatch_typed_action(WarpifyFooterViewAction::Warpify);
-                })
+            ActionButton::new(
+                tr("terminal.binding.warpify_subshell"),
+                AgentFooterButtonTheme::new(None),
+            )
+            .with_icon(Icon::Warp)
+            .with_size(button_size)
+            .with_tooltip(tr("terminal.agent_footer.enable_shell_integration_tooltip"))
+            .with_tooltip_alignment(TooltipAlignment::Left)
+            .on_click(|ctx| {
+                ctx.dispatch_typed_action(WarpifyFooterViewAction::Warpify);
+            })
         });
 
         let use_agent_button = ctx.add_typed_action_view(|ctx| {
-            ActionButton::new("Use agent", AgentFooterButtonTheme::new(None))
-                .with_icon(Icon::Oz)
-                .with_keybinding(KeystrokeSource::Fixed(USE_AGENT_KEYSTROKE.clone()), ctx)
-                .with_size(button_size)
-                .with_tooltip("Ask the Warp agent to assist")
-                .with_tooltip_alignment(TooltipAlignment::Left)
-                .on_click(|ctx| {
-                    ctx.dispatch_typed_action(WarpifyFooterViewAction::UseAgent);
-                })
+            ActionButton::new(
+                tr("terminal.agent_footer.use_agent"),
+                AgentFooterButtonTheme::new(None),
+            )
+            .with_icon(Icon::Oz)
+            .with_keybinding(KeystrokeSource::Fixed(USE_AGENT_KEYSTROKE.clone()), ctx)
+            .with_size(button_size)
+            .with_tooltip(tr("terminal.agent_footer.ask_agent_to_assist_tooltip"))
+            .with_tooltip_alignment(TooltipAlignment::Left)
+            .on_click(|ctx| {
+                ctx.dispatch_typed_action(WarpifyFooterViewAction::UseAgent);
+            })
         });
 
         let dismiss_button = ctx.add_typed_action_view(|_ctx| {
-            ActionButton::new("Dismiss", AgentFooterButtonTheme::new(None))
+            ActionButton::new(tr("common.dismiss"), AgentFooterButtonTheme::new(None))
                 .with_size(button_size)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(WarpifyFooterViewAction::Dismiss);
@@ -72,10 +79,13 @@ impl WarpifyFooterView {
     /// Updates the warpify button label, keybinding, and stores the current warpification mode.
     pub fn set_mode(&mut self, mode: WarpificationMode, ctx: &mut ViewContext<Self>) {
         let (label, binding_name) = match mode {
-            WarpificationMode::Ssh { .. } => {
-                ("Warpify SSH session", "terminal:warpify_ssh_session")
+            WarpificationMode::Ssh { .. } => (
+                tr("terminal.warpify.ssh_session"),
+                "terminal:warpify_ssh_session",
+            ),
+            WarpificationMode::Subshell { .. } => {
+                (tr("terminal.warpify.subshell"), "terminal:warpify_subshell")
             }
-            WarpificationMode::Subshell { .. } => ("Warpify subshell", "terminal:warpify_subshell"),
         };
         self.warpify_button.update(ctx, |button, ctx| {
             button.set_label(label, ctx);

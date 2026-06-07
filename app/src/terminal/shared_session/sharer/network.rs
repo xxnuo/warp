@@ -36,6 +36,7 @@ use session_sharing_protocol::sharer::{
     UpstreamMessage,
 };
 use warp_core::features::FeatureFlag;
+use warp_i18n::{tr, tr_with};
 use warpui::r#async::Timer;
 use warpui::{Entity, ModelContext, ModelHandle, RequestState, RetryOption, SingletonEntity};
 use websocket::{Message, Sink, Stream, WebSocket, WebsocketMessage as _};
@@ -208,11 +209,11 @@ impl StartupFailure {
             Self::ServerRejected(reason) => reason.clone(),
             Self::WebsocketClosedBeforeStarted => {
                 FailedToInitializeSessionReason::InternalServerError {
-                    details: "Websocket closed before starting session".to_string(),
+                    details: tr("shared_session.sharer.websocket_closed_before_start"),
                 }
             }
             Self::Timeout => FailedToInitializeSessionReason::InternalServerError {
-                details: "Timed out creating shared session".to_string(),
+                details: tr("shared_session.sharer.create_timeout"),
             },
             Self::Transport | Self::InitializeSend | Self::WebsocketError => {
                 FailedToInitializeSessionReason::internal_server_error_without_details()
@@ -1721,8 +1722,10 @@ impl Network {
     }
 }
 
-const NO_QUOTA_REMAINING_MESSAGE: &str =
-    "Session sharing usage exceeded for the day. Please try again later.";
+fn no_quota_remaining_message() -> String {
+    tr("shared_session.sharer.no_quota_remaining")
+}
+
 fn session_terminated_reason_diagnostic_label(reason: &SessionTerminatedReason) -> &'static str {
     match reason {
         SessionTerminatedReason::NoUserQuotaRemaining {} => "no_user_quota_remaining",
@@ -1739,14 +1742,19 @@ pub fn session_terminated_reason_string(
     match reason {
         SessionTerminatedReason::NoUserQuotaRemaining {} => {
             // TODO: we should pass down the next refresh time to tell the user.
-            NO_QUOTA_REMAINING_MESSAGE.to_string()
+            no_quota_remaining_message()
         }
         SessionTerminatedReason::ExceededSizeLimit => {
-            let max_bytes = max_session_size.get_appropriate_unit(UnitType::Decimal);
-            format!("Session limit ({max_bytes}) exceeded. Please reshare to continue.")
+            let max_bytes = max_session_size
+                .get_appropriate_unit(UnitType::Decimal)
+                .to_string();
+            tr_with(
+                "shared_session.sharer.session_limit_exceeded",
+                &[("max_bytes", &max_bytes)],
+            )
         }
         SessionTerminatedReason::InternalServerError { .. } => {
-            "Session ended due to an internal error. Please try sharing again.".to_string()
+            tr("shared_session.sharer.session_ended_internal")
         }
     }
 }
@@ -1755,31 +1763,29 @@ pub fn session_terminated_reason_string(
 pub fn failed_to_initialize_session_user_error(reason: &FailedToInitializeSessionReason) -> String {
     match reason {
         FailedToInitializeSessionReason::InternalServerError { .. } => {
-            "An internal error occurred. Please try sharing again."
+            tr("shared_session.sharer.initialize_internal")
         }
         FailedToInitializeSessionReason::ScrollbackTooLarge {} => {
-            "Scrollback exceeds limit. Try sharing again without scrollback."
+            tr("shared_session.sharer.scrollback_too_large")
         }
         FailedToInitializeSessionReason::NoUserQuotaRemaining { .. } => {
             // TODO: we should pass down the next refresh time to tell the user.
-            NO_QUOTA_REMAINING_MESSAGE
+            no_quota_remaining_message()
         }
-        FailedToInitializeSessionReason::UserNotFound => "You must be logged in to share sessions.",
+        FailedToInitializeSessionReason::UserNotFound => tr("shared_session.sharer.must_log_in"),
     }
-    .to_string()
 }
 
 pub fn failed_to_add_guests_user_error(reason: &FailedToAddGuestsReason) -> String {
     match reason {
-        FailedToAddGuestsReason::Invalid => "Something went wrong. Please try again.",
+        FailedToAddGuestsReason::Invalid => tr("shared_session.sharer.add_guests_invalid"),
         FailedToAddGuestsReason::NotWarpUsers => {
-            "One or more emails were not associated with Warp accounts."
+            tr("shared_session.sharer.add_guests_not_warp_users")
         }
         FailedToAddGuestsReason::GuestAlreadyAdded => {
-            "One or more emails have already been added to the session."
+            tr("shared_session.sharer.add_guests_already_added")
         }
     }
-    .to_string()
 }
 
 pub enum NetworkEvent {

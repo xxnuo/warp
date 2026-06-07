@@ -1,6 +1,7 @@
 use std::default::Default;
 
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::{tr, tr_with};
 use warpui::fonts::Weight;
 use warpui::keymap::FixedBinding;
 use warpui::presenter::ChildView;
@@ -10,7 +11,7 @@ use warpui::{
 };
 
 use super::shared_objects_creation_denied_body::{
-    SharedObjectsCreationDeniedBody, SharedObjectsCreationDeniedBodyEvent,
+    shared_object_type_label, SharedObjectsCreationDeniedBody, SharedObjectsCreationDeniedBodyEvent,
 };
 use crate::drive::cloud_object_styling::warp_drive_icon_color;
 use crate::drive::DriveObjectType;
@@ -20,8 +21,6 @@ use crate::themes::theme::Fill;
 use crate::ui_components::icons::Icon;
 use crate::workspaces::user_workspaces::UserWorkspaces;
 use crate::workspaces::workspace::CustomerType;
-
-const DEFAULT_LIMIT_REACHED_MODAL_HEADER: &str = "Shared object limit reached";
 
 pub struct SharedObjectsCreationDeniedModal {
     shared_objects_creation_denied_modal: ViewHandle<Modal<SharedObjectsCreationDeniedBody>>,
@@ -65,7 +64,7 @@ impl SharedObjectsCreationDeniedModal {
 
         let shared_objects_creation_denied_modal = ctx.add_typed_action_view(|ctx| {
             Modal::new(
-                Some(DEFAULT_LIMIT_REACHED_MODAL_HEADER.into()),
+                Some(tr("billing.shared_objects.limit_reached.default_title")),
                 shared_objects_creation_denied_body,
                 ctx,
             )
@@ -124,10 +123,17 @@ impl SharedObjectsCreationDeniedModal {
     ) {
         let appearance = Appearance::as_ref(ctx);
         self.team_uid = Some(team_uid);
+        let object_type_label = shared_object_type_label(object_type);
         let title: Option<String> = if is_delinquent_due_to_payment_issue {
-            Some(format!("Shared {object_type}s restricted"))
+            Some(tr_with(
+                "billing.shared_objects.restricted_title",
+                &[("object_type", object_type_label.as_str())],
+            ))
         } else {
-            Some(format!("Shared {object_type}s limit reached"))
+            Some(tr_with(
+                "billing.shared_objects.limit_reached.title",
+                &[("object_type", object_type_label.as_str())],
+            ))
         };
         let (icon, icon_color) = match object_type {
             DriveObjectType::Notebook { is_ai_document } => (

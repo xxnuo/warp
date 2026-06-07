@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use settings::Setting as _;
+use warp_i18n::tr;
 use warpui::{AppContext, SingletonEntity};
 
 use crate::auth::AuthStateProvider;
@@ -34,13 +35,13 @@ pub enum HeaderToolbarItemKind {
 }
 
 impl HeaderToolbarItemKind {
-    pub fn display_label(&self) -> &'static str {
+    pub fn display_label(&self) -> String {
         match self {
-            Self::TabsPanel => "Tabs Panel",
-            Self::ToolsPanel => "Tools Panel",
-            Self::AgentManagement => "Agent Management",
-            Self::CodeReview => "Code Review",
-            Self::NotificationsMailbox => "Notifications",
+            Self::TabsPanel => tr("workspace.header_toolbar.tabs_panel"),
+            Self::ToolsPanel => tr("workspace.header_toolbar.tools_panel"),
+            Self::AgentManagement => tr("workspace.header_toolbar.agent_management"),
+            Self::CodeReview => tr("workspace.header_toolbar.code_review"),
+            Self::NotificationsMailbox => tr("workspace.header_toolbar.notifications"),
         }
     }
 

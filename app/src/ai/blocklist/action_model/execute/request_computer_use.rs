@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use ai::agent::action_result::{AIAgentActionResultType, RequestComputerUseResult};
 use futures::future::BoxFuture;
 use futures::FutureExt;
+use warp_i18n::tr;
 use warpui::{Entity, EntityId, ModelContext, SingletonEntity};
 
 use super::{ActionExecution, AnyActionExecution, ExecuteActionInput, PreprocessActionInput};
@@ -115,11 +116,11 @@ impl RequestComputerUseExecutor {
                     }),
                     None,
                 ) => AIAgentActionResultType::RequestComputerUse(RequestComputerUseResult::Error(
-                    "Unknown platform".to_string(),
+                    tr("ai_block.request_computer_use.unknown_platform"),
                 )),
                 (Ok(_), _) => {
                     AIAgentActionResultType::RequestComputerUse(RequestComputerUseResult::Error(
-                        "Failed to capture initial screenshot".to_string(),
+                        tr("ai_block.request_computer_use.failed_initial_screenshot"),
                     ))
                 }
                 (Err(err), _) => AIAgentActionResultType::RequestComputerUse(

@@ -5,6 +5,7 @@ use std::cmp;
 use fuzzy_match::{match_indices_case_insensitive, FuzzyMatchResult};
 use warp_core::ui::theme::Fill;
 use warp_editor::editor::NavigationKey;
+use warp_i18n::tr;
 use warpui::color::ColorU;
 use warpui::elements::{
     Border, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Dismiss,
@@ -112,7 +113,7 @@ impl CodeReviewDiffMenu {
                 ..Default::default()
             };
             let mut editor = EditorView::new(options, ctx);
-            editor.set_placeholder_text("Search diff sets or branches to compare…", ctx);
+            editor.set_placeholder_text(tr("code_review.diff_menu.search_placeholder"), ctx);
             editor
         });
 
@@ -279,7 +280,7 @@ impl CodeReviewDiffMenu {
         let theme = appearance.theme();
         Container::new(
             Text::new(
-                "No matches",
+                tr("common.no_matches"),
                 appearance.ui_font_family(),
                 appearance.ui_font_size(),
             )

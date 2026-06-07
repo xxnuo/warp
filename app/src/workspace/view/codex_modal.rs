@@ -3,6 +3,7 @@ use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, CacheOption, ChildAnchor, ConstrainedBox, Container, CornerRadius,
     CrossAxisAlignment, DropShadow, Flex, FormattedTextElement, Image, MainAxisAlignment,
@@ -71,7 +72,7 @@ pub struct CodexModal {
 impl CodexModal {
     pub fn new(ctx: &mut ViewContext<Self>) -> Self {
         let cta_button = ctx.add_view(|_| {
-            ActionButton::new("Use latest codex model", WhiteButtonTheme)
+            ActionButton::new(tr("workspace.codex.use_latest_model"), WhiteButtonTheme)
                 .with_icon(Icon::OpenAILogo)
                 .with_full_width(true)
                 .on_click(|ctx| {
@@ -90,7 +91,7 @@ impl CodexModal {
         // Magenta/pink color for the badge
         let magenta: ColorU = theme.terminal_colors().normal.magenta.into();
         Container::new(
-            Text::new("New", appearance.ui_font_family(), 12.)
+            Text::new(tr("common.new"), appearance.ui_font_family(), 12.)
                 .with_color(magenta)
                 .finish(),
         )
@@ -110,7 +111,7 @@ impl CodexModal {
 
         // Title
         let title = FormattedTextElement::from_str(
-            "Use Codex models in Warp",
+            tr("workspace.codex.title"),
             appearance.ui_font_family(),
             24.,
         )
@@ -123,7 +124,7 @@ impl CodexModal {
 
         // Description - first paragraph
         let description_1 = FormattedTextElement::from_str(
-            "Codex is OpenAI's most advanced agentic coding model for real-world engineering.",
+            tr("workspace.codex.description_1"),
             appearance.ui_font_family(),
             14.,
         )
@@ -135,8 +136,7 @@ impl CodexModal {
 
         // Description - second paragraph
         let description_2 = FormattedTextElement::from_str(
-            "Use Codex directly in Oz and leverage \
-            features like in-app code review, agent session sharing and file editing.",
+            tr("workspace.codex.description_2"),
             appearance.ui_font_family(),
             14.,
         )

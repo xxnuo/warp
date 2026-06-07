@@ -12,6 +12,7 @@ pub(crate) use modal_shell::{
 use pathfinder_geometry::rect::RectF;
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ConstrainedBox, Container, CrossAxisAlignment, Dash, DispatchEventResult, Draggable,
     DraggableState, Element, Empty, EventHandler, Flex, Hoverable, MouseStateHandle,
@@ -196,13 +197,13 @@ impl ControlItemRenderer {
             .finish()
     }
 
-    pub(crate) fn display_label(&self) -> &str {
+    pub(crate) fn display_label(&self) -> String {
         if let Some(label) = &self.custom_label {
-            label
+            label.clone()
         } else if let Some(kind) = &self.kind {
             kind.display_label()
         } else {
-            "Unknown"
+            tr("common.unknown")
         }
     }
 
@@ -221,7 +222,7 @@ impl ControlItemRenderer {
         appearance: &Appearance,
     ) -> Box<dyn Element> {
         let font_size = udi_font_size(appearance);
-        let label = self.display_label().to_string();
+        let label = self.display_label();
         let icon = self.display_icon();
         let is_dragging = matches!(drag_state, ChipDragState::Draggable { is_dragging: true });
         let mut hoverable = Hoverable::new(self.tooltip_state_handle.clone(), move |mouse_state| {

@@ -4,6 +4,7 @@ use std::sync::Arc;
 use parking_lot::FairMutex;
 use style::{DENIED_MODAL_WIDTH, MODAL_HEIGHT, MODAL_WIDTH};
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::keymap::FixedBinding;
 use warpui::presenter::ChildView;
 use warpui::ui_components::components::UiComponentStyles;
@@ -26,9 +27,6 @@ use denied_body::{DeniedBody, DeniedBodyEvent};
 
 use self::body::BodyEvent;
 use super::{SharedSessionActionSource, SharedSessionScrollbackType};
-
-const MODAL_HEADER: &str = "Share session";
-const SESSION_LIMIT_REACHED_HEADER: &str = "Shared session limit reached";
 
 pub struct ShareSessionModal {
     modal: ViewHandle<Modal<Body>>,
@@ -72,7 +70,7 @@ impl ShareSessionModal {
         });
 
         let modal = ctx.add_typed_action_view(|ctx| {
-            Modal::new(Some(MODAL_HEADER.to_string()), body, ctx)
+            Modal::new(Some(tr("shared_session.share_modal.title")), body, ctx)
                 .with_modal_style(UiComponentStyles {
                     width: Some(MODAL_WIDTH),
                     height: Some(MODAL_HEIGHT),
@@ -91,7 +89,7 @@ impl ShareSessionModal {
         });
         let denied_modal = ctx.add_typed_action_view(|ctx| {
             let mut denied_modal = Modal::new(
-                Some(SESSION_LIMIT_REACHED_HEADER.to_string()),
+                Some(tr("shared_session.share_modal.limit_reached_title")),
                 denied_body,
                 ctx,
             )

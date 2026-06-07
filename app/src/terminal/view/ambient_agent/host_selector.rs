@@ -6,6 +6,7 @@ use settings::Setting as _;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildAnchor, ChildView, OffsetPositioning, ParentAnchor, ParentElement as _,
     ParentOffsetBounds, Stack,
@@ -36,10 +37,6 @@ const ITEM_VERTICAL_PADDING: f32 = 8.;
 const HEADER_VERTICAL_PADDING: f32 = 6.;
 
 const MENU_WIDTH: f32 = 208.;
-
-const BUTTON_TOOLTIP: &str = "Execution host";
-
-const MENU_HEADER_LABEL: &str = "Execution host";
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Host {
@@ -101,7 +98,7 @@ impl HostSelector {
             ActionButton::new(initial_label, NakedHeaderButtonTheme)
                 .with_size(ButtonSize::AgentInputButton)
                 .with_menu(true)
-                .with_tooltip(BUTTON_TOOLTIP)
+                .with_tooltip(tr("ambient_agent.execution_host"))
                 .with_tooltip_alignment(TooltipAlignment::Left)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(HostSelectorAction::ToggleMenu);
@@ -277,7 +274,7 @@ fn build_menu_items(
     ctx: &mut ViewContext<HostSelector>,
 ) -> Vec<MenuItem<HostSelectorAction>> {
     let header = MenuItem::Header {
-        fields: MenuItemFields::new(MENU_HEADER_LABEL)
+        fields: MenuItemFields::new(tr("ambient_agent.execution_host"))
             .with_font_size_override(HEADER_FONT_SIZE)
             .with_override_text_color(header_text_color)
             .with_padding_override(HEADER_VERTICAL_PADDING, MENU_HORIZONTAL_PADDING)

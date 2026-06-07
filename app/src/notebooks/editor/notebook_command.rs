@@ -25,6 +25,7 @@ use warp_editor::content::text::{
     CODE_BLOCK_SHELL_DISPLAY_LANG,
 };
 use warp_editor::editor::RunnableCommandModel;
+use warp_i18n::tr;
 use warp_util::user_input::UserInput;
 use warpui::elements::{
     Align, Border, Container, CornerRadius, CrossAxisAlignment, Empty, Flex, MainAxisAlignment,
@@ -671,7 +672,7 @@ impl RunnableCommandModel for NotebookCommand {
             .with_active_styles(active_highlight)
             .with_tooltip(move || {
                 tooltip_builder_raw
-                    .tool_tip("Raw".to_string())
+                    .tool_tip(tr("common.raw"))
                     .build()
                     .finish()
             })
@@ -696,7 +697,7 @@ impl RunnableCommandModel for NotebookCommand {
             .with_active_styles(active_highlight)
             .with_tooltip(move || {
                 tooltip_builder_rendered
-                    .tool_tip("Rendered".to_string())
+                    .tool_tip(tr("common.rendered"))
                     .build()
                     .finish()
             })

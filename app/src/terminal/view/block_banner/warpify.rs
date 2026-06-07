@@ -1,4 +1,5 @@
 use pathfinder_color::ColorU;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, ConstrainedBox, Container, CrossAxisAlignment, Flex, HighlightedHyperlink,
     MouseStateHandle, ParentElement, Shrinkable,
@@ -86,10 +87,10 @@ impl WarpifyBannerState {
         self.mode.is_ssh()
     }
 
-    pub fn title(&self) -> &str {
+    pub fn title(&self) -> String {
         match &self.mode {
-            WarpificationMode::Ssh { .. } => "Warpify SSH session",
-            WarpificationMode::Subshell { .. } => "Warpify subshell",
+            WarpificationMode::Ssh { .. } => tr("terminal.warpify.ssh_session"),
+            WarpificationMode::Subshell { .. } => tr("terminal.warpify.subshell"),
         }
     }
 
@@ -151,7 +152,7 @@ pub fn render_warpification_banner(
                 ButtonVariant::Text,
                 state.dont_ask_button_mouse_state.clone(),
             )
-            .with_text_label("Do not show again".to_owned())
+            .with_text_label(tr("common.dont_show_again"))
             .build()
             .on_click(move |ctx, _, _| {
                 ctx.dispatch_typed_action(TerminalAction::DismissWarpifyBanner(

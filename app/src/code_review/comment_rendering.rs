@@ -11,6 +11,7 @@ use warp_core::ui::theme::color::internal_colors::{neutral_1, neutral_2, text_su
 use warp_core::ui::theme::Fill;
 use warp_editor::content::buffer::InitialBufferState;
 use warp_editor::render::element::VerticalExpansionBehavior;
+use warp_i18n::tr;
 use warpui::elements::new_scrollable::ScrollableAppearance;
 use warpui::elements::{
     Border, ChildView, Container, CornerRadius, CrossAxisAlignment, Flex, Hoverable,
@@ -172,7 +173,7 @@ fn render_comment_text_section(
     if is_imported_from_github {
         left_section.add_child(
             Text::new(
-                "From GitHub".to_string(),
+                tr("code_review.from_github"),
                 appearance.ui_font_family(),
                 appearance.ui_font_size(),
             )
@@ -475,7 +476,7 @@ impl CommentViewCard {
             _ => source
                 .head()
                 .map(|head| head.title())
-                .unwrap_or_else(|| "Review Comment".to_string()),
+                .unwrap_or_else(|| tr("code_review.review_comment")),
         }
     }
 }

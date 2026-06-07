@@ -1,5 +1,6 @@
 #![cfg_attr(target_family = "wasm", allow(dead_code, unused_imports))]
 
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ChildView, ConstrainedBox, Container, CornerRadius, DropShadow, Flex,
     ParentElement, Radius, Text,
@@ -51,7 +52,7 @@ impl GoToLineView {
                 },
                 ctx,
             );
-            editor.set_placeholder_text("Line number:Column", ctx);
+            editor.set_placeholder_text(tr("code.editor.goto_line.placeholder"), ctx);
             editor
         });
 
@@ -136,7 +137,7 @@ impl View for GoToLineView {
         let theme = appearance.theme();
 
         let label = Text::new_inline(
-            "Go to line",
+            tr("code.editor.goto_line.label"),
             appearance.ui_font_family(),
             GOTO_LINE_LABEL_FONT_SIZE,
         )

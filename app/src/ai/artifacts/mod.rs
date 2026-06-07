@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use anyhow::anyhow;
 use ui_components::lightbox::{LightboxImage, LightboxImageSource};
 use warp_core::report_error;
+use warp_i18n::{tr, tr_with};
 use warp_multi_agent_api as api;
 #[cfg(feature = "local_fs")]
 use warpui::platform::SaveFilePickerConfiguration;
@@ -292,7 +293,7 @@ pub fn file_button_label(filename: &str, filepath: &str) -> String {
     {
         return filepath_basename.to_string();
     }
-    "File".to_string()
+    tr("ai.artifacts.file_title")
 }
 
 pub fn open_screenshot_lightbox<V: warpui::View>(
@@ -360,7 +361,7 @@ fn screenshot_lightbox_image_from_download_result(
             log::warn!("Failed to load screenshot artifact {index}: {e}");
             Some(LightboxImage {
                 source: LightboxImageSource::Loading,
-                description: Some("Failed to load".to_string()),
+                description: Some(tr("ai.artifacts.failed_to_load")),
             })
         }
     }
@@ -386,7 +387,7 @@ pub fn download_file_artifact<V: warpui::View>(
                 log::warn!("Failed to load file artifact {artifact_uid}: {error}");
                 show_file_download_toast(
                     &artifact_uid,
-                    DismissibleToast::error("Failed to prepare file download.".to_string()),
+                    DismissibleToast::error(tr("ai.artifacts.failed_to_prepare_download")),
                     ctx,
                 );
             }
@@ -447,15 +448,19 @@ fn open_file_download_picker<V: warpui::View>(
                 move |_me, result, ctx| match result {
                     Ok(()) => show_file_download_toast(
                         &artifact_uid,
-                        DismissibleToast::success(format!("Downloaded {toast_filename}.")),
+                        DismissibleToast::success(tr_with(
+                            "ai.artifacts.downloaded_file",
+                            &[("filename", &toast_filename)],
+                        )),
                         ctx,
                     ),
                     Err(error) => {
                         log::warn!("Failed to download file artifact {artifact_uid}: {error}");
                         show_file_download_toast(
                             &artifact_uid,
-                            DismissibleToast::error(format!(
-                                "Failed to download {toast_filename}."
+                            DismissibleToast::error(tr_with(
+                                "ai.artifacts.failed_to_download_file",
+                                &[("filename", &toast_filename)],
                             )),
                             ctx,
                         );
@@ -484,8 +489,8 @@ fn download_toast_filename(path: &Path) -> String {
     path.file_name()
         .and_then(|file_name| file_name.to_str())
         .filter(|file_name| !file_name.is_empty())
-        .unwrap_or("file")
-        .to_string()
+        .map(str::to_string)
+        .unwrap_or_else(|| tr("ai.artifacts.file"))
 }
 
 fn non_empty_trimmed(value: &str) -> Option<&str> {

@@ -2,6 +2,7 @@
 
 use pathfinder_geometry::vector::Vector2F;
 use warp_core::context_flag::ContextFlag;
+use warp_i18n::tr;
 use warpui::elements::{ChildAnchor, OffsetPositioning, ParentAnchor, ParentOffsetBounds, Stack};
 use warpui::keymap::Trigger;
 use warpui::presenter::ChildView;
@@ -116,19 +117,19 @@ where
         };
 
         if has_selection && can_edit {
-            let item = MenuItemFields::new("Cut")
+            let item = MenuItemFields::new(tr("terminal.context_menu.cut"))
                 .with_on_select_action(V::Action::from(ContextMenuAction::CutSelectedText))
                 .with_key_shortcut_label(custom_action_to_display(CustomAction::Cut));
             items.push(item.into_item());
         }
         if has_selection {
-            let item = MenuItemFields::new("Copy")
+            let item = MenuItemFields::new(tr("terminal.context_menu.copy"))
                 .with_on_select_action(V::Action::from(ContextMenuAction::CopySelectedText))
                 .with_key_shortcut_label(custom_action_to_display(CustomAction::Copy));
             items.push(item.into_item());
         }
         if can_edit {
-            let item = MenuItemFields::new("Paste")
+            let item = MenuItemFields::new(tr("terminal.context_menu.paste"))
                 .with_on_select_action(V::Action::from(ContextMenuAction::Paste))
                 .with_key_shortcut_label(custom_action_to_display(CustomAction::Paste));
             items.push(item.into_item());
@@ -155,7 +156,7 @@ where
         let mut items = vec![];
         if ContextFlag::CreateNewSession.is_enabled() {
             items.extend([
-                MenuItemFields::new("Split pane right")
+                MenuItemFields::new(tr("terminal.context_menu.split_pane_right"))
                     .with_on_select_action(V::Action::from(ContextMenuAction::EmitPaneEvent(
                         PaneEvent::SplitRight(None),
                     )))
@@ -164,7 +165,7 @@ where
                         ctx,
                     ))
                     .into_item(),
-                MenuItemFields::new("Split pane left")
+                MenuItemFields::new(tr("terminal.context_menu.split_pane_left"))
                     .with_on_select_action(V::Action::from(ContextMenuAction::EmitPaneEvent(
                         PaneEvent::SplitLeft(None),
                     )))
@@ -173,7 +174,7 @@ where
                         ctx,
                     ))
                     .into_item(),
-                MenuItemFields::new("Split pane down")
+                MenuItemFields::new(tr("terminal.context_menu.split_pane_down"))
                     .with_on_select_action(V::Action::from(ContextMenuAction::EmitPaneEvent(
                         PaneEvent::SplitDown(None),
                     )))
@@ -182,7 +183,7 @@ where
                         ctx,
                     ))
                     .into_item(),
-                MenuItemFields::new("Split pane up")
+                MenuItemFields::new(tr("terminal.context_menu.split_pane_up"))
                     .with_on_select_action(V::Action::from(ContextMenuAction::EmitPaneEvent(
                         PaneEvent::SplitUp(None),
                     )))
@@ -213,7 +214,7 @@ where
             );
 
             items.push(
-                MenuItemFields::new("Close pane")
+                MenuItemFields::new(tr("terminal.context_menu.close_pane"))
                     .with_on_select_action(V::Action::from(ContextMenuAction::EmitPaneEvent(
                         PaneEvent::Close,
                     )))

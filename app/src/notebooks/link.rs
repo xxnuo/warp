@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 use futures_util::future::Either;
 use url::Url;
+use warp_i18n::tr;
 use warp_util::path::{CleanPathResult, LineAndColumnArg};
 use warpui::r#async::SpawnedFutureHandle;
 use warpui::{AppContext, Entity, ModelContext, ModelHandle, SingletonEntity, WindowId};
@@ -49,16 +50,16 @@ impl LinkTarget {
     pub fn secondary_action(&self) -> Option<SecondaryAction> {
         match self {
             LinkTarget::LocalDirectory { .. } => Some(SecondaryAction {
-                label: "New session".into(),
-                tooltip: Some("Open a new terminal session in this directory".into()),
-                accessibility_content: "Open in terminal session".into(),
+                label: tr("notebooks.link.new_session").into(),
+                tooltip: Some(tr("notebooks.link.open_new_terminal_session").into()),
+                accessibility_content: tr("notebooks.link.open_in_terminal_session").into(),
             }),
             LinkTarget::LocalFile {
                 is_markdown: true, ..
             } => Some(SecondaryAction {
-                label: "Open in editor".into(),
+                label: tr("common.open_in_editor").into(),
                 tooltip: None,
-                accessibility_content: "Edit Markdown file".into(),
+                accessibility_content: tr("notebooks.link.edit_markdown_file").into(),
             }),
             LinkTarget::Url(_) | LinkTarget::LocalFile { .. } => None,
         }

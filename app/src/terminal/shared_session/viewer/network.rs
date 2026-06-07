@@ -28,6 +28,7 @@ use session_sharing_protocol::viewer::{
     ViewerRemovedReason,
 };
 use warp_core::features::FeatureFlag;
+use warp_i18n::tr;
 use warpui::r#async::{SpawnedFutureHandle, Timer};
 use warpui::{
     Entity, ModelContext, ModelHandle, RequestState, RetryOption, SingletonEntity, WeakViewHandle,
@@ -1049,18 +1050,18 @@ pub enum FailedToJoinReason {
 
 impl FailedToJoinReason {
     /// This error message will be displayed to the user.
-    pub fn user_facing_error_message(&self) -> &str {
+    pub fn user_facing_error_message(&self) -> String {
         match self {
-            FailedToJoinReason::Unknown => "Failed to join shared session.",
+            FailedToJoinReason::Unknown => tr("shared_session.viewer.failed_to_join"),
             FailedToJoinReason::FailedToConnectToServer => {
-                "Failed to connect. Please try again later."
+                tr("shared_session.viewer.failed_to_connect")
             }
-            FailedToJoinReason::SessionNotFound => "Shared session not found.",
-            FailedToJoinReason::WrongPassword => "Invalid session sharing link.",
+            FailedToJoinReason::SessionNotFound => tr("shared_session.viewer.session_not_found"),
+            FailedToJoinReason::WrongPassword => tr("shared_session.viewer.invalid_link"),
             FailedToJoinReason::MaxNumberOfParticipantsReached => {
-                "The maximum number of participants for this shared session has been reached."
+                tr("shared_session.viewer.max_participants_reached")
             }
-            FailedToJoinReason::SessionNotAccessible => "You don't have access to this link.",
+            FailedToJoinReason::SessionNotAccessible => tr("shared_session.viewer.no_link_access"),
         }
     }
 }
@@ -1082,21 +1083,18 @@ impl From<session_sharing_protocol::viewer::FailedToJoinReason> for FailedToJoin
 pub fn session_ended_reason_string(reason: &SessionEndedReason) -> String {
     match reason {
         SessionEndedReason::InternalServerError => {
-            "Something went wrong. Please ask sharer to reshare to continue.".to_owned()
+            tr("shared_session.viewer.ended_internal_server_error")
         }
         SessionEndedReason::InactivityLimitReached => {
-            "Sharing ended due to sharer inactivity".to_owned()
+            tr("shared_session.viewer.ended_sharer_inactivity")
         }
-        _ => "Session ended.".to_owned(),
+        _ => tr("shared_session.viewer.session_ended"),
     }
 }
 
 pub fn viewer_removed_reason_string(reason: &ViewerRemovedReason) -> String {
     match reason {
-        ViewerRemovedReason::LostAccess => {
-            "Your access to the session was removed. Please ask sharer to reshare to continue."
-                .to_owned()
-        }
+        ViewerRemovedReason::LostAccess => tr("shared_session.viewer.access_removed"),
     }
 }
 
@@ -1104,9 +1102,9 @@ pub fn viewer_removed_reason_string(reason: &ViewerRemovedReason) -> String {
 pub fn command_execution_failure_reason_string(reason: &CommandExecutionFailureReason) -> String {
     match reason {
         CommandExecutionFailureReason::InsufficientPermissions => {
-            "Insufficient permissions. Please request edit access.".to_owned()
+            tr("shared_session.viewer.insufficient_permissions")
         }
-        _ => "Failed to execute command. Please try again.".to_owned(),
+        _ => tr("shared_session.viewer.failed_execute_command"),
     }
 }
 
@@ -1114,9 +1112,9 @@ pub fn command_execution_failure_reason_string(reason: &CommandExecutionFailureR
 pub fn write_to_pty_failure_reason_string(reason: &WriteToPtyFailureReason) -> String {
     match reason {
         WriteToPtyFailureReason::InsufficientPermissions => {
-            "Insufficient permissions. Please request edit access.".to_owned()
+            tr("shared_session.viewer.insufficient_permissions")
         }
-        _ => "Failed to make edit. Please try again.".to_owned(),
+        _ => tr("shared_session.viewer.failed_make_edit"),
     }
 }
 
@@ -1124,13 +1122,13 @@ pub fn write_to_pty_failure_reason_string(reason: &WriteToPtyFailureReason) -> S
 pub fn agent_prompt_failure_reason_string(reason: &AgentPromptFailureReason) -> String {
     match reason {
         AgentPromptFailureReason::InsufficientPermissions => {
-            "Insufficient permissions. Please request edit access.".to_owned()
+            tr("shared_session.viewer.insufficient_permissions")
         }
         AgentPromptFailureReason::InvalidConversation => {
-            "Invalid conversation. Please try again.".to_owned()
+            tr("shared_session.viewer.invalid_conversation")
         }
         AgentPromptFailureReason::CommandInProgress => {
-            "A long running command is currently in progress. Please wait for it to complete before sending an agent prompt.".to_owned()
+            tr("shared_session.viewer.command_in_progress")
         }
     }
 }
@@ -1139,9 +1137,9 @@ pub fn agent_prompt_failure_reason_string(reason: &AgentPromptFailureReason) -> 
 pub fn control_action_failure_reason_string(reason: &ControlActionFailureReason) -> String {
     match reason {
         ControlActionFailureReason::InsufficientPermissions => {
-            "Insufficient permissions. Please request edit access.".to_owned()
+            tr("shared_session.viewer.insufficient_permissions")
         }
-        _ => "Failed to perform action. Please try again.".to_owned(),
+        _ => tr("shared_session.viewer.failed_perform_action"),
     }
 }
 

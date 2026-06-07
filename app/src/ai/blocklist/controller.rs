@@ -24,6 +24,7 @@ use pending_response_streams::PendingResponseStreams;
 use session_sharing_protocol::common::ParticipantId;
 pub use slash_command::*;
 use warp_core::assertions::safe_assert;
+use warp_i18n::{tr, tr_with};
 use warp_multi_agent_api::{message, Task, ToolType};
 use warpui::r#async::{SpawnedFutureHandle, Timer};
 use warpui::{AppContext, Entity, EntityId, ModelContext, ModelHandle, SingletonEntity};
@@ -2765,11 +2766,11 @@ impl BlocklistAIController {
                         "generate_multi_agent_output stream ended without emitting StreamFinished event."
                     );
 
-                    let error_message = "Request did not successfully complete";
+                    let error_message = tr("ai.agent.request_incomplete");
                     history_model.update(ctx, |history_model, ctx| {
                         history_model.mark_response_stream_completed_with_error(
                             RenderableAIError::Other {
-                                error_message: error_message.to_string(),
+                                error_message,
                                 will_attempt_resume: false,
                                 waiting_for_network: false,
                             },
@@ -2935,11 +2936,11 @@ impl BlocklistAIController {
                 });
             }
             Some(warp_multi_agent_api::response_event::stream_finished::Reason::Other(_)) => {
-                let error_message = "Response stream finished unexpectedly (with finish reason `Other`).";
+                let error_message = tr("ai.agent.response_stream_unexpected_other");
                 history_model.update(ctx, |history_model, ctx| {
                     history_model.mark_response_stream_completed_with_error(
                         RenderableAIError::Other {
-                            error_message: error_message.to_owned(),
+                            error_message,
                             will_attempt_resume: false,
                             waiting_for_network: false,
                         },
@@ -2951,10 +2952,10 @@ impl BlocklistAIController {
                 });
             }
             Some(warp_multi_agent_api::response_event::stream_finished::Reason::ContextWindowExceeded(_)) => {
-                let error_message = "Input exceeded context window limit.";
+                let error_message = tr("ai.agent.input_exceeded_context_window");
                 history_model.update(ctx, |history_model, ctx| {
                     history_model.mark_response_stream_completed_with_error(
-                        RenderableAIError::ContextWindowExceeded(error_message.to_owned()),
+                        RenderableAIError::ContextWindowExceeded(error_message),
                         stream_id,
                         conversation_id,
                         self.terminal_view_id,
@@ -2976,11 +2977,11 @@ impl BlocklistAIController {
                 });
             }
             Some(warp_multi_agent_api::response_event::stream_finished::Reason::LlmUnavailable(_)) => {
-                let error_message = "The LLM is currently unavailable.";
+                let error_message = tr("ai.agent.llm_unavailable");
                 history_model.update(ctx, |history_model, ctx| {
                     history_model.mark_response_stream_completed_with_error(
                         RenderableAIError::Other {
-                            error_message: error_message.to_owned(),
+                            error_message,
                             will_attempt_resume: false,
                             waiting_for_network: false,
                         },
@@ -3030,8 +3031,9 @@ impl BlocklistAIController {
             }
             Some(warp_multi_agent_api::response_event::stream_finished::Reason::InternalError(
                 warp_multi_agent_api::response_event::stream_finished::InternalError{ message})) => {
-                let error_message = format!(
-                    "Response stream finished unexpectedly with internal error: {message}",
+                let error_message = tr_with(
+                    "ai.agent.response_stream_internal_error",
+                    &[("message", message.as_str())],
                 );
                 history_model.update(ctx, |history_model, ctx| {
                     history_model.mark_response_stream_completed_with_error(
@@ -3048,10 +3050,10 @@ impl BlocklistAIController {
                 });
             }
             Some(warp_multi_agent_api::response_event::stream_finished::Reason::MaxTokenLimit(_)) => {
-                let error_message = "Input exceeded context window limit.";
+                let error_message = tr("ai.agent.input_exceeded_context_window");
                 history_model.update(ctx, |history_model, ctx| {
                     history_model.mark_response_stream_completed_with_error(
-                        RenderableAIError::ContextWindowExceeded(error_message.to_owned()),
+                        RenderableAIError::ContextWindowExceeded(error_message),
                         stream_id,
                         conversation_id,
                         self.terminal_view_id,

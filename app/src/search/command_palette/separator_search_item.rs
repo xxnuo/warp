@@ -1,4 +1,5 @@
 use ordered_float::OrderedFloat;
+use warp_i18n::tr_with;
 use warpui::elements::{Empty, Text};
 use warpui::{AppContext, Element, SingletonEntity};
 
@@ -66,7 +67,7 @@ impl SearchItem for SeparatorSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("Section: {}", self.title)
+        tr_with("search.a11y.section", &[("name", self.title.as_str())])
     }
 
     fn is_static_separator(&self) -> bool {

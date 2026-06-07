@@ -9,6 +9,7 @@ use warp_core::ui::color::coloru_with_opacity;
 use warp_core::ui::color::contrast::relative_luminance;
 use warp_core::ui::theme::phenomenon::PhenomenonStyle;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui_core::elements::{
     Border, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, DropShadow, Flex,
     MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement, Radius, Rect,
@@ -92,7 +93,7 @@ pub struct Button {
 impl Button {
     pub fn next(handler: MouseEventHandler) -> Self {
         Self {
-            text: Cow::Borrowed("Next"),
+            text: Cow::Owned(tr("common.next")),
             keystroke: Some(Keystroke {
                 key: "enter".into(),
                 ..Default::default()

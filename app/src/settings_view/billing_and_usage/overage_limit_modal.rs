@@ -1,3 +1,4 @@
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ChildView, Clipped, Container, CornerRadius, CrossAxisAlignment, Expanded, Flex,
     MouseStateHandle, Padding, ParentElement, Radius, Text,
@@ -152,10 +153,10 @@ impl SpendingLimitModal {
     fn error_text(&self) -> Option<String> {
         match self.input_error_state {
             Some(SpendingLimitModalInputErrorState::InvalidNumberFormat) => {
-                Some("Please enter a valid currency amount".to_string())
+                Some(tr("settings.billing.valid_currency_amount"))
             }
             Some(SpendingLimitModalInputErrorState::NumberOutOfRange) => {
-                Some("Please enter a price between $0.01 and $10,000,000".to_string())
+                Some(tr("settings.billing.price_between_range"))
             }
             None => None,
         }
@@ -263,7 +264,7 @@ impl View for SpendingLimitModal {
                 ButtonVariant::Accent,
                 self.update_button_mouse_state.clone(),
             )
-            .with_text_label("Update".to_string())
+            .with_text_label(tr("common.update"))
             .with_style(button_style);
 
         if self.input_error_state.is_some() {
@@ -278,7 +279,7 @@ impl View for SpendingLimitModal {
                         ButtonVariant::Secondary,
                         self.cancel_button_mouse_state.clone(),
                     )
-                    .with_text_label("Cancel".to_string())
+                    .with_text_label(tr("common.cancel"))
                     .with_style(button_style)
                     .build()
                     .on_click(|ctx, _, _| {

@@ -1,4 +1,5 @@
 use ordered_float::OrderedFloat;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{Container, Flex, Highlight, ParentElement, Text};
 use warpui::fonts::{Properties, Weight};
 use warpui::{AppContext, Element, SingletonEntity};
@@ -62,7 +63,7 @@ impl SearchItem for NotebookSearchItem {
     ) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
         let title = if self.cloud_notebook.model().title.is_empty() {
-            "Untitled".to_string()
+            tr("common.untitled")
         } else {
             self.cloud_notebook.model().title.clone()
         };
@@ -142,6 +143,9 @@ impl SearchItem for NotebookSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("Notebook: {}", self.cloud_notebook.model().title)
+        tr_with(
+            "search.a11y.notebook",
+            &[("name", self.cloud_notebook.model().title.as_str())],
+        )
     }
 }

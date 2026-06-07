@@ -1,5 +1,6 @@
 use pathfinder_geometry::vector::Vector2F;
 use warp_core::context_flag::ContextFlag;
+use warp_i18n::tr;
 use warpui::keymap::Trigger;
 use warpui::{SingletonEntity, ViewContext, ViewHandle};
 
@@ -31,35 +32,35 @@ pub struct Menus {
 impl EnvVarCollectionView {
     pub(super) fn initialize_menus(ctx: &mut ViewContext<Self>) -> Menus {
         let command_item = Self::item(
-            "Command",
+            tr("env_vars.menu.command"),
             EnvVarCollectionAction::DisplayCommandDialog,
             None,
             Some(Icon::Terminal),
         );
 
         let one_password_item = Self::item(
-            "1Password",
+            "1Password".to_string(),
             EnvVarCollectionAction::SelectSecretManager(SecretManager::OnePassword),
             None,
             Some(Icon::OnePassword),
         );
 
         let lastpass_item = Self::item(
-            "LastPass",
+            "LastPass".to_string(),
             EnvVarCollectionAction::SelectSecretManager(SecretManager::LastPass),
             None,
             Some(Icon::LastPass),
         );
 
         let edit_item = Self::item(
-            "Edit",
+            tr("common.edit"),
             EnvVarCollectionAction::EditCommand,
             None,
             Some(Icon::Terminal),
         );
 
         let clear_secret_item = Self::item(
-            "Clear secret",
+            tr("env_vars.menu.clear_secret"),
             EnvVarCollectionAction::ClearSecret,
             None,
             Some(Icon::Trash),
@@ -128,28 +129,28 @@ impl EnvVarCollectionView {
         ctx: &mut ViewContext<Self>,
     ) -> ViewHandle<Menu<EnvVarCollectionAction>> {
         let split_pane_right = Self::item(
-            "Split pane right",
+            tr("settings.menu.split_pane_right"),
             EnvVarCollectionAction::EmitPaneEvent(PaneEvent::SplitRight(None)),
             keybinding_name_to_display_string("pane_group:add_right", ctx),
             None,
         );
 
         let split_pane_left = Self::item(
-            "Split pane left",
+            tr("settings.menu.split_pane_left"),
             EnvVarCollectionAction::EmitPaneEvent(PaneEvent::SplitLeft(None)),
             keybinding_name_to_display_string("pane_group:add_left", ctx),
             None,
         );
 
         let split_pane_down = Self::item(
-            "Split pane down",
+            tr("settings.menu.split_pane_down"),
             EnvVarCollectionAction::EmitPaneEvent(PaneEvent::SplitDown(None)),
             keybinding_name_to_display_string("pane_group:add_down", ctx),
             None,
         );
 
         let split_pane_up = Self::item(
-            "Split pane up",
+            tr("settings.menu.split_pane_up"),
             EnvVarCollectionAction::EmitPaneEvent(PaneEvent::SplitUp(None)),
             keybinding_name_to_display_string("pane_group:add_up", ctx),
             None,
@@ -161,9 +162,9 @@ impl EnvVarCollectionView {
             .is_some_and(|handle| handle.split_pane_state(ctx).is_maximized());
         let toggle_maximize_pane = Self::item(
             if is_maximized {
-                "Minimize pane"
+                tr("settings.menu.minimize_pane")
             } else {
-                "Maximize pane"
+                tr("settings.menu.maximize_pane")
             },
             EnvVarCollectionAction::EmitPaneEvent(PaneEvent::ToggleMaximized),
             keybinding_name_to_display_string("pane_group:toggle_maximize_pane", ctx),
@@ -171,7 +172,7 @@ impl EnvVarCollectionView {
         );
 
         let close_pane = Self::item(
-            "Close pane",
+            tr("settings.menu.close_pane"),
             EnvVarCollectionAction::EmitPaneEvent(PaneEvent::Close),
             trigger_to_keystroke(&Trigger::Custom(CustomAction::CloseCurrentSession.into()))
                 .map(|keystroke| keystroke.displayed()),
@@ -336,7 +337,7 @@ impl EnvVarCollectionView {
     }
 
     fn item(
-        name: &str,
+        name: String,
         action: EnvVarCollectionAction,
         key_shortcut: Option<String>,
         icon: Option<Icon>,
@@ -372,7 +373,7 @@ impl EnvVarCollectionView {
         // Add "Copy Link" to menu
         if let Some(link) = self.env_var_collection_link(ctx) {
             menu_items.push(
-                MenuItemFields::new("Copy link")
+                MenuItemFields::new(tr("sharing.copy_link"))
                     .with_on_select_action(EnvVarCollectionAction::CopyLink(link))
                     .with_icon(Icon::Link)
                     .into_item(),
@@ -382,7 +383,7 @@ impl EnvVarCollectionView {
         // Add "Duplicate" to menu
         if space != Some(Space::Shared) {
             menu_items.push(
-                MenuItemFields::new("Duplicate")
+                MenuItemFields::new(tr("common.duplicate"))
                     .with_on_select_action(EnvVarCollectionAction::Duplicate)
                     .with_icon(Icon::Duplicate)
                     .into_item(),
@@ -394,7 +395,7 @@ impl EnvVarCollectionView {
             && (!FeatureFlag::SharedWithMe.is_enabled() || access_level.can_trash())
         {
             menu_items.push(
-                MenuItemFields::new("Trash")
+                MenuItemFields::new(tr("drive.trash"))
                     .with_on_select_action(EnvVarCollectionAction::Trash)
                     .with_icon(Icon::Trash)
                     .into_item(),
@@ -403,7 +404,7 @@ impl EnvVarCollectionView {
 
         #[cfg(feature = "local_fs")]
         menu_items.push(
-            MenuItemFields::new("Export")
+            MenuItemFields::new(tr("common.export"))
                 .with_on_select_action(EnvVarCollectionAction::Export)
                 .with_icon(Icon::Download)
                 .into_item(),

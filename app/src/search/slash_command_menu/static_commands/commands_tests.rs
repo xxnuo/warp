@@ -23,7 +23,8 @@ fn rename_tab_command_requires_argument() {
 
     assert!(!argument.is_optional);
     assert!(!argument.should_execute_on_selection);
-    assert_eq!(argument.hint_text, Some("<tab name>"));
+    assert_eq!(argument.hint_text, Some("slash_command.rename_tab.hint"));
+    assert!(argument.hint_text_is_i18n_key);
 }
 
 #[cfg(not(target_family = "wasm"))]
@@ -47,10 +48,8 @@ fn continue_locally_command_is_registered() {
         .expect("expected /continue-locally to declare an argument");
     assert!(argument.is_optional);
     assert!(!argument.should_execute_on_selection);
-    assert_eq!(
-        argument.hint_text,
-        Some("<optional prompt to send in forked conversation>")
-    );
+    assert_eq!(argument.hint_text, Some("slash_command.fork.hint"));
+    assert!(argument.hint_text_is_i18n_key);
 }
 
 #[test]
@@ -65,6 +64,7 @@ fn set_tab_color_command_requires_argument() {
 
     assert!(!argument.is_optional);
     assert!(!argument.should_execute_on_selection);
+    assert!(!argument.hint_text_is_i18n_key);
 
     let hint = argument
         .hint_text

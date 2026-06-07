@@ -3,6 +3,7 @@ use std::path::Path;
 use anyhow::Context as _;
 use serde_json::{Map, Value};
 use warp_cli::mcp::MCPSpec;
+use warp_i18n::{tr, tr_with};
 
 use crate::ai::ambient_agents::AgentConfigSnapshot;
 
@@ -44,8 +45,10 @@ pub struct LoadedAgentConfigSnapshotFile {
 /// - otherwise: try JSON, then YAML
 #[cfg(not(target_family = "wasm"))]
 pub fn load_config_file(path: &Path) -> anyhow::Result<LoadedAgentConfigSnapshotFile> {
-    let contents = std::fs::read_to_string(path)
-        .with_context(|| format!("Failed to read config file '{}'", path.display()))?;
+    let contents = std::fs::read_to_string(path).with_context(|| {
+        let path = path.display().to_string();
+        tr_with("ai.agent_sdk.config_file.read_failed", &[("path", &path)])
+    })?;
 
     let ext = path
         .extension()
@@ -53,23 +56,30 @@ pub fn load_config_file(path: &Path) -> anyhow::Result<LoadedAgentConfigSnapshot
         .map(|s| s.to_ascii_lowercase());
 
     let file = match ext.as_deref() {
-        Some("json") => parse_json(&contents)
-            .with_context(|| format!("Invalid JSON in config file '{}'", path.display()))?,
-        Some("yml") | Some("yaml") => parse_yaml(&contents)
-            .with_context(|| format!("Invalid YAML in config file '{}'", path.display()))?,
+        Some("json") => parse_json(&contents).with_context(|| {
+            let path = path.display().to_string();
+            tr_with("ai.agent_sdk.config_file.invalid_json", &[("path", &path)])
+        })?,
+        Some("yml") | Some("yaml") => parse_yaml(&contents).with_context(|| {
+            let path = path.display().to_string();
+            tr_with("ai.agent_sdk.config_file.invalid_yaml", &[("path", &path)])
+        })?,
         _ => parse_json(&contents)
             .or_else(|_| parse_yaml(&contents))
             .with_context(|| {
-                format!(
-                    "Failed to parse config file '{}' as JSON or YAML",
-                    path.display()
-                )
+                let path = path.display().to_string();
+                tr_with("ai.agent_sdk.config_file.parse_failed", &[("path", &path)])
             })?,
     };
 
     if let Some(mcp_servers) = &file.mcp_servers {
-        super::mcp_config::validate_mcp_servers(mcp_servers)
-            .with_context(|| format!("Invalid mcp_servers in '{}'", path.display()))?;
+        super::mcp_config::validate_mcp_servers(mcp_servers).with_context(|| {
+            let path = path.display().to_string();
+            tr_with(
+                "ai.agent_sdk.config_file.invalid_mcp_servers",
+                &[("path", &path)],
+            )
+        })?;
     }
 
     Ok(LoadedAgentConfigSnapshotFile { file })
@@ -78,9 +88,9 @@ pub fn load_config_file(path: &Path) -> anyhow::Result<LoadedAgentConfigSnapshot
 /// WASM builds don't use CLI command execution / local file access.
 #[cfg(target_family = "wasm")]
 pub fn load_config_file(_path: &Path) -> anyhow::Result<LoadedAgentConfigSnapshotFile> {
-    Err(anyhow::anyhow!(
-        "Config files are not supported in WASM builds"
-    ))
+    Err(anyhow::anyhow!(tr(
+        "ai.agent_sdk.config_file.wasm_unsupported"
+    )))
 }
 
 fn parse_json(input: &str) -> anyhow::Result<AgentConfigSnapshotFile> {
@@ -93,7 +103,7 @@ fn parse_yaml(input: &str) -> anyhow::Result<AgentConfigSnapshotFile> {
 }
 
 fn supported_keys_context() -> String {
-    "Supported keys: name, environment_id, model_id, base_prompt, mcp_servers, host, computer_use_enabled".to_string()
+    tr("ai.agent_sdk.config_file.supported_keys")
 }
 
 /// Convert an unwrapped `mcp_servers` map into runtime MCP specs for AgentDriver.
@@ -108,13 +118,19 @@ pub fn mcp_specs_from_mcp_servers(
     let mut json_map: Map<String, Value> = Map::new();
 
     for (name, config) in mcp_servers {
-        let obj = config
-            .as_object()
-            .ok_or_else(|| anyhow::anyhow!("MCP server '{name}' config must be a JSON object"))?;
+        let obj = config.as_object().ok_or_else(|| {
+            anyhow::anyhow!(tr_with(
+                "ai.agent_sdk.mcp_config.config_must_be_object",
+                &[("server_name", name)]
+            ))
+        })?;
 
         if let Some(warp_id) = obj.get("warp_id").and_then(Value::as_str) {
             let uuid = uuid::Uuid::parse_str(warp_id).map_err(|_| {
-                anyhow::anyhow!("MCP server '{name}' field 'warp_id' must be a UUID")
+                anyhow::anyhow!(tr_with(
+                    "ai.agent_sdk.mcp_config.field_must_be_uuid",
+                    &[("server_name", name), ("field", "warp_id")]
+                ))
             })?;
             uuids.push(uuid);
         } else {

@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     ChildView, Container, CrossAxisAlignment, Flex, MouseStateHandle, ParentElement, Text,
 };
@@ -148,10 +149,14 @@ impl InactivityModalBody {
     }
 
     fn render_countdown(&self, appearance: &Appearance) -> Box<dyn Element> {
-        let text = format!(
-            "Sharing will end in {}:{:02} due to inactivity.",
+        let time_remaining = format!(
+            "{}:{:02}",
             self.duration.as_secs() / 60,
-            self.duration.as_secs() % 60,
+            self.duration.as_secs() % 60
+        );
+        let text = tr_with(
+            "shared_session.inactivity.sharing_will_end",
+            &[("time", &time_remaining)],
         );
 
         Container::new(
@@ -179,7 +184,7 @@ impl InactivityModalBody {
                     font_weight: Some(Weight::Bold),
                     ..Default::default()
                 })
-                .with_centered_text_label(String::from("Stop sharing"))
+                .with_centered_text_label(tr("terminal.context_menu.stop_sharing"))
                 .build()
                 .with_cursor(Cursor::PointingHand)
                 .on_click(move |ctx, _, _| {
@@ -205,7 +210,7 @@ impl InactivityModalBody {
                 font_weight: Some(Weight::Bold),
                 ..Default::default()
             })
-            .with_centered_text_label(String::from("Continue sharing"))
+            .with_centered_text_label(tr("shared_session.inactivity.continue_sharing"))
             .build()
             .with_cursor(Cursor::PointingHand)
             .on_click(move |ctx, _, _| {
@@ -232,7 +237,7 @@ impl View for InactivityModalBody {
 
         let header = Container::new(
             Text::new_inline(
-                "Are you still there?",
+                tr("shared_session.inactivity.title"),
                 appearance.ui_font_family(),
                 HEADER_FONT_SIZE,
             )

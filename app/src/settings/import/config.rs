@@ -8,6 +8,7 @@ use strum_macros::EnumIter;
 use thiserror::Error;
 use warp_core::ui::color::hex_color::HexColorError as UiHexColorError;
 use warp_core::ui::theme::{AnsiColors, WarpTheme};
+use warp_i18n::tr;
 use warpui::fonts::FontInfo;
 use warpui::keymap::Keystroke;
 use warpui::DisplayIdx;
@@ -75,19 +76,21 @@ pub enum SettingType {
 }
 
 impl SettingType {
-    pub fn get_name(&self) -> &'static str {
+    pub fn get_name(&self) -> String {
         match self {
-            SettingType::Theme => "Theme",
-            SettingType::OptionAsMeta => "Option as Meta",
-            SettingType::MouseAndScrollReporting => "Mouse/Scroll Reporting",
-            SettingType::Font => "Font",
-            SettingType::DefaultShell => "Default Shell",
-            SettingType::WorkingDirectory => "Working Directory",
-            SettingType::HotkeyMode => "Global hotkey",
-            SettingType::WindowSize => "Window Dimensions",
-            SettingType::CopyOnSelect => "Copy On Select",
-            SettingType::Opacity => "Window Opacity",
-            SettingType::CursorBlinking => "Cursor Blinking",
+            SettingType::Theme => tr("settings.import.setting.theme"),
+            SettingType::OptionAsMeta => tr("settings.import.setting.option_as_meta"),
+            SettingType::MouseAndScrollReporting => {
+                tr("settings.import.setting.mouse_and_scroll_reporting")
+            }
+            SettingType::Font => tr("settings.import.setting.font"),
+            SettingType::DefaultShell => tr("settings.import.setting.default_shell"),
+            SettingType::WorkingDirectory => tr("settings.import.setting.working_directory"),
+            SettingType::HotkeyMode => tr("settings.import.setting.global_hotkey"),
+            SettingType::WindowSize => tr("settings.import.setting.window_dimensions"),
+            SettingType::CopyOnSelect => tr("settings.import.setting.copy_on_select"),
+            SettingType::Opacity => tr("settings.import.setting.window_opacity"),
+            SettingType::CursorBlinking => tr("settings.import.setting.cursor_blinking"),
         }
     }
 }

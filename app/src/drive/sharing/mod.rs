@@ -4,6 +4,7 @@ use chrono::{DateTime, Local};
 use session_sharing_protocol::common::SessionId;
 use warp_core::channel::ChannelState;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::color::ColorU;
 use warpui::ui_components::components::{UiComponent, UiComponentStyles};
 use warpui::{AppContext, SingletonEntity, WeakViewHandle};
@@ -110,7 +111,7 @@ impl SubjectExt for Subject {
             Subject::User(kind) => kind.name(app),
             Subject::PendingUser { email } => email.clone().map(Cow::from),
             Subject::Team(kind) => kind.display_name(app).map(Cow::from),
-            Subject::AnyoneWithLink(_) => Some(Cow::from("Anyone with the link")),
+            Subject::AnyoneWithLink(_) => Some(Cow::from(tr("sharing.anyone_with_link"))),
         }
     }
 

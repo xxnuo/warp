@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use warp_i18n::tr;
 use warpui::elements::{
     Container, CrossAxisAlignment, Flex, MouseStateHandle, ParentElement, Text,
 };
@@ -55,7 +56,7 @@ where
 {
     let callout_bg = callout_background_fill(appearance).into_solid();
     let title = Text::new(
-        "Create your first tab config",
+        tr("workspace.hoa_onboarding.tab_config.title"),
         appearance.ui_font_family(),
         16.,
     )
@@ -64,7 +65,7 @@ where
     .finish();
 
     let description = Text::new(
-        "Set up a reusable starting point for your tabs. Pick a repo, choose a session type, and optionally attach a worktree. Use it whenever you want to open a tab with this setup.",
+        tr("workspace.hoa_onboarding.tab_config.description"),
         appearance.ui_font_family(),
         14.,
     )

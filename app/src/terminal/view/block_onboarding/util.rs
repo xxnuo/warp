@@ -1,5 +1,6 @@
 use pathfinder_color::ColorU;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Flex, MouseStateHandle,
     ParentElement, Radius, Shrinkable,
@@ -42,7 +43,7 @@ pub fn render_skip_button<A: Action + Clone>(
             background: Some(appearance.theme().outline().into()),
             ..Default::default()
         })
-        .with_centered_text_label("Skip".to_owned())
+        .with_centered_text_label(tr("common.skip"))
         .build()
         .with_cursor(Cursor::PointingHand)
         .on_click(move |ctx, _, _| ctx.dispatch_typed_action(action.clone()))
@@ -112,7 +113,7 @@ pub fn render_input_row<A: Action + Clone>(
             height: Some(SKIP_BUTTON_HEIGHT),
             ..Default::default()
         })
-        .with_centered_text_label("Create team".to_owned());
+        .with_centered_text_label(tr("settings.teams.create_team"));
     if name(ctx, team_name_editor).is_none() {
         create_team_button = create_team_button
             .with_style(UiComponentStyles {

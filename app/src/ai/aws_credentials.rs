@@ -9,6 +9,7 @@ use futures::channel::oneshot::channel;
 use futures::future::BoxFuture;
 use tokio::sync::Mutex;
 use vec1::vec1;
+use warp_i18n::{tr, tr_with};
 use warp_managed_secrets::client::IdentityTokenOptions;
 use warp_managed_secrets::ManagedSecretManager;
 use warpui::{ModelContext, ModelHandle, SingletonEntity};
@@ -34,9 +35,13 @@ pub enum LoadAwsCredentialsError {
 impl std::fmt::Display for LoadAwsCredentialsError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::NotConfigured => write!(f, "No AWS credentials configured"),
+            Self::NotConfigured => write!(f, "{}", tr("ai.aws_credentials.not_configured")),
             Self::CredentialsLoadFailed(msg) => {
-                write!(f, "Failed to load AWS credentials: {msg}")
+                write!(
+                    f,
+                    "{}",
+                    tr_with("ai.aws_credentials.load_failed", &[("message", msg)])
+                )
             }
         }
     }
@@ -46,39 +51,40 @@ fn aws_profile_reference_for_message(profile: &str, capitalize_first_word: bool)
     let profile = profile.trim();
     if profile.is_empty() {
         if capitalize_first_word {
-            "The default AWS profile".to_string()
+            tr("ai.aws_credentials.default_profile_capitalized")
         } else {
-            "the default AWS profile".to_string()
+            tr("ai.aws_credentials.default_profile")
         }
     } else {
-        let article = if capitalize_first_word { "The" } else { "the" };
-        format!("{article} AWS profile `{profile}`")
+        let key = if capitalize_first_word {
+            "ai.aws_credentials.profile_reference_capitalized"
+        } else {
+            "ai.aws_credentials.profile_reference"
+        };
+        tr_with(key, &[("profile", profile)])
     }
 }
 
 fn user_facing_aws_credentials_error_message(err: &CredentialsError, profile: &str) -> String {
     match err {
-        CredentialsError::CredentialsNotLoaded(_) => format!(
-            "AWS credentials were not found for {}. Log in with the AWS CLI or update your AWS credentials configuration, then refresh.",
-            aws_profile_reference_for_message(profile, false)
-        ),
-        CredentialsError::ProviderTimedOut(_) => {
-            "Timed out while loading AWS credentials. Refresh and try again.".to_string()
+        CredentialsError::CredentialsNotLoaded(_) => {
+            let profile = aws_profile_reference_for_message(profile, false);
+            tr_with(
+                "ai.aws_credentials.credentials_not_found",
+                &[("profile", &profile)],
+            )
         }
-        CredentialsError::InvalidConfiguration(_) => format!(
-            "{} is invalid or incomplete in your local AWS configuration. Update your AWS profile settings and credentials, then refresh.",
-            aws_profile_reference_for_message(profile, true)
-        ),
-        CredentialsError::ProviderError(_) => {
-            "Unable to load AWS credentials from your configured provider. Refresh your AWS login and try again."
-                .to_string()
+        CredentialsError::ProviderTimedOut(_) => tr("ai.aws_credentials.provider_timed_out"),
+        CredentialsError::InvalidConfiguration(_) => {
+            let profile = aws_profile_reference_for_message(profile, true);
+            tr_with(
+                "ai.aws_credentials.invalid_configuration",
+                &[("profile", &profile)],
+            )
         }
-        CredentialsError::Unhandled(_) => {
-            "Unexpected error while loading AWS credentials. Refresh your AWS login and try again."
-                .to_string()
-        }
-        _ => "Unable to load AWS credentials. Refresh your AWS login and try again."
-            .to_string(),
+        CredentialsError::ProviderError(_) => tr("ai.aws_credentials.provider_error"),
+        CredentialsError::Unhandled(_) => tr("ai.aws_credentials.unexpected_error"),
+        _ => tr("ai.aws_credentials.unable_to_load"),
     }
 }
 
@@ -295,7 +301,7 @@ fn refresh_aws_credentials_local_chain(
     );
     Box::pin(async move {
         rx.await
-            .unwrap_or_else(|_| Err("Credential refresh was interrupted".to_string()))
+            .unwrap_or_else(|_| Err(tr("ai.aws_credentials.refresh_interrupted")))
     })
 }
 
@@ -320,9 +326,7 @@ fn refresh_aws_credentials_oidc(
     }
 
     let Some(task_id) = task_id else {
-        let message = "AWS Bedrock inference requires an ambient task ID before credentials \
-                       can be minted"
-            .to_string();
+        let message = tr("ai.aws_credentials.bedrock_requires_task_id");
         manager.set_aws_credentials_state(
             AwsCredentialsState::Failed {
                 message: message.clone(),
@@ -406,7 +410,7 @@ fn refresh_aws_credentials_oidc(
     );
     Box::pin(async move {
         rx.await
-            .unwrap_or_else(|_| Err("Credential refresh was interrupted".to_string()))
+            .unwrap_or_else(|_| Err(tr("ai.aws_credentials.refresh_interrupted")))
     })
 }
 
