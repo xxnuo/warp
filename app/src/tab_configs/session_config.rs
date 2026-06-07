@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 
 #[cfg(feature = "local_fs")]
 use anyhow::Result;
+use warp_i18n::tr;
 
 use super::tab_config::{
     generated_worktree_path_string, TabConfig, TabConfigPaneNode, TabConfigPaneType,
@@ -13,7 +14,6 @@ use crate::launch_configs::launch_config::SplitDirection;
 use crate::terminal::cli_agent::CLIAgent;
 use crate::themes::theme::AnsiColorIdentifier;
 use crate::ui_components::icons::Icon;
-use warp_i18n::tr;
 
 /// The type of session the user wants to start.
 ///

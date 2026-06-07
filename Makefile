@@ -8,7 +8,7 @@ TAG ?= v0.local
 DOCKER_IMAGE ?= arch-bundle-builder
 DMG_NAME_SUFFIX ?=
 
-.PHONY: arch arch-docker arch-image binary deps mac mac-deps release-deps run clean-bundles
+.PHONY: arch arch-docker arch-image binary deps i18n-check mac mac-deps release-deps run clean-bundles
 
 deps:
 	./script/linux/install_build_deps
@@ -18,6 +18,9 @@ release-deps:
 
 run:
 	./script/run
+
+i18n-check:
+	cargo run -p warp_i18n --bin warp-i18n-check --quiet
 
 binary:
 	GIT_RELEASE_TAG=$(TAG) ./script/bundle --channel $(CHANNEL) --artifact $(ARTIFACT) --packages none

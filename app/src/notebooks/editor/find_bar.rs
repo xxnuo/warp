@@ -6,6 +6,7 @@ use pathfinder_geometry::vector::vec2f;
 use warp_core::r#async::debounce;
 use warp_editor::render::model::{AutoScrollMode, Decoration};
 use warp_editor::search::{SearchEvent, Searcher};
+use warp_i18n::tr;
 use warpui::accessibility::{AccessibilityContent, ActionAccessibilityContent, WarpA11yRole};
 use warpui::elements::{
     Border, ChildAnchor, Clipped, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
@@ -28,7 +29,6 @@ use crate::appearance::Appearance;
 use crate::editor::{EditorView, Event as EditorEvent, SingleLineEditorOptions, TextOptions};
 use crate::ui_components::icons::Icon;
 use crate::view_components::find::{CASE_SENSITIVE_LABEL, FIND_BAR_WIDTH, REGEX_TOGGLE_LABEL};
-use warp_i18n::tr;
 
 /// View for the find bar within a notebook.
 pub struct FindBar {

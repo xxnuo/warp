@@ -2,6 +2,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::sync::{OnceLock, RwLock};
 
+#[cfg(not(target_family = "wasm"))]
+pub mod check;
+
 pub const AUTO_LOCALE: &str = "auto";
 pub const FALLBACK_LOCALE: &str = "en-US";
 
@@ -228,8 +231,9 @@ fn system_locale() -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::sync::Mutex;
+
+    use super::*;
 
     static TEST_LOCALE_LOCK: Mutex<()> = Mutex::new(());
 
