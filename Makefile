@@ -19,7 +19,7 @@ release-deps:
 binary:
 	GIT_RELEASE_TAG=$(TAG) ./script/bundle --channel $(CHANNEL) --artifact $(ARTIFACT) --packages none
 
-arch: release-deps
+arch:
 	GIT_RELEASE_TAG=$(TAG) ./script/bundle --channel $(CHANNEL) --artifact $(ARTIFACT) --packages arch --arch $(ARCH)
 
 mac-deps:
@@ -29,7 +29,7 @@ mac-deps:
 	PATH="$(MAC_BUILD_PATH)" command -v cargo-bundle >/dev/null || PATH="$(MAC_BUILD_PATH)" cargo install cargo-bundle --git=https://github.com/burtonageo/cargo-bundle --rev ae4c76e92c08774bf54ff077b1c52e3d1cd6c16d
 	PATH="$(MAC_BUILD_PATH)" command -v create-dmg >/dev/null || PATH="$(MAC_BUILD_PATH)" brew install create-dmg
 
-mac: mac-deps
+mac:
 	PATH="$(MAC_BUILD_PATH)" RUSTC_WRAPPER=$(RUSTC_WRAPPER) GIT_RELEASE_TAG=$(TAG) ./script/macos/bundle --channel $(CHANNEL) --artifact $(ARTIFACT) --arch $(MAC_ARCH)$(if $(DMG_NAME_SUFFIX), --dmg-name-suffix $(DMG_NAME_SUFFIX))
 
 arch-image:
