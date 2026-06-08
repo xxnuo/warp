@@ -13,6 +13,7 @@ use session_sharing_protocol::common::{
 use session_sharing_protocol::sharer::SessionSourceType;
 use session_sharing_protocol::viewer::SessionEndedReason;
 use settings::Setting as _;
+use warp_i18n::tr;
 use warpui::{
     AppContext, ModelContext, ModelHandle, SingletonEntity, ViewContext, ViewHandle,
     WeakViewHandle, WindowId,
@@ -953,7 +954,7 @@ impl TerminalManager {
                 };
                 view.update(ctx, |terminal_view, ctx| {
                     terminal_view.show_persistent_toast(
-                        reason.user_facing_error_message().to_string(),
+                        reason.user_facing_error_message(),
                         ToastFlavor::Error,
                         ctx,
                     );
@@ -969,7 +970,7 @@ impl TerminalManager {
                 Self::shared_session_ended(&view, model.clone(), ctx);
                 view.update(ctx, |terminal_view, ctx| {
                     terminal_view.show_persistent_toast(
-                        "Failed to reconnect. Please try again later.".to_owned(),
+                        tr("shared_session.viewer.failed_reconnect"),
                         ToastFlavor::Error,
                         ctx,
                     );
@@ -1274,7 +1275,7 @@ impl TerminalManager {
                     }
                     LinkAccessLevelUpdateResponse::Error => {
                         terminal_view.show_persistent_toast(
-                            "Failed to update permissions for shared session".to_owned(),
+                            tr("shared_session.viewer.failed_update_permissions"),
                             ToastFlavor::Error,
                             ctx,
                         );
@@ -1303,7 +1304,7 @@ impl TerminalManager {
                     }
                     TeamAccessLevelUpdateResponse::Error(_) => {
                         terminal_view.show_persistent_toast(
-                            "Something went wrong. Please try again.".to_owned(),
+                            tr("shared_session.viewer.generic_try_again"),
                             ToastFlavor::Error,
                             ctx,
                         );
@@ -1318,12 +1319,12 @@ impl TerminalManager {
                     view.update(ctx, |terminal_view, ctx| {
                         let reason_string = match reason {
                             session_sharing_protocol::common::FailedToAddGuestsReason::NotWarpUsers => {
-                                "One or more of the emails are not Warp users.".to_owned()
+                                tr("shared_session.viewer.add_guests_not_warp_users")
                             }
                             session_sharing_protocol::common::FailedToAddGuestsReason::GuestAlreadyAdded => {
-                                "One or more of the guests has already been added.".to_owned()
+                                tr("shared_session.viewer.add_guests_already_added")
                             }
-                            _ => "Something went wrong. Please try again.".to_owned(),
+                            _ => tr("shared_session.viewer.generic_try_again"),
                         };
                         terminal_view.show_persistent_toast(reason_string, ToastFlavor::Error, ctx);
                     });
@@ -1336,7 +1337,7 @@ impl TerminalManager {
                     };
                     view.update(ctx, |terminal_view, ctx| {
                         terminal_view.show_persistent_toast(
-                            "Something went wrong. Please try again.".to_owned(),
+                            tr("shared_session.viewer.generic_try_again"),
                             ToastFlavor::Error,
                             ctx,
                         );
@@ -1350,7 +1351,7 @@ impl TerminalManager {
                     };
                     view.update(ctx, |terminal_view, ctx| {
                         terminal_view.show_persistent_toast(
-                            "Something went wrong. Please try again.".to_owned(),
+                            tr("shared_session.viewer.generic_try_again"),
                             ToastFlavor::Error,
                             ctx,
                         );

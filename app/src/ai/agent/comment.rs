@@ -1,3 +1,5 @@
+use warp_i18n::tr;
+
 use crate::code::buffer_location::LocalOrRemotePath;
 use crate::code_review::comments::CommentId;
 
@@ -45,7 +47,7 @@ impl ReviewComment {
                 .head_title
                 .as_ref()
                 .cloned()
-                .unwrap_or_else(|| "Review Comment".to_string()),
+                .unwrap_or_else(|| tr("code_review.review_comment")),
         }
     }
 }

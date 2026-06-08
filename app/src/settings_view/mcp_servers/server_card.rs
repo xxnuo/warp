@@ -5,6 +5,7 @@ use warp_core::ui::external_product_icon::ExternalProductIcon;
 use warp_core::ui::icons::{Icon, ICON_DIMENSIONS};
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::AnsiColorIdentifier;
+use warp_i18n::{tr, tr_with};
 use warpui::accessibility::ActionAccessibilityContent;
 use warpui::elements::{
     Border, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Expanded, Fill, Flex,
@@ -222,7 +223,7 @@ impl From<ServerCardStatus> for ServerCardOptions {
                     indicator_type: StatusElementTypes::Circle,
                     color: StatusColor::Neutral,
                 }),
-                status_line: Some("Offline".to_string()),
+                status_line: Some(tr("settings.mcp.status.offline")),
                 background: Background::Filled,
                 full_card_clickable: false,
             },
@@ -242,7 +243,7 @@ impl From<ServerCardStatus> for ServerCardOptions {
                     indicator_type: StatusElementTypes::Circle,
                     color: StatusColor::Yellow,
                 }),
-                status_line: Some("Starting server...".to_string()),
+                status_line: Some(tr("settings.mcp.status.starting_server")),
                 background: Background::Filled,
                 full_card_clickable: false,
             },
@@ -262,7 +263,7 @@ impl From<ServerCardStatus> for ServerCardOptions {
                     indicator_type: StatusElementTypes::Circle,
                     color: StatusColor::Yellow,
                 }),
-                status_line: Some("Authenticating...".to_string()),
+                status_line: Some(tr("settings.mcp.status.authenticating")),
                 background: Background::Filled,
                 full_card_clickable: false,
             },
@@ -302,7 +303,7 @@ impl From<ServerCardStatus> for ServerCardOptions {
                     indicator_type: StatusElementTypes::Circle,
                     color: StatusColor::Neutral,
                 }),
-                status_line: Some("Shutting down...".to_string()),
+                status_line: Some(tr("settings.mcp.status.shutting_down")),
                 background: Background::Filled,
                 full_card_clickable: false,
             },
@@ -479,7 +480,7 @@ impl ServerCardView {
 
         if tools.is_empty() {
             return Text::new(
-                "No tools available".to_string(),
+                tr("settings.mcp.no_tools_available"),
                 appearance.ui_font_family(),
                 appearance.ui_font_size(),
             )
@@ -496,12 +497,15 @@ impl ServerCardView {
         let toggle_mouse_state = self.mouse_handles.tools_expandable_hover.clone();
         let chevron_dimensions = 16.;
 
+        let tool_count = tools.len().to_string();
+        let tools_available = tr_with("settings.mcp.tools_available", &[("count", &tool_count)]);
+
         Hoverable::new(toggle_mouse_state, move |_is_hovered| {
             Flex::row()
                 .with_cross_axis_alignment(CrossAxisAlignment::Center)
                 .with_child(
                     Text::new(
-                        format!("{} tools available", tools.len()),
+                        tools_available.clone(),
                         appearance.ui_font_family(),
                         appearance.ui_font_size(),
                     )
@@ -618,15 +622,19 @@ impl ServerCardView {
                     let template_uuid = installation.template_uuid();
                     let gallery_uuid = installation.gallery_uuid();
                     let gallery_uuid_text = match gallery_uuid {
-                        Some(uuid) => format!("Gallery Id: {uuid}"),
-                        None => "Gallery Id: None".to_string(),
+                        Some(uuid) => {
+                            let id = uuid.to_string();
+                            tr_with("settings.mcp.gallery_id", &[("id", &id)])
+                        }
+                        None => tr("settings.mcp.gallery_id_none"),
                     };
                     let cloud_server = CloudTemplatableMCPServer::get_by_uuid(&template_uuid, app);
                     let template_sync_id_text = match cloud_server {
                         Some(cloud_server) => {
-                            format!("Template sync id: {}", cloud_server.sync_id())
+                            let id = cloud_server.sync_id().to_string();
+                            tr_with("settings.mcp.template_sync_id", &[("id", &id)])
                         }
-                        None => "Could not find cloud template".to_string(),
+                        None => tr("settings.mcp.cloud_template_not_found"),
                     };
                     lines.push(format!(
                         "{}",
@@ -750,7 +758,7 @@ impl ServerCardView {
                     self.build_icon_button(
                         appearance,
                         Icon::Code1,
-                        "Show logs".to_string(),
+                        tr("settings.mcp.show_logs"),
                         self.mouse_handles.show_logs_icon_button.clone(),
                     )
                     .on_click(move |ctx, _, _| {
@@ -765,7 +773,7 @@ impl ServerCardView {
                     self.build_icon_button(
                         appearance,
                         Icon::LogOut,
-                        "Log out".to_string(),
+                        tr("workspace.menu.log_out"),
                         self.mouse_handles.logout_icon_button.clone(),
                     )
                     .on_click(move |ctx, _, _| {
@@ -780,7 +788,7 @@ impl ServerCardView {
                     self.build_icon_button(
                         appearance,
                         Icon::Share,
-                        "Share server".to_string(),
+                        tr("settings.mcp.share_server"),
                         self.mouse_handles.share_icon_button.clone(),
                     )
                     .on_click(move |ctx, _, _| {
@@ -795,7 +803,7 @@ impl ServerCardView {
                     self.build_icon_button(
                         appearance,
                         Icon::Pencil,
-                        "Edit".to_string(),
+                        tr("common.edit"),
                         self.mouse_handles.edit_icon_button.clone(),
                     )
                     .on_click(move |ctx, _, _| {
@@ -817,7 +825,7 @@ impl ServerCardView {
                     ButtonVariant::Secondary,
                     self.mouse_handles.view_logs_button.clone(),
                 )
-                .with_centered_text_label("View logs".to_string())
+                .with_centered_text_label(tr("settings.code.view_logs"))
                 .build()
                 .on_click(move |ctx, _, _| {
                     ctx.dispatch_typed_action(ServerCardAction::ViewLogs(item_id))
@@ -833,7 +841,7 @@ impl ServerCardView {
                     ButtonVariant::Accent,
                     self.mouse_handles.edit_config_button.clone(),
                 )
-                .with_centered_text_label("Edit config".to_string())
+                .with_centered_text_label(tr("tab_configs.edit_config"))
                 .build()
                 .on_click(move |ctx, _, _| {
                     ctx.dispatch_typed_action(ServerCardAction::Edit(item_id));
@@ -849,7 +857,7 @@ impl ServerCardView {
                     ButtonVariant::Accent,
                     self.mouse_handles.setup_button.clone(),
                 )
-                .with_centered_text_label("Set up".to_string())
+                .with_centered_text_label(tr("settings.mcp.set_up"))
                 .build()
                 .on_click(move |ctx, _, _| {
                     ctx.dispatch_typed_action(ServerCardAction::Install(item_id));
@@ -897,7 +905,7 @@ impl ServerCardView {
             .build_icon_button(
                 appearance,
                 Icon::Refresh,
-                "Server update available".to_string(),
+                tr("settings.mcp.server_update_available"),
                 self.mouse_handles.update_icon_button.clone(),
             )
             .on_click(move |ctx, _, _| {

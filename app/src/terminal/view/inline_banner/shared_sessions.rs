@@ -1,5 +1,6 @@
 //! The rendering logic for shared session banners.
 use chrono::{DateTime, Datelike, Local};
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Flex, MainAxisSize,
     ParentElement, Radius, Rect, Shrinkable, Text,
@@ -32,7 +33,7 @@ fn render_inline_shared_session_banner(
     let today = Local::now();
     let is_today = datetime.year() == today.year() && datetime.ordinal() == today.ordinal();
     let day_str = if is_today {
-        String::from("Today")
+        tr("terminal.shared_session.today")
     } else {
         // Formatted as "Month Day", e.g. "October 10".
         datetime.format("%B %e").to_string()
@@ -99,13 +100,13 @@ pub fn render_inline_shared_session_started_banner(
     appearance: &Appearance,
 ) -> Box<dyn Element> {
     let label = if is_shared_ambient_agent_session {
-        "Environment started"
+        tr("terminal.shared_session.environment_started")
     } else if is_remote_control {
-        "Remote control active"
+        tr("terminal.shared_session.remote_control_active")
     } else {
-        "Sharing started"
+        tr("terminal.shared_session.sharing_started")
     };
-    render_inline_shared_session_banner(is_active, label.to_string(), started_at, appearance)
+    render_inline_shared_session_banner(is_active, label, started_at, appearance)
 }
 
 pub fn render_inline_shared_session_ended_banner(
@@ -115,11 +116,11 @@ pub fn render_inline_shared_session_ended_banner(
     appearance: &Appearance,
 ) -> Box<dyn Element> {
     let label = if is_shared_ambient_agent_session {
-        "Environment ended"
+        tr("terminal.shared_session.environment_ended")
     } else if is_remote_control {
-        "Remote control stopped"
+        tr("terminal.shared_session.remote_control_stopped")
     } else {
-        "Sharing ended"
+        tr("terminal.shared_session.sharing_ended")
     };
-    render_inline_shared_session_banner(false, label.to_string(), ended_at, appearance)
+    render_inline_shared_session_banner(false, label, ended_at, appearance)
 }

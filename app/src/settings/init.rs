@@ -15,9 +15,10 @@ use super::native_preference::NativePreferenceSettings;
 use super::{
     AISettings, AccessibilitySettings, AliasExpansionSettings, AppEditorSettings,
     BlockVisibilitySettings, ChangelogSettings, CodeSettings, DebugSettings, EmacsBindingsSettings,
-    FontSettings, FontSettingsChangedEvent, GPUSettings, InputBoxType, InputModeSettings,
-    InputSettings, LocalControlSettings, PaneSettings, SameLinePromptBlockSettings, ScrollSettings,
-    SelectionSettings, SshSettings, ThemeSettings, VimBannerSettings, WarpDrivePrivacySettings,
+    FontSettings, FontSettingsChangedEvent, GPUSettings, I18nSettings, I18nSettingsChangedEvent,
+    InputBoxType, InputModeSettings, InputSettings, LocalControlSettings, PaneSettings,
+    SameLinePromptBlockSettings, ScrollSettings, SelectionSettings, SshSettings, ThemeSettings,
+    VimBannerSettings, WarpDrivePrivacySettings,
 };
 use crate::ai::cloud_agent_settings::CloudAgentSettings;
 use crate::banner::BannerState;
@@ -69,6 +70,7 @@ pub fn register_all_settings(ctx: &mut AppContext) {
     CodeSettings::register(ctx);
     LigatureSettings::register(ctx);
     GPUSettings::register(ctx);
+    I18nSettings::register(ctx);
     ChangelogSettings::register(ctx);
     GeneralSettings::register(ctx);
     AISettings::register_and_subscribe_to_events(ctx);
@@ -119,6 +121,8 @@ pub fn init(
     ctx.add_singleton_model(|_| SettingsInitializer::new());
 
     register_all_settings(ctx);
+
+    warp_i18n::init(I18nSettings::as_ref(ctx).locale.value());
 
     // One-time migration: copy public settings from the platform-native store
     // into the TOML file so existing users don't lose their customizations
@@ -178,6 +182,13 @@ pub fn init(
             ctx.update_rendering_config(|config| {
                 config.glyphs.use_thin_strokes = use_thin_strokes;
             });
+        }
+    });
+
+    ctx.subscribe_to_model(&I18nSettings::handle(ctx), |settings, event, ctx| {
+        if matches!(event, I18nSettingsChangedEvent::UiLocale { .. }) {
+            warp_i18n::set_locale(settings.as_ref(ctx).locale.value());
+            ctx.invalidate_all_views();
         }
     });
 

@@ -4,6 +4,7 @@ use std::time::Duration;
 use instant::Instant;
 use parking_lot::FairMutex;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::keymap::Keystroke;
 use warpui::r#async::SpawnedFutureHandle;
 use warpui::{AppContext, Entity, EntityId, ModelContext, ModelHandle, SingletonEntity};
@@ -28,6 +29,15 @@ pub enum EnterAgentViewError {
     LongRunningCommand,
 }
 
+impl EnterAgentViewError {
+    pub fn localized_message(self) -> String {
+        match self {
+            Self::AlreadyInAgentView => tr("agent_view.controller.already_in_agent_mode"),
+            Self::LongRunningCommand => tr("agent_view.controller.cannot_enter_command_running"),
+        }
+    }
+}
+
 /// Error returned when exiting the agent view fails.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
 pub enum ExitAgentViewError {
@@ -37,6 +47,16 @@ pub enum ExitAgentViewError {
     ConversationViewer,
     #[error("Cannot exit cloud agent.")]
     AmbientAgent,
+}
+
+impl ExitAgentViewError {
+    pub fn localized_message(self) -> String {
+        match self {
+            Self::LongRunningCommand => tr("agent_view.controller.cannot_exit_command_running"),
+            Self::ConversationViewer => tr("agent_view.controller.cannot_exit_viewer"),
+            Self::AmbientAgent => tr("agent_view.controller.cannot_exit_cloud_agent"),
+        }
+    }
 }
 
 /// The display mode for an active agent view.
@@ -1030,9 +1050,9 @@ fn exit_confirmation_message(
                 ..Default::default()
             },
             if should_stop_and_exit {
-                "again to stop and exit"
+                tr("agent_view.controller.again_to_stop_and_exit")
             } else {
-                "again to exit"
+                tr("agent_view.controller.again_to_exit")
             },
         ),
         ExitConfirmationTrigger::CtrlC => (
@@ -1041,7 +1061,7 @@ fn exit_confirmation_message(
                 ctrl: true,
                 ..Default::default()
             },
-            "again to exit",
+            tr("agent_view.controller.again_to_exit"),
         ),
     };
 
@@ -1059,7 +1079,7 @@ fn new_conversation_keybinding_confirmation_message(
     let appearance = Appearance::handle(app).as_ref(app);
     Message::new(vec![
         MessageItem::keystroke(keystroke),
-        MessageItem::text("again to start new conversation"),
+        MessageItem::text(tr("agent_view.controller.again_to_start_new_conversation")),
     ])
     .with_text_color(appearance.theme().ansi_fg_magenta())
 }

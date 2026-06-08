@@ -8,6 +8,7 @@ use warpui::elements::{
 use warpui::platform::Cursor;
 use warpui::{AppContext, Element, SingletonEntity};
 
+use crate::ai::ai_document_view::localized_planning_document_title;
 use crate::ai::blocklist::block::view_impl::WithContentItemSpacing;
 use crate::ai::blocklist::inline_action::inline_action_header::{
     self, INLINE_ACTION_HORIZONTAL_PADDING, INLINE_ACTION_VERTICAL_PADDING,
@@ -32,7 +33,7 @@ impl CreateOrEditDocumentAction {
         let document = AIDocumentModel::as_ref(app).get_document(&document_id, document_version)?;
         Some(Self {
             document_id,
-            document_title: document.get_title(),
+            document_title: localized_planning_document_title(&document.get_title()),
             document_version: document.get_version(),
             mouse_state,
         })

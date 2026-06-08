@@ -10,6 +10,7 @@ use settings::Setting;
 use warp_core::features::FeatureFlag;
 use warp_core::report_if_error;
 use warp_core::ui::Icon;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Clipped, Container, CornerRadius, CrossAxisAlignment, Flex, FormattedTextElement,
     HighlightedHyperlink, MainAxisSize, MouseStateHandle, ParentElement, Radius, Shrinkable, Text,
@@ -47,9 +48,6 @@ use crate::terminal::{self, prompt, TerminalModel};
 use crate::util::time_format::format_approx_duration_from_now_utc;
 
 const CLOUD_AGENT_DOCS_URL: &str = "https://docs.warp.dev/agent-platform/cloud-agents/overview";
-const OZ_UPDATES_SECTION_HEADER: &str = "What's new in Oz";
-
-// The maximum number of Oz updates from the changelog rendered in-line in the 'What's new in Oz section'.
 const MAX_OZ_UPDATE_COUNT: usize = 4;
 
 const MAX_RECENT_CONVERSATION_COUNT: usize = 3;
@@ -401,23 +399,26 @@ impl View for AgentViewZeroStateBlock {
 
         let header_props = if self.origin.is_cloud_agent() {
             HeaderProps {
-                title: "New Oz cloud agent conversation".into(),
+                title: tr("agent_view.zero_state.new_cloud_title").into(),
                 description: AgentViewDescription::CloudModeWithDocsLink,
                 icon: Icon::OzCloud,
             }
         } else {
-            let mut local_description =
-                "Send a prompt below to start a new conversation".to_owned();
             let active_session = self.active_session(app);
             let location_label = active_session.as_deref().and_then(|session| {
                 format_session_location(session, self.current_working_directory.as_deref())
             });
-            if let Some(location_label) = location_label {
-                local_description += &format!(" in `{location_label}`");
-            }
+            let local_description = if let Some(location_label) = location_label {
+                tr_with(
+                    "agent_view.zero_state.local_description_in_location",
+                    &[("location", &location_label)],
+                )
+            } else {
+                tr("agent_view.zero_state.local_description")
+            };
 
             HeaderProps {
-                title: "New Oz agent conversation".into(),
+                title: tr("agent_view.zero_state.new_local_title").into(),
                 description: AgentViewDescription::PlainText(vec![local_description.into()]),
                 icon: Icon::Oz,
             }
@@ -644,7 +645,7 @@ fn render_title_and_description(props: HeaderProps, app: &AppContext) -> Vec<Box
             items.push(
                 Container::new(
                     Text::new(
-                        "Run your agent task in an isolated cloud environment.",
+                        tr("agent_view.zero_state.cloud_isolated_environment"),
                         appearance.ui_font_family(),
                         appearance.monospace_font_size(),
                     )
@@ -657,10 +658,11 @@ fn render_title_and_description(props: HeaderProps, app: &AppContext) -> Vec<Box
 
             // Second line: text with "Visit docs" hyperlink.
             let description_with_link = FormattedText::new([FormattedTextLine::Line(vec![
-                FormattedTextFragment::plain_text(
-                    "Use cloud agents to run parallel agents, build agents that run autonomously, and check in on your agents from anywhere. ",
+                FormattedTextFragment::plain_text(tr("agent_view.zero_state.cloud_docs_prefix")),
+                FormattedTextFragment::hyperlink(
+                    tr("agent_view.zero_state.cloud_docs_link"),
+                    CLOUD_AGENT_DOCS_URL,
                 ),
-                FormattedTextFragment::hyperlink("Visit docs", CLOUD_AGENT_DOCS_URL),
             ])]);
 
             items.push(
@@ -730,7 +732,7 @@ fn render_body(props: ZeroStateBodyProps<'_>, app: &AppContext) -> Vec<Box<dyn E
                 Message::new(vec![MessageItem::clickable(
                     vec![
                         MessageItem::keystroke(ENTER_AGENT_VIEW_NEW_CONVERSATION_KEYSTROKE.clone()),
-                        MessageItem::text("start a new agent conversation"),
+                        MessageItem::text(tr("agent_view.zero_state.start_new_agent_conversation")),
                     ],
                     |ctx| {
                         ctx.dispatch_typed_action(TerminalAction::StartNewAgentConversation {
@@ -749,7 +751,9 @@ fn render_body(props: ZeroStateBodyProps<'_>, app: &AppContext) -> Vec<Box<dyn E
                         MessageItem::keystroke(
                             ENTER_CLOUD_AGENT_VIEW_NEW_CONVERSATION_KEYSTROKE.clone(),
                         ),
-                        MessageItem::text("start a new cloud agent conversation"),
+                        MessageItem::text(tr(
+                            "agent_view.zero_state.start_new_cloud_agent_conversation",
+                        )),
                     ],
                     |ctx| {
                         ctx.dispatch_typed_action(TerminalAction::EnterCloudAgentView);
@@ -765,7 +769,7 @@ fn render_body(props: ZeroStateBodyProps<'_>, app: &AppContext) -> Vec<Box<dyn E
                             key: "/model".to_owned(),
                             ..Default::default()
                         }),
-                        MessageItem::text("switch model"),
+                        MessageItem::text(tr("agent_view.zero_state.switch_model")),
                     ],
                     |ctx| {
                         ctx.dispatch_typed_action(TerminalAction::OpenModelSelector);
@@ -785,7 +789,7 @@ fn render_body(props: ZeroStateBodyProps<'_>, app: &AppContext) -> Vec<Box<dyn E
                             key: "escape".to_owned(),
                             ..Default::default()
                         }),
-                        MessageItem::text("go back to terminal"),
+                        MessageItem::text(tr("agent_view.zero_state.go_back_to_terminal")),
                     ],
                     |ctx| {
                         ctx.dispatch_typed_action(TerminalAction::ExitAgentView);
@@ -810,9 +814,7 @@ fn render_body(props: ZeroStateBodyProps<'_>, app: &AppContext) -> Vec<Box<dyn E
                 key: "/init".to_owned(),
                 ..Default::default()
             }),
-            MessageItem::text(
-                "to index this codebase and generate an AGENTS.md for optimal performance",
-            ),
+            MessageItem::text(tr("agent_view.zero_state.init_callout")),
         ])
         .with_text_color(main_text_color);
         body_items.push(
@@ -882,7 +884,7 @@ fn render_recent_conversations_section(
         .with_child(
             Container::new(
                 Text::new(
-                    "RECENT ACTIVITY",
+                    tr("agent_view.zero_state.recent_activity"),
                     appearance.ui_font_family(),
                     header_font_size,
                 )
@@ -1053,7 +1055,7 @@ fn render_oz_updates(props: OzUpdatesProps<'_>, app: &AppContext) -> Option<Box<
                         .with_child(
                             Container::new(
                                 Text::new(
-                                    OZ_UPDATES_SECTION_HEADER,
+                                    tr("agent_view.zero_state.oz_updates_header"),
                                     appearance.ui_font_family(),
                                     appearance.monospace_font_size() - 2.,
                                 )
@@ -1068,14 +1070,16 @@ fn render_oz_updates(props: OzUpdatesProps<'_>, app: &AppContext) -> Option<Box<
                             Container::new(
                                 Text::new(
                                     if changelog_model.oz_updates.len() == 1 {
-                                        "1 update".to_owned()
+                                        tr("agent_view.zero_state.update_count_one")
                                     } else {
-                                        format!(
-                                            "{} updates",
-                                            changelog_model
-                                                .oz_updates
-                                                .len()
-                                                .min(MAX_OZ_UPDATE_COUNT)
+                                        let count = changelog_model
+                                            .oz_updates
+                                            .len()
+                                            .min(MAX_OZ_UPDATE_COUNT)
+                                            .to_string();
+                                        tr_with(
+                                            "agent_view.zero_state.update_count_many",
+                                            &[("count", &count)],
                                         )
                                     },
                                     appearance.ui_font_family(),
@@ -1113,7 +1117,7 @@ fn render_oz_updates(props: OzUpdatesProps<'_>, app: &AppContext) -> Option<Box<
                                 .with_child(
                                     Container::new(
                                         Text::new(
-                                            "View changelog",
+                                            tr("agent_view.zero_state.view_changelog"),
                                             appearance.ui_font_family(),
                                             appearance.monospace_font_size() - 2.,
                                         )
@@ -1228,7 +1232,11 @@ pub fn render_ambient_credits_banner(credits: i32, app: &AppContext) -> Box<dyn 
     // Use ANSI terminal colors for the pill styling.
     let text_color = theme.terminal_colors().normal.blue;
 
-    let credits_text = format!("{credits} free cloud agent credits");
+    let credits = credits.to_string();
+    let credits_text = tr_with(
+        "agent_view.zero_state.free_cloud_agent_credits",
+        &[("credits", &credits)],
+    );
     let text = Text::new(credits_text, font_family, font_size)
         .with_color(text_color.into())
         .with_style(Properties::default().weight(Weight::Semibold))

@@ -8,6 +8,7 @@ use markdown_parser::FormattedTextFragment;
 use session_sharing_protocol::common::{ParticipantId, ParticipantList, Role, SessionId};
 use session_sharing_protocol::sharer::SessionSourceType;
 use warp_core::features::FeatureFlag;
+use warp_i18n::tr;
 use warpui::elements::MouseStateHandle;
 use warpui::{AppContext, Element, ModelHandle, ViewContext, ViewHandle};
 
@@ -107,7 +108,7 @@ impl Adapter {
     ) -> Self {
         let reconnecting_banner = ctx.add_typed_action_view(|_| {
             Banner::new_without_close(BannerTextContent::formatted_text(vec![
-                FormattedTextFragment::plain_text("Offline, trying to reconnect..."),
+                FormattedTextFragment::plain_text(tr("shared_session.banner.offline_reconnecting")),
             ]))
             .with_icon(Icon::CloudOffline)
         });

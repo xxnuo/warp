@@ -9,6 +9,7 @@ use warp_core::ui::appearance::Appearance;
 use warp_core::ui::Icon;
 use warp_graphql::billing::AddonCreditsOption;
 use warp_graphql::error::BudgetExceededError;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Align, Border, ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius,
     CrossAxisAlignment, DropShadow, Expanded, Flex, FormattedTextElement, HighlightedHyperlink,
@@ -217,7 +218,7 @@ impl BuyCreditsBanner {
                 if self.banner_auto_reload_update_in_flight {
                     self.banner_auto_reload_update_in_flight = false;
                     ctx.emit(BuyCreditsBannerEvent::ShowAutoReloadError {
-                        error_message: "Failed to enable auto-reload for your team. Please try again in Settings > Billing and Usage.",
+                        error_message: tr("terminal.buy_credits.auto_reload_error"),
                     });
                     ctx.notify();
                 }
@@ -250,9 +251,13 @@ impl BuyCreditsBanner {
 
         let sub_text_color = theme.sub_text_color(theme.surface_1());
 
-        let label = Text::new_inline("Auto reload", appearance.ui_font_family(), 12.)
-            .with_color(sub_text_color.into())
-            .finish();
+        let label = Text::new_inline(
+            tr("terminal.buy_credits.auto_reload"),
+            appearance.ui_font_family(),
+            12.,
+        )
+        .with_color(sub_text_color.into())
+        .finish();
 
         // Get the selected amount for the tooltip
         let selected_credits = self
@@ -261,9 +266,10 @@ impl BuyCreditsBanner {
             .map(|option| option.credits)
             .unwrap_or(0);
 
-        let tooltip_text = format!(
-            "When enabled, auto reload will purchase {} credits when your credit balance gets low",
-            selected_credits
+        let selected_credits_text = selected_credits.to_string();
+        let tooltip_text = tr_with(
+            "terminal.buy_credits.auto_reload_tooltip",
+            &[("credits", selected_credits_text.as_str())],
         );
 
         // Create info icon with a custom sub_text_color & mouse cursor (i.e. as opposed to using IconWithTooltip)
@@ -417,16 +423,16 @@ impl BuyCreditsBanner {
 
         // Banner text with title and description based on admin status
         let banner_description = if has_admin_permissions {
-            "Your monthly spend limit has been reached. Increase it to continue."
+            tr("terminal.buy_credits.monthly_limit_admin_description")
         } else {
-            "Contact a team admin to increase monthly limit."
+            tr("terminal.buy_credits.monthly_limit_nonadmin_description")
         };
 
         let banner_text = Flex::column()
             .with_children([
                 appearance
                     .ui_builder()
-                    .paragraph("Monthly limit reached")
+                    .paragraph(tr("terminal.buy_credits.monthly_limit_title"))
                     .with_style(UiComponentStyles {
                         font_size: Some(14.),
                         ..Default::default()
@@ -477,7 +483,7 @@ impl BuyCreditsBanner {
                     }),
                     ..Default::default()
                 })
-                .with_text_label("Manage billing".to_string())
+                .with_text_label(tr("settings.account.manage_billing"))
                 .build()
                 .on_click(|ctx, _, _| {
                     ctx.dispatch_typed_action(Action::ManageBilling);
@@ -562,7 +568,7 @@ impl BuyCreditsBanner {
         let make_banner_text = || {
             let mut banner_text_children = vec![appearance
                 .ui_builder()
-                .paragraph("Out of credits")
+                .paragraph(tr("terminal.buy_credits.out_of_credits"))
                 .with_style(UiComponentStyles {
                     font_size: Some(14.),
                     ..Default::default()
@@ -574,11 +580,16 @@ impl BuyCreditsBanner {
             if is_at_monthly_limit || would_purchase_exceed_limit {
                 // Create formatted text with clickable hyperlink
                 let warning_text_fragments = vec![
-                    FormattedTextFragment::plain_text(
-                        "Purchasing these credits would take you over your monthly spend limit. ",
+                    FormattedTextFragment::plain_text(tr(
+                        "terminal.buy_credits.purchase_exceeds_limit_prefix",
+                    )),
+                    FormattedTextFragment::hyperlink_action(
+                        tr("terminal.buy_credits.increase_it"),
+                        Action::ManageBilling,
                     ),
-                    FormattedTextFragment::hyperlink_action("Increase it", Action::ManageBilling),
-                    FormattedTextFragment::plain_text(" to continue."),
+                    FormattedTextFragment::plain_text(tr(
+                        "terminal.buy_credits.purchase_exceeds_limit_suffix",
+                    )),
                 ];
 
                 let formatted_warning = FormattedTextElement::new(
@@ -606,9 +617,9 @@ impl BuyCreditsBanner {
             } else {
                 // Default message when not at limit
                 let banner_description = if has_admin_permissions {
-                    "Add more credits to your account to continue using Oz agents."
+                    tr("terminal.buy_credits.add_more_credits_admin_description")
                 } else {
-                    "Contact a team admin to purchase more credits to continue."
+                    tr("terminal.buy_credits.add_more_credits_nonadmin_description")
                 };
 
                 banner_text_children.push(
@@ -647,9 +658,9 @@ impl BuyCreditsBanner {
                 || would_purchase_exceed_limit;
 
             let button_text = if self.purchase_addon_credits_loading {
-                "Buying…".to_string()
+                tr("terminal.buy_credits.buying")
             } else {
-                "Buy".to_string()
+                tr("terminal.buy_credits.buy")
             };
 
             let button_font_color = buy_button_disabled.then_some(
@@ -806,7 +817,7 @@ pub enum BuyCreditsBannerEvent {
     OpenBillingAndUsage,
     RefocusInput,
     OpenAutoReloadModal { purchased_credits: i32 },
-    ShowAutoReloadError { error_message: &'static str },
+    ShowAutoReloadError { error_message: String },
 }
 
 impl Entity for BuyCreditsBanner {

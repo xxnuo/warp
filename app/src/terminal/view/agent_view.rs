@@ -1,6 +1,7 @@
 use warp_core::features::FeatureFlag;
 use warp_core::send_telemetry_from_ctx;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::{tr, tr_with};
 use warpui::keymap::Keystroke;
 use warpui::{EntityId, SingletonEntity, ViewContext};
 
@@ -63,10 +64,9 @@ impl TerminalView {
             let window_id = ctx.window_id();
             ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                 toast_stack.add_ephemeral_toast(
-                    DismissibleToast::error(
-                        "Cannot start a new conversation while agent is monitoring a command."
-                            .to_string(),
-                    ),
+                    DismissibleToast::error(tr(
+                        "agent_view.controller.cannot_start_new_conversation_monitoring",
+                    )),
                     window_id,
                     ctx,
                 );
@@ -80,7 +80,7 @@ impl TerminalView {
                 origin,
                 e
             );
-            self.show_error_toast(e.to_string(), ctx);
+            self.show_error_toast(e.localized_message(), ctx);
         }
         self.redetermine_global_focus(ctx);
     }
@@ -113,7 +113,7 @@ impl TerminalView {
                     origin,
                     e
                 );
-                self.show_error_toast(e.to_string(), ctx);
+                self.show_error_toast(e.localized_message(), ctx);
                 self.redetermine_global_focus(ctx);
                 None
             }
@@ -151,7 +151,7 @@ impl TerminalView {
                     origin,
                     e
                 );
-                self.show_error_toast(e.to_string(), ctx);
+                self.show_error_toast(e.localized_message(), ctx);
             }
         } else if let Some(conversation) = in_memory_conversation {
             self.restore_conversation_after_view_creation(
@@ -172,7 +172,7 @@ impl TerminalView {
                     origin,
                     e
                 );
-                self.show_error_toast(e.to_string(), ctx);
+                self.show_error_toast(e.localized_message(), ctx);
             }
         } else {
             let conversation_id_copy = conversation_id;
@@ -181,8 +181,12 @@ impl TerminalView {
                 .load_conversation_data(conversation_id_copy, ctx);
             ctx.spawn(future, move |me, conversation, ctx| {
                 let Some(conversation) = conversation else {
+                    let conversation_id = conversation_id.to_string();
                     me.show_error_toast(
-                        format!("Failed to load conversation with id: {conversation_id}"),
+                        tr_with(
+                            "agent_view.controller.failed_load_conversation",
+                            &[("conversation_id", &conversation_id)],
+                        ),
                         ctx,
                     );
                     return;
@@ -317,7 +321,7 @@ impl TerminalView {
                         key: "enter".to_owned(),
                         ..Default::default()
                     }),
-                    MessageItem::text("again to send to agent"),
+                    MessageItem::text(tr("terminal.agent_view.enter_again_to_send")),
                 ])
                 .with_text_color(appearance.theme().ansi_fg_magenta());
                 self.ephemeral_message_model.update(ctx, |model, ctx| {

@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 
 use warp_editor::editor::NavigationKey;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ChildAnchor, ChildView, Clipped, ConstrainedBox, Container, CornerRadius,
     CrossAxisAlignment, Dismiss, DispatchEventResult, Element, EventHandler, Flex,
@@ -54,7 +55,7 @@ pub struct FilterableDropdown<A: DropdownItemAction = ()> {
     selected_item: Option<MenuItem<DropdownAction>>,
     items: Vec<MenuItem<DropdownAction>>,
     orientation: FilterableDropdownOrientation,
-    static_menu_header: Option<&'static str>,
+    static_menu_header: Option<String>,
     button_variant: ButtonVariant,
     style_override: Option<UiComponentStyles>,
     hovered_style_override: Option<UiComponentStyles>,
@@ -106,7 +107,7 @@ where
                 },
                 ctx,
             );
-            editor.set_placeholder_text("Search", ctx);
+            editor.set_placeholder_text(tr("common.search"), ctx);
             editor
         });
         ctx.subscribe_to_view(&filter_editor, |me, _, event, ctx| {
@@ -427,8 +428,8 @@ where
     }
 
     fn render_closed_top_bar(&self, appearance: &Appearance) -> Box<dyn Element> {
-        let (selected_item_text, font_family_id) = match self.static_menu_header {
-            Some(header) => (header.to_string(), None),
+        let (selected_item_text, font_family_id) = match &self.static_menu_header {
+            Some(header) => (header.clone(), None),
             None => match self.selected_item.clone() {
                 Some(MenuItem::Item(fields)) => {
                     let label = fields.label();
@@ -575,7 +576,7 @@ where
         let background_fill = appearance.theme().surface_2();
         let empty_text = appearance
             .ui_builder()
-            .span("No matches found.")
+            .span(tr("common.no_matches_found"))
             .with_style(UiComponentStyles {
                 font_color: Some(appearance.theme().sub_text_color(background_fill).into()),
                 ..Default::default()
@@ -727,8 +728,8 @@ where
         });
     }
 
-    pub fn set_menu_header_to_static(&mut self, header: &'static str) {
-        self.static_menu_header = Some(header);
+    pub fn set_menu_header_to_static(&mut self, header: impl Into<String>) {
+        self.static_menu_header = Some(header.into());
     }
 }
 

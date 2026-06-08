@@ -5,6 +5,7 @@ use std::sync::Arc;
 use channel_versions::{Changelog, MarkdownSection};
 use itertools::Itertools;
 use markdown_parser::{parse_markdown, FormattedText};
+use warp_i18n::tr;
 use warpui::assets::asset_cache::{AssetCache, AssetSource};
 use warpui::image_cache::ImageType;
 use warpui::{Entity, ModelContext, SingletonEntity};
@@ -205,6 +206,16 @@ pub enum ChangelogHeader {
     NewFeatures,
     Improvements,
     BugFixes,
+}
+
+impl ChangelogHeader {
+    pub fn localized_title(&self) -> String {
+        match self {
+            ChangelogHeader::NewFeatures => tr("resource_center.changelog.new_features"),
+            ChangelogHeader::Improvements => tr("resource_center.changelog.improvements"),
+            ChangelogHeader::BugFixes => tr("resource_center.changelog.bug_fixes"),
+        }
+    }
 }
 
 impl fmt::Display for ChangelogHeader {

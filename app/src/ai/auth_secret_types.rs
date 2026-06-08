@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Result};
 use warp_cli::agent::Harness;
 use warp_graphql::managed_secrets::ManagedSecretType;
+use warp_i18n::tr;
 use warp_managed_secrets::ManagedSecretValue;
 
 pub struct AuthSecretTypeField {
@@ -17,6 +18,17 @@ pub struct AuthSecretTypeInfo {
     pub secret_type: ManagedSecretType,
     pub fields: &'static [AuthSecretTypeField],
     pub learn_more_url: &'static str,
+}
+
+impl AuthSecretTypeField {
+    pub fn placeholder_text(&self) -> String {
+        let placeholder = self.placeholder.unwrap_or(self.label);
+        if placeholder.starts_with("ambient_agent.auth_secret.placeholder.") {
+            tr(placeholder)
+        } else {
+            placeholder.to_string()
+        }
+    }
 }
 
 pub fn auth_secret_types_for_harness(harness: Harness) -> &'static [AuthSecretTypeInfo] {
@@ -137,7 +149,7 @@ static CLAUDE_AUTH_SECRET_TYPES: [AuthSecretTypeInfo; 3] = [
         fields: &[
             AuthSecretTypeField {
                 label: "AWS_BEARER_TOKEN_BEDROCK",
-                placeholder: Some("Bearer token"),
+                placeholder: Some("ambient_agent.auth_secret.placeholder.bearer_token"),
                 optional: false,
                 sensitive: true,
             },
@@ -162,13 +174,13 @@ static CLAUDE_AUTH_SECRET_TYPES: [AuthSecretTypeInfo; 3] = [
             },
             AuthSecretTypeField {
                 label: "AWS_SECRET_ACCESS_KEY",
-                placeholder: Some("Secret access key"),
+                placeholder: Some("ambient_agent.auth_secret.placeholder.secret_access_key"),
                 optional: false,
                 sensitive: true,
             },
             AuthSecretTypeField {
                 label: "AWS_SESSION_TOKEN",
-                placeholder: Some("Session token (temporary credentials only)"),
+                placeholder: Some("ambient_agent.auth_secret.placeholder.session_token"),
                 optional: true,
                 sensitive: true,
             },

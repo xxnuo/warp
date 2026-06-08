@@ -14,6 +14,7 @@ use warp_graphql::queries::list_warp_dev_images::{
     ListWarpDevImages, ListWarpDevImagesResult, ListWarpDevImagesVariables,
 };
 use warp_graphql::queries::user_repo_auth_status::UserRepoAuthStatusEnum;
+use warp_i18n::{tr, tr_with};
 use warpui::r#async::FutureExt;
 use warpui::{AppContext, ModelContext, SingletonEntity};
 
@@ -218,20 +219,20 @@ impl EnvironmentCommandRunner {
                                 .profile_for_uid(UserUid::new(uid))
                                 .map(|profile| profile.email.clone())
                         })
-                        .unwrap_or_else(|| "Unknown".to_string());
+                        .unwrap_or_else(|| tr("common.unknown"));
 
                     let last_edited_utc = environment.metadata().revision.as_ref().map(|r| r.utc());
 
                     let last_edited = last_edited_utc
                         .map(format_approx_duration_from_now_utc)
-                        .unwrap_or_else(|| "Unknown".to_string());
+                        .unwrap_or_else(|| tr("common.unknown"));
 
                     let scope_display =
                         super::common::format_owner(&environment.permissions().owner);
 
                     let id = match environment.sync_id() {
                         SyncId::ServerId(server_id) => server_id.to_string(),
-                        SyncId::ClientId(_) => "Unsynced".to_string(),
+                        SyncId::ClientId(_) => tr("ai.agent_sdk.unsynced"),
                     };
 
                     EnvironmentInfo {
@@ -289,34 +290,52 @@ impl EnvironmentCommandRunner {
             } else {
                 ctx.terminate_app(
                     warpui::platform::TerminationMode::ForceTerminate,
-                    Some(Err(anyhow::anyhow!("Environment {} not found", id))),
+                    Some(Err(anyhow::anyhow!(
+                        "{}",
+                        tr_with("ai.agent_sdk.environment.not_found", &[("id", &id)])
+                    ))),
                 );
             }
         });
     }
 
     fn print_environment_details(env: &AmbientAgentEnvironment) {
-        println!("Name: {}", env.name);
+        println!(
+            "{}",
+            tr_with("ai.agent_sdk.environment.name_line", &[("name", &env.name)])
+        );
         if let Some(desc) = &env.description {
-            println!("Description: {desc}");
+            println!(
+                "{}",
+                tr_with(
+                    "ai.agent_sdk.environment.description_line",
+                    &[("description", desc)]
+                )
+            );
         }
         match &env.base_image {
             BaseImage::DockerImage(img) => {
-                println!("Docker image: {img}");
+                println!(
+                    "{}",
+                    tr_with(
+                        "ai.agent_sdk.environment.docker_image_line",
+                        &[("image", img)]
+                    )
+                );
             }
         }
         if env.github_repos.is_empty() {
-            println!("Repositories: None");
+            println!("{}", tr("ai.agent_sdk.environment.repositories_none"));
         } else {
-            println!("Repositories:");
+            println!("{}", tr("ai.agent_sdk.environment.repositories"));
             for repo in &env.github_repos {
                 println!("  - {}/{}", repo.owner, repo.repo);
             }
         }
         if env.setup_commands.is_empty() {
-            println!("Setup commands: None");
+            println!("{}", tr("ai.agent_sdk.environment.setup_commands_none"));
         } else {
-            println!("Setup commands:");
+            println!("{}", tr("ai.agent_sdk.environment.setup_commands"));
             for (i, cmd) in env.setup_commands.iter().enumerate() {
                 println!("  {}. {}", i + 1, cmd);
             }
@@ -340,8 +359,6 @@ impl EnvironmentCommandRunner {
     where
         F: FnOnce(String, &mut ModelContext<Self>) + Send + 'static,
     {
-        const CUSTOM_IMAGE_OPTION: &str = "Custom Docker image";
-
         let server_api = ServerApiProvider::as_ref(ctx).get();
         let operation = ListWarpDevImages::build(ListWarpDevImagesVariables {});
         let fetch_images = async move { server_api.send_graphql_request(operation, None).await };
@@ -351,32 +368,39 @@ impl EnvironmentCommandRunner {
                 ListWarpDevImagesResult::ListWarpDevImagesOutput(output) => {
                     if output.images.is_empty() {
                         super::report_fatal_error(
-                            anyhow::anyhow!("No Warp dev images available."),
+                            anyhow::anyhow!(
+                                "{}",
+                                tr("ai.agent_sdk.environment.no_warp_dev_images")
+                            ),
                             ctx,
                         );
                         return;
                     }
 
+                    println!("{}", tr("ai.agent_sdk.environment.select_base_image_intro"));
                     println!(
-                        "No docker image provided, please select a base image.\n"
-                    );
-                    println!(
-                        "All warpdotdev images contain Python and Node, in addition to language-specific tooling. For more info: {}\n",
-                        WARP_DEV_ENVIRONMENTS_REPO
+                        "{}",
+                        tr_with(
+                            "ai.agent_sdk.environment.warp_dev_images_help",
+                            &[("url", WARP_DEV_ENVIRONMENTS_REPO)]
+                        )
                     );
 
                     let mut image_choices: Vec<String> =
                         output.images.into_iter().map(|img| img.image).collect();
-                    image_choices.push(CUSTOM_IMAGE_OPTION.to_string());
+                    let custom_image_option = tr("ai.agent_sdk.environment.custom_docker_image");
+                    image_choices.push(custom_image_option.clone());
 
-                    let selected_image = match Select::new("Select a base image:", image_choices)
-                        .prompt()
-                    {
+                    let prompt = tr("ai.agent_sdk.environment.select_base_image");
+                    let selected_image = match Select::new(&prompt, image_choices).prompt() {
                         Ok(image) => image,
                         Err(err) => {
                             if !Self::handle_inquire_error(err, ctx) {
                                 super::report_fatal_error(
-                                    anyhow::anyhow!("Error selecting image"),
+                                    anyhow::anyhow!(
+                                        "{}",
+                                        tr("ai.agent_sdk.environment.error_selecting_image")
+                                    ),
                                     ctx,
                                 );
                             }
@@ -384,13 +408,17 @@ impl EnvironmentCommandRunner {
                         }
                     };
 
-                    let final_image = if selected_image == CUSTOM_IMAGE_OPTION {
-                        match inquire::Text::new("Enter custom Docker image name:").prompt() {
+                    let final_image = if selected_image == custom_image_option {
+                        let prompt = tr("ai.agent_sdk.environment.enter_custom_docker_image");
+                        match inquire::Text::new(&prompt).prompt() {
                             Ok(custom) => custom,
                             Err(err) => {
                                 if !Self::handle_inquire_error(err, ctx) {
                                     super::report_fatal_error(
-                                        anyhow::anyhow!("Error entering custom image"),
+                                        anyhow::anyhow!(
+                                            "{}",
+                                            tr("ai.agent_sdk.environment.error_entering_custom_image")
+                                        ),
                                         ctx,
                                     );
                                 }
@@ -761,7 +789,14 @@ impl EnvironmentCommandRunner {
                     && result.client_id == Some(client_id)
                 {
                     let server_id = result.server_id.unwrap();
-                    println!("Environment created successfully with ID: {server_id}");
+                    let server_id = server_id.to_string();
+                    println!(
+                        "{}",
+                        tr_with(
+                            "ai.agent_sdk.environment.created_success_with_id",
+                            &[("id", &server_id)],
+                        )
+                    );
                     ctx.terminate_app(warpui::platform::TerminationMode::ForceTerminate, None);
                 }
             }
@@ -1135,15 +1170,15 @@ struct EnvironmentInfo {
 impl TableFormat for EnvironmentInfo {
     fn header() -> Vec<Cell> {
         vec![
-            Cell::new("ID"),
-            Cell::new("Name"),
-            Cell::new("Description"),
-            Cell::new("Base image"),
-            Cell::new("Git repos"),
-            Cell::new("Setup commands"),
-            Cell::new("Creator"),
-            Cell::new("Last edited"),
-            Cell::new("Scope"),
+            Cell::new(tr("ai.agent_sdk.environment.table.id")),
+            Cell::new(tr("ai.agent_sdk.environment.table.name")),
+            Cell::new(tr("ai.agent_sdk.environment.table.description")),
+            Cell::new(tr("ai.agent_sdk.environment.table.base_image")),
+            Cell::new(tr("ai.agent_sdk.environment.table.git_repos")),
+            Cell::new(tr("ai.agent_sdk.environment.table.setup_commands")),
+            Cell::new(tr("ai.agent_sdk.environment.table.creator")),
+            Cell::new(tr("ai.agent_sdk.environment.table.last_edited")),
+            Cell::new(tr("ai.agent_sdk.environment.table.scope")),
         ]
     }
 
@@ -1182,9 +1217,9 @@ struct ImageInfo {
 impl TableFormat for ImageInfo {
     fn header() -> Vec<Cell> {
         vec![
-            Cell::new("Image"),
-            Cell::new("Repository"),
-            Cell::new("Tag"),
+            Cell::new(tr("ai.agent_sdk.environment.image_table.image")),
+            Cell::new(tr("ai.agent_sdk.environment.image_table.repository")),
+            Cell::new(tr("ai.agent_sdk.environment.image_table.tag")),
         ]
     }
 

@@ -780,6 +780,27 @@ impl CommandBinding {
             id: BindingId::new(),
         }
     }
+
+    pub fn search_text(&self, description_for: DescriptionContext) -> String {
+        let mut text = self.description.in_context(description_for).to_owned();
+        text.push(' ');
+        text.push_str(&self.name.replace([':', '_', '-'], " "));
+        for alias in self.search_aliases() {
+            text.push(' ');
+            text.push_str(alias);
+        }
+        text
+    }
+
+    fn search_aliases(&self) -> &'static [&'static str] {
+        match self.name.as_str() {
+            "workspace:toggle_ai_assistant" => &["new agent pane agent mode warp ai"],
+            "terminal:ask_ai_assistant" => {
+                &["ask agent mode attach selection as agent context warp ai"]
+            }
+            _ => &[],
+        }
+    }
 }
 
 fn materialize_description(desc: &BindingDescription, ctx: &AppContext) -> BindingDescription {

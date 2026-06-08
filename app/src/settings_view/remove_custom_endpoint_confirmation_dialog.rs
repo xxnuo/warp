@@ -1,4 +1,5 @@
 use warp_core::ui::theme::color::internal_colors;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildView, Container, CornerRadius, Dismiss, Empty, Flex, ParentElement, Radius, Text,
 };
@@ -37,13 +38,17 @@ pub struct RemoveCustomEndpointConfirmationDialog {
 impl RemoveCustomEndpointConfirmationDialog {
     pub fn new(ctx: &mut ViewContext<Self>) -> Self {
         let cancel_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Cancel", NakedTheme).on_click(|ctx| {
+            ActionButton::new(tr("common.cancel"), NakedTheme).on_click(|ctx| {
                 ctx.dispatch_typed_action(RemoveCustomEndpointConfirmationDialogAction::Cancel);
             })
         });
 
         let confirm_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Remove endpoint", DangerPrimaryTheme).on_click(|ctx| {
+            ActionButton::new(
+                tr("settings.custom_inference.remove_endpoint"),
+                DangerPrimaryTheme,
+            )
+            .on_click(|ctx| {
                 ctx.dispatch_typed_action(RemoveCustomEndpointConfirmationDialogAction::Confirm);
             })
         });
@@ -99,7 +104,7 @@ impl View for RemoveCustomEndpointConfirmationDialog {
         let appearance = Appearance::as_ref(app);
         let theme = appearance.theme();
 
-        let description = "Are you sure you want to remove this endpoint? You won't be able to use its models in your agent sessions moving forward.".to_string();
+        let description = tr("settings.ai.custom_endpoint.remove_description");
 
         let endpoint_title = Text::new_inline(
             self.endpoint_name.clone(),
@@ -130,7 +135,7 @@ impl View for RemoveCustomEndpointConfirmationDialog {
         .finish();
 
         let dialog = Dialog::new(
-            "Remove endpoint?".to_string(),
+            tr("settings.ai.custom_endpoint.remove_title"),
             Some(description),
             dialog_styles(appearance),
         )

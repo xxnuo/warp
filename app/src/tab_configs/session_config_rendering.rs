@@ -4,6 +4,7 @@ use std::sync::Arc;
 use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::theme::{Fill, WarpTheme};
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildAnchor, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Expanded,
     Flex, Hoverable, MainAxisAlignment, MainAxisSize, MouseStateHandle, OffsetPositioning,
@@ -87,13 +88,17 @@ where
     let on_accent_bg = bg.is_some();
     let on_select = Arc::new(on_select);
 
-    let label = Text::new_inline("Session type".to_string(), appearance.ui_font_family(), 12.)
-        .with_color(if on_accent_bg {
-            callout_label_color(appearance)
-        } else {
-            blended_colors::text_disabled(theme, bg_fill)
-        })
-        .finish();
+    let label = Text::new_inline(
+        tr("tab_configs.session_type"),
+        appearance.ui_font_family(),
+        12.,
+    )
+    .with_color(if on_accent_bg {
+        callout_label_color(appearance)
+    } else {
+        blended_colors::text_disabled(theme, bg_fill)
+    })
+    .finish();
 
     let mut pills_row = Flex::row().with_spacing(PILL_GAP);
 
@@ -224,7 +229,7 @@ where
     let on_accent_bg = bg.is_some();
 
     let label = Text::new_inline(
-        "Select directory".to_string(),
+        tr("tab_configs.select_directory"),
         appearance.ui_font_family(),
         12.,
     )
@@ -355,13 +360,9 @@ where
             stack.add_child(checkbox_el);
             if state.is_hovered() {
                 let tooltip = Container::new(
-                    Text::new_inline(
-                        "Select a git repository to enable worktree support".to_string(),
-                        font_family,
-                        12.,
-                    )
-                    .with_color(theme.background().into_solid())
-                    .finish(),
+                    Text::new_inline(tr("tab_configs.select_git_repo_tooltip"), font_family, 12.)
+                        .with_color(theme.background().into_solid())
+                        .finish(),
                 )
                 .with_horizontal_padding(14.)
                 .with_vertical_padding(6.)
@@ -400,7 +401,7 @@ where
         blended_colors::text_sub(theme, theme.background())
     };
     let label = Text::new(
-        "Automatically create a worktree when opening a new tab",
+        tr("tab_configs.auto_create_worktree"),
         appearance.ui_font_family(),
         12.,
     )
@@ -486,15 +487,9 @@ where
             stack.add_child(checkbox_el);
             if state.is_hovered() {
                 let tooltip = Container::new(
-                    Text::new_inline(
-                        "You must select that you want to automatically create a \
-                         worktree in order to select this"
-                            .to_string(),
-                        font_family,
-                        12.,
-                    )
-                    .with_color(theme.background().into_solid())
-                    .finish(),
+                    Text::new_inline(tr("tab_configs.enable_worktree_required"), font_family, 12.)
+                        .with_color(theme.background().into_solid())
+                        .finish(),
                 )
                 .with_horizontal_padding(14.)
                 .with_vertical_padding(6.)
@@ -534,7 +529,7 @@ where
     };
 
     let label = Text::new(
-        "Auto-generate worktree branch name",
+        tr("tab_configs.auto_generate_worktree_branch_name"),
         appearance.ui_font_family(),
         12.,
     )

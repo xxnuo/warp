@@ -1,4 +1,5 @@
 use ordered_float::OrderedFloat;
+use warp_i18n::tr_with;
 use warpui::elements::{ConstrainedBox, Container, Flex, ParentElement, Text};
 use warpui::fonts::{Properties, Weight};
 use warpui::{AppContext, Element, SingletonEntity};
@@ -99,13 +100,16 @@ impl SearchItemTrait for SearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("Selected tab: {}.", self.tab.title)
+        tr_with(
+            "command_palette.tabs.a11y.selected_tab",
+            &[("title", &self.tab.title)],
+        )
     }
 
     fn accessibility_help_message(&self) -> Option<String> {
-        Some(format!(
-            "Press enter to navigate to tab: {}.",
-            self.tab.title
+        Some(tr_with(
+            "command_palette.tabs.a11y.navigate_to_tab",
+            &[("title", &self.tab.title)],
         ))
     }
 }

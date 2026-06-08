@@ -1,6 +1,7 @@
 pub mod settings;
 mod stack;
 
+use warp_i18n::tr;
 use warpui::keymap::EditableBinding;
 use warpui::AppContext;
 
@@ -13,7 +14,7 @@ use crate::workspace::WorkspaceAction;
 pub fn init(ctx: &mut AppContext) {
     ctx.register_editable_bindings([EditableBinding::new(
         "app:reopen_closed_session",
-        "Reopen closed session",
+        tr("undo_close.binding.reopen_closed_session"),
         // Trigger ReopenClosedSession on the active workspace when
         // the action is taken from the command palette.
         WorkspaceAction::ReopenClosedSession,

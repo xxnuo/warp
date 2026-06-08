@@ -1,6 +1,7 @@
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::color::coloru_with_opacity;
 use warp_core::ui::theme::color::internal_colors;
+use warp_i18n::tr;
 use warp_util::path::user_friendly_path;
 use warpui::elements::{
     AnchorPair, ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius,
@@ -131,7 +132,7 @@ pub fn render_static_item(props: StaticItemProps<'_>, app: &AppContext) -> Box<d
     .finish();
 
     let title_text = Text::new_inline(
-        "New conversation",
+        tr("workspace.conversation_list.new_conversation"),
         appearance.ui_font_family(),
         appearance.ui_font_size() + 2.,
     )

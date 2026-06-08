@@ -1,5 +1,6 @@
 use settings::Setting as _;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{Align, Container, Empty, Flex, MouseStateHandle, ParentElement};
 use warpui::fonts::Weight;
 use warpui::keymap::FixedBinding;
@@ -137,7 +138,7 @@ impl View for NativeModal {
         let dont_show_again_checkbox = appearance
             .ui_builder()
             .checkbox(self.dont_show_again_mouse_state.clone(), Some(14.))
-            .with_label(Span::new("Don't show again.", Default::default()))
+            .with_label(Span::new(tr("common.dont_show_again"), Default::default()))
             .check(self.dont_show_again)
             .build()
             .with_cursor(Cursor::PointingHand)

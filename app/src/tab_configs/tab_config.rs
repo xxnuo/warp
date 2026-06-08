@@ -4,6 +4,8 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "local_fs")]
 use toml::Value;
+#[cfg(feature = "local_fs")]
+use warp_i18n::tr;
 
 /// Describes a tab config file that failed to parse.
 ///
@@ -449,7 +451,7 @@ pub(crate) fn build_worktree_config_toml(
         param.insert("type".into(), Value::String("text".into()));
         param.insert(
             "description".into(),
-            Value::String("Worktree branch name".to_string()),
+            Value::String(tr("tab_configs.worktree_branch_name")),
         );
         let mut params = toml::map::Map::new();
         params.insert("worktree_branch_name".into(), Value::Table(param));

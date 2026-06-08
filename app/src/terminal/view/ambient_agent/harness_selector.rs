@@ -10,6 +10,7 @@ use warp_cli::agent::Harness;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildAnchor, ChildView, OffsetPositioning, ParentAnchor, ParentElement as _,
     ParentOffsetBounds, Stack,
@@ -53,12 +54,6 @@ const MENU_WIDTH: f32 = 208.;
 /// than the default `ui_font_size()` to give the logos more visual presence.
 const ITEM_ICON_SIZE: f32 = 16.;
 
-/// Tooltip string for the closed-state button.
-const BUTTON_TOOLTIP: &str = "Agent harness";
-
-/// Label rendered at the top of the dropdown.
-const MENU_HEADER_LABEL: &str = "Agent harness";
-
 /// Actions dispatched by the [`HarnessSelector`].
 #[derive(Clone, Debug, PartialEq)]
 pub enum HarnessSelectorAction {
@@ -95,7 +90,7 @@ impl HarnessSelector {
                 .with_size(ButtonSize::AgentInputButton)
                 .with_menu(true)
                 .with_disabled_theme(AgentInputButtonTheme)
-                .with_tooltip(BUTTON_TOOLTIP)
+                .with_tooltip(tr("ambient_agent.harness_selector.button_tooltip"))
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(HarnessSelectorAction::ToggleMenu);
                 })
@@ -225,9 +220,9 @@ impl HarnessSelector {
             button.set_disabled(is_locked_to_oz, ctx);
             button.set_tooltip(
                 Some(if is_locked_to_oz {
-                    "This conversation is with the Warp Agent, so the cloud handoff will also use Warp"
+                    tr("ambient_agent.harness_selector.locked_to_warp_tooltip")
                 } else {
-                    BUTTON_TOOLTIP
+                    tr("ambient_agent.harness_selector.button_tooltip")
                 }),
                 ctx,
             );
@@ -283,7 +278,7 @@ fn build_menu_items(
     disabled_text_color: pathfinder_color::ColorU,
 ) -> Vec<MenuItem<HarnessSelectorAction>> {
     let header = MenuItem::Header {
-        fields: MenuItemFields::new(MENU_HEADER_LABEL)
+        fields: MenuItemFields::new(tr("ambient_agent.harness_selector.menu_header"))
             .with_font_size_override(HEADER_FONT_SIZE)
             .with_override_text_color(header_text_color)
             .with_padding_override(HEADER_VERTICAL_PADDING, MENU_HORIZONTAL_PADDING)
@@ -312,7 +307,7 @@ fn build_menu_items(
             fields = fields
                 .with_disabled(true)
                 .with_override_text_color(disabled_text_color)
-                .with_tooltip("Disabled by your administrator");
+                .with_tooltip(tr("ambient_agent.harness_selector.disabled_by_admin"));
         }
         items.push(MenuItem::Item(fields));
     }

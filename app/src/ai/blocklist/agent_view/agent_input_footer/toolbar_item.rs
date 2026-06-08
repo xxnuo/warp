@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use warp_i18n::tr;
 use warpui::SingletonEntity;
 
 use super::editor::AgentToolbarEditorMode;
@@ -114,20 +115,20 @@ impl AgentToolbarItemKind {
         }
     }
 
-    pub fn display_label(&self) -> &'static str {
+    pub fn display_label(&self) -> String {
         match self {
-            Self::ContextChip(_) => "Context Chip",
-            Self::ModelSelector => "Model Selector",
-            Self::NLDToggle => "Autodetection",
-            Self::VoiceInput => "Voice Input",
-            Self::FileAttach => "Attach File",
-            Self::ContextWindowUsage => "Context Usage",
-            Self::FileExplorer => "File Explorer",
-            Self::RichInput => "Rich Input",
-            Self::ShareSession => "/remote-control",
-            Self::Settings => "Settings",
-            Self::FastForwardToggle => "Fast Forward",
-            Self::HandoffToCloud => "Hand off to cloud",
+            Self::ContextChip(_) => tr("agent_input_footer.toolbar.context_chip"),
+            Self::ModelSelector => tr("agent_input_footer.toolbar.model_selector"),
+            Self::NLDToggle => tr("agent_input_footer.toolbar.autodetection"),
+            Self::VoiceInput => tr("agent_input_footer.toolbar.voice_input"),
+            Self::FileAttach => tr("agent_input_footer.toolbar.attach_file"),
+            Self::ContextWindowUsage => tr("agent_input_footer.toolbar.context_usage"),
+            Self::FileExplorer => tr("agent_input_footer.toolbar.file_explorer"),
+            Self::RichInput => tr("agent_input_footer.toolbar.rich_input"),
+            Self::ShareSession => "/remote-control".to_string(),
+            Self::Settings => tr("common.settings"),
+            Self::FastForwardToggle => tr("agent_input_footer.toolbar.fast_forward"),
+            Self::HandoffToCloud => tr("agent_input_footer.toolbar.hand_off_to_cloud"),
         }
     }
 

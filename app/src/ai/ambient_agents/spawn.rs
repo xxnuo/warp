@@ -8,6 +8,7 @@ use std::time::Duration;
 use anyhow::anyhow;
 use futures::{select, FutureExt, Stream, StreamExt};
 use session_sharing_protocol::common::SessionId;
+use warp_i18n::tr;
 
 use super::{AmbientAgentTask, AmbientAgentTaskId, AmbientAgentTaskState};
 use crate::server::retry_strategies::with_bounded_retry;
@@ -257,16 +258,16 @@ fn poll_run_until_joinable_session(
                                     let exhausted_stale_skips = !seen_working_state
                                         && skipped_stale_polls >= MAX_STALE_POLLS_BEFORE_FAILURE;
                                     let message = if exhausted_stale_skips {
-                                        "Cloud follow-up did not start in time".to_string()
+                                        tr("ai.task_status.cloud_followup_timeout")
                                     } else {
                                         task.status_message
                                             .as_ref()
                                             .map(|msg| msg.message.clone())
                                             .unwrap_or_else(|| {
                                                 if task.state.is_failure_like() {
-                                                    "Cloud agent failed".to_string()
+                                                    tr("ai.task_status.cloud_agent_failed")
                                                 } else {
-                                                    "Cloud follow-up finished before a new session became available".to_string()
+                                                    tr("ai.task_status.cloud_followup_no_session")
                                                 }
                                             })
                                     };

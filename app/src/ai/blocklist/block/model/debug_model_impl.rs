@@ -1,3 +1,4 @@
+use warp_i18n::tr;
 use warpui::{AppContext, ViewContext};
 
 use crate::ai::{
@@ -24,7 +25,7 @@ impl AIBlockModel for DebugAIBlockModel {
             },
             None => AIBlockOutputStatus::Failed {
                 error: RenderableAIError::Other {
-                    error_message: "No output received.".to_owned(),
+                    error_message: tr("ai_block.no_output_received"),
                     will_attempt_resume: false,
                     waiting_for_network: false,
                     is_user_error: false,

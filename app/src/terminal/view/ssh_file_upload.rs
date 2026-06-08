@@ -8,6 +8,7 @@ use markdown_parser::{
 use warp_core::command::ExitCode;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::color::blend::Blend as _;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, Container, CornerRadius, CrossAxisAlignment, Flex, FormattedTextElement,
     HighlightedHyperlink, MainAxisSize, MouseStateHandle, ParentElement, Radius,
@@ -98,7 +99,7 @@ impl TypedActionView for FileUpload {
 
 impl View for FileUpload {
     fn ui_name() -> &'static str {
-        "SSH File Upload"
+        "SSHFileUpload"
     }
 
     fn render(&self, app: &warpui::AppContext) -> Box<dyn warpui::Element> {
@@ -302,7 +303,7 @@ impl FileUpload {
         if let FileUploadStatus::AwaitingPassword = file.status {
             session_action_row.add_child(
                 FormattedTextElement::from_str(
-                    String::from("Waiting for password input"),
+                    tr("terminal.ssh_file_upload.waiting_for_password"),
                     font_family,
                     font_size,
                 )
@@ -365,9 +366,15 @@ impl FileUpload {
     /// assembly.
     fn render_file_detail_text(&self, file: &FileUploadInfo) -> FormattedText {
         let status_string = match file.status {
-            FileUploadStatus::Started | FileUploadStatus::AwaitingPassword => "Uploading",
-            FileUploadStatus::Completed { successful: true } => "Uploaded",
-            FileUploadStatus::Completed { successful: false } => "Failed to upload",
+            FileUploadStatus::Started | FileUploadStatus::AwaitingPassword => {
+                tr("terminal.ssh_file_upload.uploading")
+            }
+            FileUploadStatus::Completed { successful: true } => {
+                tr("terminal.ssh_file_upload.uploaded")
+            }
+            FileUploadStatus::Completed { successful: false } => {
+                tr("terminal.ssh_file_upload.failed_to_upload")
+            }
         };
 
         let mut file_iter = file.local_file_paths.iter().peekable();
@@ -392,7 +399,7 @@ impl FileUpload {
         }
 
         let mut dest_fragments = vec![
-            FormattedTextFragment::plain_text(" to "),
+            FormattedTextFragment::plain_text(tr("terminal.ssh_file_upload.to_destination")),
             FormattedTextFragment::inline_code(&file.remote_host),
         ];
         if let Some(remote_path) = &file.remote_dest_path {
@@ -416,7 +423,12 @@ impl FileUpload {
         let ui_builder = appearance.ui_builder().clone();
         Container::new(
             icon_button(appearance, Icon::X, true, file.clear_button.clone())
-                .with_tooltip(move || ui_builder.tool_tip("Clear upload".into()).build().finish())
+                .with_tooltip(move || {
+                    ui_builder
+                        .tool_tip(tr("terminal.upload.clear"))
+                        .build()
+                        .finish()
+                })
                 .build()
                 .on_click(move |event_ctx, _, _| {
                     event_ctx
@@ -434,10 +446,10 @@ impl FileUpload {
         appearance: &Appearance,
     ) -> Box<dyn Element> {
         let view_session_text = if file.local_session_open {
-            String::from("Close")
+            tr("common.close")
         } else {
-            String::from("View")
-        } + " upload session";
+            tr("common.view")
+        } + &tr("terminal.ssh_file_upload.upload_session_suffix");
         let upload_id = file.upload_id;
         Container::new(
             appearance
@@ -460,7 +472,9 @@ impl FileUpload {
             FormattedTextElement::new(
                 FormattedText::new(vec![FormattedTextLine::Heading(FormattedTextHeader {
                     heading_size: 3,
-                    text: vec![FormattedTextFragment::plain_text("File Uploads")],
+                    text: vec![FormattedTextFragment::plain_text(tr(
+                        "terminal.ssh_file_upload.file_uploads",
+                    ))],
                 })]),
                 appearance.ui_font_size(),
                 appearance.ui_font_family(),

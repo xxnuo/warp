@@ -1,4 +1,5 @@
 use pathfinder_color::ColorU;
+use warp_i18n::tr;
 use warpui::elements::{
     ConstrainedBox, Container, Element, Empty, Flex, MouseStateHandle, ParentElement, Shrinkable,
 };
@@ -94,7 +95,7 @@ impl ContentSectionView {
                 appearance
                     .ui_builder()
                     .link(
-                        item.button_label.to_string(),
+                        tr(item.button_label),
                         Some(item.url.into()),
                         None,
                         mouse_state_handle,
@@ -125,7 +126,7 @@ impl ContentSectionView {
             Container::new(
                 appearance
                     .ui_builder()
-                    .wrappable_text(item.title.to_string(), true)
+                    .wrappable_text(tr(item.title), true)
                     .with_style(UiComponentStyles {
                         font_size: Some(DESCRIPTION_FONT_SIZE),
                         ..Default::default()
@@ -142,7 +143,7 @@ impl ContentSectionView {
             Container::new(
                 appearance
                     .ui_builder()
-                    .wrappable_text(item.description.to_string(), true)
+                    .wrappable_text(tr(item.description), true)
                     .with_style(UiComponentStyles {
                         font_size: Some(DESCRIPTION_FONT_SIZE),
                         font_color: Some(ColorU::from(

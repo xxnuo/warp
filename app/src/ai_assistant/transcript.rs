@@ -3,6 +3,7 @@ use markdown_parser::CodeBlockText;
 use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::builder::AnimatedButtonOptions;
+use warp_i18n::tr;
 use warpui::clipboard::ClipboardContent;
 use warpui::elements::{
     Align, Border, ChildAnchor, ClippedScrollStateHandle, ClippedScrollable, ConstrainedBox,
@@ -54,11 +55,6 @@ const SAVE_AS_WORKFLOW_BUTTON_SIZE: f32 = 20.;
 const HOW_DO_I_FIX_PROMPT: &str = "How do I fix this?";
 const SHOW_EXAMPLES_PROMPT: &str = "Show examples.";
 const WHAT_TO_DO_NEXT_PROMPT: &str = "What should I do next?";
-const IN_FLIGHT_REQUEST_TEXT: &str = "Generating answer...";
-const ACCURACY_NOTICE_TEXT: &str = "AI responses can be inaccurate.";
-const MISSING_CONTEXT_NOTICE_TEXT: &str =
-    "Warp AI might forget earlier answers as conversations get long.";
-
 lazy_static::lazy_static! {
     static ref SCROLL_BUFFER_OFFSET_PX: Pixels = (10.).into_pixels();
 }
@@ -428,7 +424,7 @@ impl Transcript {
             .finish();
 
         buttons.add_child(appearance.ui_builder().tool_tip_on_element(
-            "Copy code to clipboard [Cmd + C]".to_string(),
+            tr("ai_assistant.transcript.copy_code_tooltip"),
             mouse_state_handles.copy_button_tooltip.clone(),
             copy_button,
             ParentAnchor::TopRight,
@@ -463,7 +459,7 @@ impl Transcript {
 
             buttons.add_child(
                 Container::new(appearance.ui_builder().tool_tip_on_element(
-                    "Insert code into terminal input [Cmd + Enter]".to_string(),
+                    tr("ai_assistant.transcript.insert_code_tooltip"),
                     mouse_state_handles.play_button_tooltip.clone(),
                     insert_button,
                     ParentAnchor::TopRight,
@@ -498,7 +494,7 @@ impl Transcript {
             buttons.add_child(
                 SavePosition::new(
                     Container::new(appearance.ui_builder().tool_tip_on_element(
-                        "Save as workflow [Cmd + S]".to_string(),
+                        tr("ai_assistant.transcript.save_as_workflow_tooltip"),
                         mouse_state_handles.save_as_workflow_button_tooltip.clone(),
                         save_as_workflow_button,
                         ParentAnchor::TopRight,
@@ -560,7 +556,7 @@ impl Transcript {
                     .finish();
 
                 appearance.ui_builder().tool_tip_on_element(
-                    "Copy answer to clipboard".to_string(),
+                    tr("ai_assistant.transcript.copy_answer_tooltip"),
                     tooltip_handle,
                     copy_button,
                     ParentAnchor::TopRight,
@@ -762,6 +758,8 @@ impl Transcript {
                 self.mouse_state_handles.what_to_do_next_button.clone(),
                 None,
                 Some(8.),
+                tr("ai_assistant.prepared.what_to_do_next"),
+                tr("ai_assistant.prepared.what_to_do_next"),
                 WHAT_TO_DO_NEXT_PROMPT,
             ))
             .with_child(
@@ -770,6 +768,8 @@ impl Transcript {
                     self.mouse_state_handles.show_examples_button.clone(),
                     None,
                     Some(8.),
+                    tr("ai_assistant.prepared.show_examples"),
+                    tr("ai_assistant.prepared.show_examples"),
                     SHOW_EXAMPLES_PROMPT,
                 ))
                 .with_margin_left(10.)
@@ -781,6 +781,8 @@ impl Transcript {
                 self.mouse_state_handles.how_do_i_fix_button.clone(),
                 None,
                 Some(8.),
+                tr("ai_assistant.prepared.how_do_i_fix"),
+                tr("ai_assistant.prepared.how_do_i_fix"),
                 HOW_DO_I_FIX_PROMPT,
             ))
             .finish()
@@ -828,10 +830,11 @@ impl View for Transcript {
             blocks.add_child(self.render_user_prompt(request, appearance));
 
             let transcript_part_index = transcript.len();
+            let in_flight_request_text = tr("ai_assistant.transcript.generating_answer");
             let in_flight_request_markdown = markdown_segments_from_text(
                 transcript_part_index,
                 TranscriptPartSubType::Answer,
-                IN_FLIGHT_REQUEST_TEXT,
+                in_flight_request_text.as_str(),
             );
             blocks.add_child(self.render_assistant_answer(
                 transcript_part_index,
@@ -840,7 +843,7 @@ impl View for Transcript {
                     copy_all_tooltip_and_button_mouse_handles: None,
                     formatted_message: FormattedTranscriptMessage {
                         markdown: in_flight_request_markdown,
-                        raw: IN_FLIGHT_REQUEST_TEXT.to_owned(),
+                        raw: in_flight_request_text,
                     },
                 },
                 appearance,
@@ -880,9 +883,10 @@ impl View for Transcript {
                 .current_transcript_summarized();
 
             blocks.add_child(
-                Container::new(
-                    self.render_warning_message(ACCURACY_NOTICE_TEXT.to_string(), appearance),
-                )
+                Container::new(self.render_warning_message(
+                    tr("ai_assistant.transcript.accuracy_notice"),
+                    appearance,
+                ))
                 .with_margin_top(DETAILS_BOTTOM_MARGIN)
                 .with_margin_bottom(if current_transcript_summarized {
                     DETAILS_BOTTOM_MARGIN / 2.
@@ -895,7 +899,7 @@ impl View for Transcript {
             if current_transcript_summarized {
                 blocks.add_child(
                     Container::new(self.render_warning_message(
-                        MISSING_CONTEXT_NOTICE_TEXT.to_string(),
+                        tr("ai_assistant.transcript.missing_context_notice"),
                         appearance,
                     ))
                     .with_margin_bottom(DETAILS_BOTTOM_MARGIN)

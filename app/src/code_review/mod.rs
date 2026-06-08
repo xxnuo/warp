@@ -25,6 +25,7 @@ pub(crate) mod diff_selector;
 pub(crate) mod file_invalidation_queue;
 
 use code_review_view::CodeReviewAction;
+use warp_i18n::tr;
 use warpui::keymap::{EditableBinding, FixedBinding};
 use warpui::{
     id, AppContext, Entity, EntityId, ModelContext, SingletonEntity, WeakViewHandle, WindowId,
@@ -61,14 +62,14 @@ pub fn init(app: &mut AppContext) {
     app.register_editable_bindings([
         EditableBinding::new(
             "code_review:save_all_unsaved_files",
-            "Save all unsaved files in code review",
+            tr("code_review.save_all_unsaved_files"),
             CodeReviewAction::SaveAllUnsavedFiles,
         )
         .with_context_predicate(id!("CodeReviewView"))
         .with_key_binding("cmdorctrl-s"),
         EditableBinding::new(
             "code_review:show_find_bar",
-            "Show find bar in code review",
+            tr("code_review.show_find_bar"),
             CodeReviewAction::ShowFindBar,
         )
         .with_context_predicate(id!("CodeReviewView"))
@@ -76,7 +77,7 @@ pub fn init(app: &mut AppContext) {
         .with_enabled(|| crate::features::FeatureFlag::CodeReviewFind.is_enabled()),
         EditableBinding::new(
             "code_review:toggle_file_navigation",
-            "Toggle file navigation in code review",
+            tr("code_review.toggle_file_navigation"),
             CodeReviewAction::ToggleFileSidebar,
         )
         .with_context_predicate(id!("CodeReviewView_NotEditing"))
@@ -87,7 +88,7 @@ pub fn init(app: &mut AppContext) {
     app.register_fixed_bindings([FixedBinding::custom(
         CustomAction::Undo,
         CodeReviewAction::UndoRevert,
-        "Undo",
+        tr("common.undo"),
         id!("CodeReviewView") & !id!("IMEOpen"),
     )]);
 

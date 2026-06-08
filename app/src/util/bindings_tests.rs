@@ -1,9 +1,11 @@
-use warpui::keymap::{EditableBinding, Keystroke, Trigger};
+use warpui::keymap::{DescriptionContext, EditableBinding, Keystroke, Trigger};
 use warpui::platform::OperatingSystem;
 use warpui::App;
 
 use crate::terminal;
-use crate::util::bindings::{keybinding_name_to_display_string, trigger_to_keystroke};
+use crate::util::bindings::{
+    keybinding_name_to_display_string, trigger_to_keystroke, CommandBinding,
+};
 use crate::workspace::WorkspaceAction;
 
 #[test]
@@ -113,4 +115,18 @@ fn test_terminal_page_scroll_bindings_are_editable() {
             assert_eq!(page_down, Keystroke::parse("pagedown").ok());
         });
     });
+}
+
+#[test]
+fn command_binding_search_text_includes_stable_aliases() {
+    let binding = CommandBinding::new(
+        "workspace:toggle_ai_assistant".to_string(),
+        "新建 Agent 面板".to_string(),
+        None,
+    );
+
+    let search_text = binding.search_text(DescriptionContext::Default);
+
+    assert!(search_text.contains("workspace toggle ai assistant"));
+    assert!(search_text.contains("new agent pane agent mode warp ai"));
 }

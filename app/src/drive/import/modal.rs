@@ -1,5 +1,6 @@
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ChildAnchor, ClippedScrollStateHandle, ClippedScrollable, ConstrainedBox,
     Container, CornerRadius, CrossAxisAlignment, Flex, Highlight, MouseStateHandle,
@@ -228,9 +229,13 @@ impl ImportModal {
                 Shrinkable::new(
                     1.0,
                     Align::new(
-                        Text::new_inline("Import", appearance.ui_font_family(), HEADER_FONT_SIZE)
-                            .with_color(appearance.theme().active_ui_text_color().into())
-                            .finish(),
+                        Text::new_inline(
+                            tr("drive.import.title"),
+                            appearance.ui_font_family(),
+                            HEADER_FONT_SIZE,
+                        )
+                        .with_color(appearance.theme().active_ui_text_color().into())
+                        .finish(),
                     )
                     .left()
                     .finish(),
@@ -282,9 +287,9 @@ impl ImportModal {
 
     fn render_footer(&self, appearance: &Appearance, app: &AppContext) -> Box<dyn Element> {
         let button_text = if !self.import_modal.as_ref(app).upload_in_progress(app) {
-            "Close".to_string()
+            tr("common.close")
         } else {
-            "Cancel".to_string()
+            tr("common.cancel")
         };
 
         Container::new(
@@ -295,7 +300,7 @@ impl ImportModal {
                         ButtonVariant::Outlined,
                         self.footer_button_mouse_state.clone(),
                     )
-                    .with_centered_text_label(button_text.to_string())
+                    .with_centered_text_label(button_text)
                     .with_style(UiComponentStyles {
                         width: Some(150.),
                         height: Some(40.),

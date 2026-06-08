@@ -17,6 +17,7 @@ use warp_core::ui::color::blend::Blend;
 use warp_core::ui::color::coloru_with_opacity;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::{Fill, WarpTheme};
+use warp_i18n::tr;
 use warpui::elements::new_scrollable::{NewScrollable, ScrollableAppearance, SingleAxisConfig};
 use warpui::elements::{
     Align, AnchorPair, ChildAnchor, ChildView, ClippedScrollStateHandle, ConstrainedBox, Container,
@@ -59,6 +60,7 @@ use crate::ai::blocklist::telemetry::{
     PillBarPillKind, PillSwitchOutcome,
 };
 use crate::ai::blocklist::{BlocklistAIHistoryEvent, BlocklistAIHistoryModel};
+use crate::ai::conversation_status_ui::conversation_status_label;
 use crate::ai::harness_display;
 use crate::features::FeatureFlag;
 use crate::menu::{Event as MenuEvent, Menu, MenuItem, MenuItemFields};
@@ -330,7 +332,7 @@ impl Entity for OrchestrationPillBar {
 
 impl OrchestrationPillBar {
     fn overflow_menu_item(
-        label: &'static str,
+        label: String,
         icon: Icon,
         action: OrchestrationPillBarAction,
         hover_background: Fill,
@@ -459,19 +461,19 @@ impl OrchestrationPillBar {
 
         let mut items = if is_open_elsewhere {
             vec![item(
-                "Focus pane",
+                tr("agent_view.orchestration_pill.focus_pane"),
                 Icon::ArrowSplit,
                 OrchestrationPillBarAction::FocusOpenedConversation(conversation_id),
             )]
         } else {
             vec![
                 item(
-                    "Open in new pane",
+                    tr("agent_view.orchestration_pill.open_in_new_pane"),
                     Icon::ArrowSplit,
                     OrchestrationPillBarAction::OpenInNewPane(conversation_id),
                 ),
                 item(
-                    "Open in new tab",
+                    tr("agent_view.orchestration_pill.open_in_new_tab"),
                     Icon::Plus,
                     OrchestrationPillBarAction::OpenInNewTab(conversation_id),
                 ),
@@ -479,7 +481,7 @@ impl OrchestrationPillBar {
         };
         if Self::oz_run_url_for_conversation(conversation_id, ctx).is_some() {
             items.push(item(
-                "View in Oz",
+                tr("agent_view.orchestration_pill.view_in_oz"),
                 Icon::Oz,
                 OrchestrationPillBarAction::ViewInOz(conversation_id),
             ));
@@ -500,15 +502,18 @@ impl OrchestrationPillBar {
         items.push(MenuItem::Separator);
         if is_in_progress {
             items.push(destructive_item(
-                "Stop agent",
+                tr("agent_view.orchestration_pill.stop_agent"),
                 Icon::StopFilled,
                 OrchestrationPillBarAction::Stop(conversation_id),
             ));
         }
         let (kill_label, kill_icon) = if is_in_finished_state {
-            ("Delete agent", Icon::Trash)
+            (
+                tr("agent_view.orchestration_pill.delete_agent"),
+                Icon::Trash,
+            )
         } else {
-            ("Kill agent", Icon::X)
+            (tr("agent_view.orchestration_pill.kill_agent"), Icon::X)
         };
         items.push(destructive_item(
             kill_label,
@@ -649,7 +654,8 @@ impl OrchestrationPillBar {
             let name = child
                 .agent_name()
                 .filter(|n| !n.is_empty())
-                .unwrap_or("Agent");
+                .map(str::to_string)
+                .unwrap_or_else(|| tr("agent_view.orchestration_pill.agent"));
             let pin_state = if pill_bar_model.is_pinned(&child.id()) {
                 PillPinState::Pinned
             } else {
@@ -657,9 +663,9 @@ impl OrchestrationPillBar {
             };
             specs.push(PillSpec {
                 conversation_id: child.id(),
-                label: name.to_string(),
-                avatar_color: pill_avatar_color(name, theme),
-                avatar_glyph: AvatarGlyph::Letter(pill_initial(name)),
+                label: name.clone(),
+                avatar_color: pill_avatar_color(&name, theme),
+                avatar_glyph: AvatarGlyph::Letter(pill_initial(&name)),
                 status: Some(child.status().clone()),
                 is_selected: child.id() == active_id,
                 kind: PillKind::Child,
@@ -718,7 +724,7 @@ fn orchestrator_label(orchestrator: &AIConversation) -> String {
         .agent_name()
         .filter(|n| !n.is_empty())
         .map(|n| n.to_string())
-        .unwrap_or_else(|| "Orchestrator".to_string())
+        .unwrap_or_else(|| tr("ai_block.orchestration.orchestrator"))
 }
 
 impl OrchestrationPillBar {
@@ -1326,7 +1332,7 @@ fn render_hover_card(
         .filter(|n| !n.is_empty())
         .map(|n| n.to_string())
         .or_else(|| conversation.title())
-        .unwrap_or_else(|| "Agent".to_string());
+        .unwrap_or_else(|| tr("agent_view.orchestration_pill.agent"));
 
     // Header: small avatar disc + bold agent name on the left, status
     // badge right-aligned. We use the conversation's `ConversationStatus`
@@ -1564,7 +1570,7 @@ fn render_status_badge(
         .with_height(12.)
         .finish();
     let label = Text::new(
-        status.to_string(),
+        conversation_status_label(status),
         appearance.ui_font_family(),
         appearance.monospace_font_size() - 2.,
     )
@@ -2266,7 +2272,7 @@ pub fn render_orchestration_breadcrumbs(
                 .filter(|t| !t.is_empty())
                 .or_else(|| p.agent_name().map(str::to_string))
         })
-        .unwrap_or_else(|| "Orchestrator".to_string());
+        .unwrap_or_else(|| tr("ai_block.orchestration.orchestrator"));
 
     // Treat empty `agent_name` as missing so the label, avatar color, and
     // initial all consistently fall back to "Agent". Without the
@@ -2276,8 +2282,9 @@ pub fn render_orchestration_breadcrumbs(
     let child_name = active
         .agent_name()
         .filter(|n| !n.is_empty())
-        .unwrap_or("Agent");
-    let child_label = child_name.to_string();
+        .map(str::to_string)
+        .unwrap_or_else(|| tr("agent_view.orchestration_pill.agent"));
+    let child_label = child_name.clone();
 
     // Parent crumb uses the Oz glyph on a neutral disc to match the
     // orchestrator pill in the pill bar.
@@ -2294,8 +2301,8 @@ pub fn render_orchestration_breadcrumbs(
     let child_spec = CrumbSpec {
         conversation_id: active_id,
         label: child_label,
-        avatar_color: pill_avatar_color(child_name, theme),
-        avatar_glyph: AvatarGlyph::Letter(pill_initial(child_name)),
+        avatar_color: pill_avatar_color(&child_name, theme),
+        avatar_glyph: AvatarGlyph::Letter(pill_initial(&child_name)),
         is_active: true,
     };
 

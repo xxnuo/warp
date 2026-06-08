@@ -5,6 +5,7 @@ use session_sharing_protocol::common::SessionId;
 use warp_cli::agent::Harness;
 use warp_core::features::FeatureFlag;
 use warp_core::send_telemetry_from_ctx;
+use warp_i18n::tr;
 use warp_terminal::model::BlockId;
 use warpui::r#async::{SpawnedFutureHandle, Timer};
 use warpui::{AppContext, Entity, EntityId, ModelContext, SingletonEntity};
@@ -17,10 +18,7 @@ use crate::ai::ambient_agents::github_auth_notifier::{GitHubAuthEvent, GitHubAut
 use crate::ai::ambient_agents::spawn::{spawn_task, submit_run_followup, AmbientAgentEvent};
 use crate::ai::ambient_agents::task::{HarnessAuthSecretsConfig, HarnessConfig};
 use crate::ai::ambient_agents::telemetry::CloudAgentTelemetryEvent;
-use crate::ai::ambient_agents::{
-    github_auth_url, AgentSource, AmbientAgentTaskId, OUT_OF_CREDITS_TASK_FAILURE_MESSAGE,
-    SERVER_OVERLOADED_TASK_FAILURE_MESSAGE,
-};
+use crate::ai::ambient_agents::{github_auth_url, AgentSource, AmbientAgentTaskId};
 #[cfg(all(feature = "local_fs", not(target_family = "wasm")))]
 use crate::ai::blocklist::handoff::touched_repos::TouchedWorkspace;
 #[cfg(all(feature = "local_fs", not(target_family = "wasm")))]
@@ -87,13 +85,13 @@ impl AgentProgress {
         }
     }
 
-    pub fn setup_status_text(&self) -> &'static str {
+    pub fn setup_status_text(&self) -> String {
         if self.harness_started_at.is_some() {
-            "Starting Environment (Step 3/3)"
+            tr("ambient_agent.progress_starting_environment")
         } else if self.claimed_at.is_some() {
-            "Creating Environment (Step 2/3)"
+            tr("ambient_agent.progress_creating_environment")
         } else {
-            "Connecting to Host (Step 1/3)"
+            tr("ambient_agent.progress_connecting_to_host")
         }
     }
 }
@@ -1414,7 +1412,7 @@ impl AmbientAgentViewModel {
                         | AmbientAgentTaskState::Unknown => {
                             let error = status_message
                                 .map(|msg| msg.message)
-                                .unwrap_or_else(|| "Cloud agent failed".to_string());
+                                .unwrap_or_else(|| tr("ai.task_status.cloud_agent_failed"));
                             self.handle_spawn_error(error, ctx);
                         }
                     }
@@ -1501,16 +1499,13 @@ impl AmbientAgentViewModel {
                 } => {
                     let error_message = user_display_message
                         .clone()
-                        .unwrap_or_else(|| OUT_OF_CREDITS_TASK_FAILURE_MESSAGE.to_string());
+                        .unwrap_or_else(|| tr("ai.task_status.out_of_credits"));
                     self.handle_spawn_error(error_message, ctx);
                     ctx.emit(AmbientAgentViewModelEvent::ShowAICreditModal);
                     return;
                 }
                 AIApiError::ServerOverloaded => {
-                    self.handle_spawn_error(
-                        SERVER_OVERLOADED_TASK_FAILURE_MESSAGE.to_string(),
-                        ctx,
-                    );
+                    self.handle_spawn_error(tr("ai.task_status.server_overloaded"), ctx);
                     return;
                 }
                 _ => {}

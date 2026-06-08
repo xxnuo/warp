@@ -33,6 +33,7 @@ use warp_core::send_telemetry_from_ctx;
 use warp_core::settings::ToggleableSetting as _;
 use warp_core::ui::theme::color::internal_colors;
 use warp_editor::editor::NavigationKey;
+use warp_i18n::{tr, tr_with};
 use warpify_page::{WarpifyPageAction, WarpifyPageView};
 use warpui::elements::{
     Align, Border, ChildAnchor, ChildView, Clipped, ClippedScrollStateHandle, ClippedScrollable,
@@ -283,24 +284,34 @@ use crate::util::bindings::custom_tag_to_keystroke;
 
 impl Display for SettingsSection {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            SettingsSection::BillingAndUsage => write!(f, "Billing and usage"),
-            SettingsSection::Keybindings => write!(f, "Keyboard shortcuts"),
-            SettingsSection::SharedBlocks => write!(f, "Shared blocks"),
-            SettingsSection::MCPServers => write!(f, "MCP Servers"),
-            SettingsSection::Scripting => write!(f, "Scripting"),
-            SettingsSection::WarpDrive => write!(f, "Warp Drive"),
-            SettingsSection::WarpAgent => write!(f, "Warp Agent"),
-            SettingsSection::AgentProfiles => write!(f, "Profiles"),
-            SettingsSection::AgentMCPServers => write!(f, "MCP servers"),
-            SettingsSection::Knowledge => write!(f, "Knowledge"),
-            SettingsSection::ThirdPartyCLIAgents => write!(f, "Third party CLI agents"),
-            SettingsSection::CodeIndexing => write!(f, "Indexing and projects"),
-            SettingsSection::EditorAndCodeReview => write!(f, "Editor and Code Review"),
-            SettingsSection::CloudEnvironments => write!(f, "Environments"),
-            SettingsSection::OzCloudAPIKeys => write!(f, "Oz Cloud API Keys"),
-            _ => write!(f, "{self:?}"),
-        }
+        let label = match self {
+            SettingsSection::About => tr("settings.section.about"),
+            SettingsSection::Account => tr("settings.section.account"),
+            SettingsSection::MCPServers => tr("settings.section.mcp_servers"),
+            SettingsSection::BillingAndUsage => tr("settings.section.billing_and_usage"),
+            SettingsSection::Appearance => tr("settings.section.appearance"),
+            SettingsSection::Features => tr("settings.section.features"),
+            SettingsSection::Keybindings => tr("settings.section.keybindings"),
+            SettingsSection::Privacy => tr("settings.section.privacy"),
+            SettingsSection::Referrals => tr("settings.section.referrals"),
+            SettingsSection::Scripting => tr("settings.section.scripting"),
+            SettingsSection::SharedBlocks => tr("settings.section.shared_blocks"),
+            SettingsSection::Teams => tr("settings.section.teams"),
+            SettingsSection::WarpDrive => tr("settings.section.warp_drive"),
+            SettingsSection::Warpify => tr("settings.section.warpify"),
+            SettingsSection::AI => tr("settings.section.ai"),
+            SettingsSection::WarpAgent => tr("settings.section.warp_agent"),
+            SettingsSection::AgentProfiles => tr("settings.section.agent_profiles"),
+            SettingsSection::AgentMCPServers => tr("settings.section.agent_mcp_servers"),
+            SettingsSection::Knowledge => tr("settings.section.knowledge"),
+            SettingsSection::ThirdPartyCLIAgents => tr("settings.section.third_party_cli_agents"),
+            SettingsSection::Code => tr("settings.section.code"),
+            SettingsSection::CodeIndexing => tr("settings.section.code_indexing"),
+            SettingsSection::EditorAndCodeReview => tr("settings.section.editor_code_review"),
+            SettingsSection::CloudEnvironments => tr("settings.section.cloud_environments"),
+            SettingsSection::OzCloudAPIKeys => tr("settings.section.oz_cloud_api_keys"),
+        };
+        write!(f, "{label}")
     }
 }
 
@@ -701,10 +712,10 @@ pub struct SettingActionPairDescriptions {
 }
 
 impl SettingActionPairDescriptions {
-    pub fn new(enable: &str, disable: &str) -> Self {
+    pub fn new(enable: impl Into<String>, disable: impl Into<String>) -> Self {
         Self {
-            enable: enable.to_owned(),
-            disable: disable.to_owned(),
+            enable: enable.into(),
+            disable: disable.into(),
         }
     }
 }
@@ -767,17 +778,21 @@ impl<T: Action + Clone> ToggleSettingActionPair<T> {
     /// is in the enabled state,
     /// and absent when the action is in the disabled state.
     pub fn new(
-        description_suffix: &str,
+        description_suffix: impl Into<String>,
         toggle_action: T,
         context_prefix: &ContextPredicate,
         context_boolean_flag: &'static str,
     ) -> Self {
         use warpui::keymap::macros::id;
 
+        let description_suffix = description_suffix.into();
         ToggleSettingActionPair {
             descriptions: SettingActionPairDescriptions {
-                enable: format!("Enable {description_suffix}"),
-                disable: format!("Disable {description_suffix}"),
+                enable: tr_with("common.enable_setting", &[("setting", &description_suffix)]),
+                disable: tr_with(
+                    "common.disable_setting",
+                    &[("setting", &description_suffix)],
+                ),
             },
             contexts: SettingActionPairContexts {
                 enable_predicate: context_prefix.to_owned() & !id!(context_boolean_flag),
@@ -1257,7 +1272,7 @@ impl SettingsView {
                 ..Default::default()
             };
             let mut editor = EditorView::single_line(options, ctx);
-            editor.set_placeholder_text("Search", ctx);
+            editor.set_placeholder_text(&tr("common.search"), ctx);
             editor
         });
 
@@ -1304,19 +1319,19 @@ impl SettingsView {
         let mut nav_items = vec![
             SettingsNavItem::Page(SettingsSection::Account),
             SettingsNavItem::Umbrella(SettingsUmbrella::new(
-                "Agents",
+                tr("settings.umbrella.agents"),
                 SettingsSection::ai_subpages().to_vec(),
             )),
             SettingsNavItem::Page(SettingsSection::BillingAndUsage),
             SettingsNavItem::Umbrella(SettingsUmbrella::new(
-                "Code",
+                tr("settings.umbrella.code"),
                 vec![
                     SettingsSection::CodeIndexing,
                     SettingsSection::EditorAndCodeReview,
                 ],
             )),
             SettingsNavItem::Umbrella(SettingsUmbrella::new(
-                "Cloud platform",
+                tr("settings.umbrella.cloud_platform"),
                 vec![
                     SettingsSection::CloudEnvironments,
                     SettingsSection::OzCloudAPIKeys,
@@ -1636,28 +1651,28 @@ impl SettingsView {
 
         if ContextFlag::CreateNewSession.is_enabled() {
             items.extend(vec![
-                MenuItemFields::new("Split pane right")
+                MenuItemFields::new(tr("settings.menu.split_pane_right"))
                     .with_on_select_action(SettingsAction::Split(Direction::Right))
                     .with_key_shortcut_label(keybinding_name_to_display_string(
                         "pane_group:add_right",
                         ctx,
                     ))
                     .into_item(),
-                MenuItemFields::new("Split pane left")
+                MenuItemFields::new(tr("settings.menu.split_pane_left"))
                     .with_on_select_action(SettingsAction::Split(Direction::Left))
                     .with_key_shortcut_label(keybinding_name_to_display_string(
                         "pane_group:add_left",
                         ctx,
                     ))
                     .into_item(),
-                MenuItemFields::new("Split pane down")
+                MenuItemFields::new(tr("settings.menu.split_pane_down"))
                     .with_on_select_action(SettingsAction::Split(Direction::Down))
                     .with_key_shortcut_label(keybinding_name_to_display_string(
                         "pane_group:add_down",
                         ctx,
                     ))
                     .into_item(),
-                MenuItemFields::new("Split pane up")
+                MenuItemFields::new(tr("settings.menu.split_pane_up"))
                     .with_on_select_action(SettingsAction::Split(Direction::Up))
                     .with_key_shortcut_label(keybinding_name_to_display_string(
                         "pane_group:add_up",
@@ -1686,7 +1701,7 @@ impl SettingsView {
             );
 
             items.push(
-                MenuItemFields::new("Close pane")
+                MenuItemFields::new(tr("settings.menu.close_pane"))
                     .with_on_select_action(SettingsAction::Close)
                     .with_key_shortcut_label(
                         custom_tag_to_keystroke(CustomAction::CloseCurrentSession.into())
@@ -2367,10 +2382,10 @@ impl SettingsView {
         Container::new(
             Align::new(
                 Flex::column()
-                .with_cross_axis_alignment(CrossAxisAlignment::Center)
+                    .with_cross_axis_alignment(CrossAxisAlignment::Center)
                     .with_children([
                         Text::new(
-                            "No settings match your search.",
+                            tr("settings.search.no_results_title"),
                             appearance.ui_font_family(),
                             appearance.ui_font_size(),
                         )
@@ -2378,7 +2393,7 @@ impl SettingsView {
                         .with_color(theme.sub_text_color(theme.background()).into_solid())
                         .finish(),
                         Text::new(
-                            "You may want to try using different keywords or checking for any possible typos.",
+                            tr("settings.search.no_results_description"),
                             appearance.ui_font_family(),
                             appearance.ui_font_size(),
                         )
@@ -2389,7 +2404,7 @@ impl SettingsView {
             )
             .finish(),
         )
-            .with_uniform_margin(16.)
+        .with_uniform_margin(16.)
         .with_corner_radius(CornerRadius::with_all(Radius::Pixels(4.)))
         .with_background(internal_colors::fg_overlay_1(appearance.theme()))
         .finish()
@@ -2797,7 +2812,7 @@ impl BackingView for SettingsView {
         _ctx: &view::HeaderRenderContext<'_>,
         _app: &AppContext,
     ) -> view::HeaderContent {
-        view::HeaderContent::simple("Settings")
+        view::HeaderContent::simple(tr("settings.title"))
     }
 
     fn set_focus_handle(&mut self, focus_handle: PaneFocusHandle, _ctx: &mut ViewContext<Self>) {

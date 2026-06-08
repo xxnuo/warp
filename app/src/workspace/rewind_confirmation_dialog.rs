@@ -1,6 +1,7 @@
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::color::coloru_with_opacity;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, ChildAnchor, ConstrainedBox, Container, CrossAxisAlignment, Flex, Hoverable,
     MouseStateHandle, OffsetPositioning, ParentAnchor, ParentElement, ParentOffsetBounds, Stack,
@@ -105,9 +106,13 @@ impl View for RewindConfirmationDialog {
         let rewind_button_label = Flex::row()
             .with_cross_axis_alignment(CrossAxisAlignment::Center)
             .with_child(
-                Text::new_inline("Rewind", appearance.ui_font_family(), 14.)
-                    .with_color(text_color)
-                    .finish(),
+                Text::new_inline(
+                    tr("workspace.rewind.action"),
+                    appearance.ui_font_family(),
+                    14.,
+                )
+                .with_color(text_color)
+                .finish(),
             )
             .with_child(
                 Container::new(
@@ -159,7 +164,7 @@ impl View for RewindConfirmationDialog {
                 } else {
                     cancel_text_color
                 };
-                Text::new_inline("Cancel", appearance.ui_font_family(), 14.)
+                Text::new_inline(tr("common.cancel"), appearance.ui_font_family(), 14.)
                     .with_color(color.into_solid())
                     .finish()
             })
@@ -186,7 +191,7 @@ impl View for RewindConfirmationDialog {
             )
             .with_child(
                 Text::new_inline(
-                    "Rewinding does not affect files edited manually or via shell commands.",
+                    tr("workspace.rewind.info"),
                     appearance.ui_font_family(),
                     12.,
                 )
@@ -197,11 +202,8 @@ impl View for RewindConfirmationDialog {
 
         let dialog = Container::new(
             Dialog::new(
-                "Rewind".into(),
-                Some(
-                    "Are you sure you want to rewind? This will restore your code and conversation to before this point, and cancel any commands the agent is currently running. A copy of the original conversation will be saved in your conversation history."
-                        .into(),
-                ),
+                tr("workspace.rewind.title"),
+                Some(tr("workspace.rewind.description")),
                 UiComponentStyles {
                     width: Some(DIALOG_WIDTH),
                     padding: Some(Coords::uniform(24.)),

@@ -1,5 +1,6 @@
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Border, ChildAnchor, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Empty,
     Expanded, Flex, Hoverable, MainAxisAlignment, MainAxisSize, MouseStateHandle,
@@ -45,7 +46,7 @@ const CARD_BAR_RADIUS: f32 = CARD_BAR_HEIGHT / 2.;
 /// Summary backing a single team-totals card (Overall / Local / Cloud).
 #[derive(Debug)]
 pub struct TeamTotalCardSummary {
-    pub title: &'static str,
+    pub title: String,
     pub card_key: &'static str,
     pub segments: Vec<BarSegment>,
     pub total_credits: i64,
@@ -59,7 +60,7 @@ pub fn build_team_total_card_summaries(
 ) -> Vec<TeamTotalCardSummary> {
     let (overall_segments, overall_credits, overall_cost) = aggregate_segments(entries.iter());
     let mut summaries = vec![TeamTotalCardSummary {
-        title: "Overall usage",
+        title: tr("settings.billing.overall_usage"),
         card_key: "__card_overall__",
         segments: overall_segments,
         total_credits: overall_credits,
@@ -83,7 +84,7 @@ pub fn build_team_total_card_summaries(
                 .filter(|e| e.usage_source == AiCreditsUsageSource::Cloud),
         );
         summaries.push(TeamTotalCardSummary {
-            title: "Local agent usage",
+            title: tr("settings.billing.local_agent_usage"),
             card_key: "__card_local__",
             segments: local_segments,
             total_credits: local_credits,
@@ -91,7 +92,7 @@ pub fn build_team_total_card_summaries(
             limit_cents: None,
         });
         summaries.push(TeamTotalCardSummary {
-            title: "Cloud agent usage",
+            title: tr("settings.billing.cloud_agent_usage"),
             card_key: "__card_cloud__",
             segments: cloud_segments,
             total_credits: cloud_credits,
@@ -221,7 +222,10 @@ fn build_team_total_card(
     .finish();
 
     let credits_text = Text::new_inline(
-        format!("({} credits)", format_credits(summary.total_credits)),
+        tr_with(
+            "settings.billing.credits_parenthetical",
+            &[("credits", &format_credits(summary.total_credits))],
+        ),
         appearance.ui_font_family(),
         13.,
     )
@@ -237,7 +241,10 @@ fn build_team_total_card(
     let totals_row: Box<dyn Element> = match summary.limit_cents {
         Some(limit) => {
             let limit_text = Text::new_inline(
-                format!("Limit: {}", format_cost_cents(limit)),
+                tr_with(
+                    "settings.billing.limit_amount",
+                    &[("amount", &format_cost_cents(limit))],
+                ),
                 appearance.ui_font_family(),
                 12.,
             )
@@ -353,9 +360,12 @@ pub fn render_team_totals_block(
 ) -> Box<dyn Element> {
     let mut column = Flex::column().with_cross_axis_alignment(CrossAxisAlignment::Stretch);
     column.add_child(
-        Container::new(render_section_subheader("Team", appearance))
-            .with_margin_bottom(8.)
-            .finish(),
+        Container::new(render_section_subheader(
+            &tr("settings.billing.team"),
+            appearance,
+        ))
+        .with_margin_bottom(8.)
+        .finish(),
     );
     column.add_child(render_team_totals_section(
         entries,

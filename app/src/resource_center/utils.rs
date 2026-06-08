@@ -1,6 +1,7 @@
 // Hard coded constants to divide keybindings into their respective categories/sections.
 // This should always align with documentation: https://docs.warp.dev/getting-started/keyboard-shortcuts
 
+use warp_i18n::tr;
 use warpui::keymap::Keystroke;
 
 use crate::util::bindings::CommandBinding;
@@ -119,27 +120,27 @@ pub fn get_additional_keybindings() -> Vec<CommandBinding> {
     vec![
         CommandBinding::new(
             "workspace:new_window".into(),
-            "Open New Window".into(),
+            tr("resource_center.keybindings.open_new_window"),
             Some(Keystroke::parse("cmd-n").expect("Valid keystroke")),
         ),
         CommandBinding::new(
             "workspace:hide_warp".into(),
-            "Hide Warp".into(),
+            tr("resource_center.keybindings.hide_warp"),
             Some(Keystroke::parse("cmd-h").expect("Valid keystroke")),
         ),
         CommandBinding::new(
             "workspace:hide_others".into(),
-            "Hide Others".into(),
+            tr("resource_center.keybindings.hide_others"),
             Some(Keystroke::parse("alt-cmd-h").expect("Valid keystroke")),
         ),
         CommandBinding::new(
             "workspace:quit_warp".into(),
-            "Quit Warp".into(),
+            tr("resource_center.keybindings.quit_warp"),
             Some(Keystroke::parse("cmd-q").expect("Valid keystroke")),
         ),
         CommandBinding::new(
             "workspace:minimize".into(),
-            "Minimize".into(),
+            tr("resource_center.keybindings.minimize"),
             Some(Keystroke::parse("cmd-m").expect("Valid keystroke")),
         ),
     ]

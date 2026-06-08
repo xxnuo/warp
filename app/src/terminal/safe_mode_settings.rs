@@ -1,5 +1,6 @@
 use settings::macros::define_settings_group;
 use settings::{RespectUserSyncSetting, Setting, SupportedPlatforms, SyncToCloud};
+use warp_i18n::tr;
 use warpui::{AppContext, SingletonEntity};
 
 use crate::terminal::model::ObfuscateSecrets;
@@ -52,11 +53,11 @@ impl SecretDisplayMode {
     }
 
     /// Display name for UI
-    pub fn display_name(self) -> &'static str {
+    pub fn display_name(self) -> String {
         match self {
-            SecretDisplayMode::Asterisks => "Asterisks",
-            SecretDisplayMode::Strikethrough => "Strikethrough",
-            SecretDisplayMode::AlwaysShow => "Always show secrets",
+            SecretDisplayMode::Asterisks => tr("settings.privacy.secret_display.asterisks"),
+            SecretDisplayMode::Strikethrough => tr("settings.privacy.secret_display.strikethrough"),
+            SecretDisplayMode::AlwaysShow => tr("settings.privacy.secret_display.always_show"),
         }
     }
 

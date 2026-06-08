@@ -1,5 +1,6 @@
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
+use warp_i18n::tr_with;
 use warpui::elements::{ConstrainedBox, Container, Icon, Text};
 use warpui::{AppContext, Element, SingletonEntity};
 
@@ -81,6 +82,6 @@ impl SearchItem for CommandSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("Command: {}", self.command)
+        tr_with("search.a11y.command", &[("command", self.command.as_str())])
     }
 }

@@ -3,6 +3,7 @@
 
 use warp_core::features::FeatureFlag;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::elements::{ChildView, Container};
 use warpui::{AppContext, Element, Entity, SingletonEntity, View, ViewContext, ViewHandle};
 
@@ -47,7 +48,11 @@ impl BillingAndUsageDispatchView {
             ctx.notify();
         });
 
-        let page = PageType::new_monolith(BillingAndUsageWidget, Some("Billing and Usage"), true);
+        let page = PageType::new_monolith(
+            BillingAndUsageWidget,
+            Some(tr("settings.section.billing_and_usage")),
+            true,
+        );
 
         Self { page, v1, v2 }
     }

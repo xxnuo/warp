@@ -9,6 +9,7 @@
 use chrono::{DateTime, Local};
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
+use warp_i18n::tr;
 use warpui::{AppContext, Entity, EntityId, ModelHandle, SingletonEntity};
 
 use crate::ai::agent::conversation::{AIConversationId, ConversationStatus};
@@ -166,7 +167,7 @@ impl InlineHistoryMenuDataSource {
             };
             let title = conversation
                 .title()
-                .unwrap_or_else(|| "Untitled conversation".to_string());
+                .unwrap_or_else(|| tr("agent_view.entry_block.untitled_conversation"));
             let match_result = if trimmed_query.is_empty() {
                 None
             } else {

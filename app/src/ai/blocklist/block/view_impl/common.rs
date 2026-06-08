@@ -129,6 +129,14 @@ pub const LOAD_OUTPUT_MESSAGE_FOR_WAITING_FOR_COMMAND_COMPLETION: &str =
 pub const LOAD_OUTPUT_MESSAGE_FOR_WEB_SEARCH: &str = "Searching the web...";
 pub const LOAD_OUTPUT_MESSAGE_FOR_FETCHING_REVIEW_COMMENTS: &str = "Fetching PR comments...";
 
+pub fn waiting_for_user_input_message() -> String {
+    WAITING_FOR_USER_INPUT_MESSAGE.to_string()
+}
+
+pub fn load_output_message() -> String {
+    LOAD_OUTPUT_MESSAGE.to_string()
+}
+
 #[cfg(feature = "local_fs")]
 pub(crate) type ResolvedBlocklistImageSources = HashMap<String, Option<AssetSource>>;
 
@@ -785,12 +793,14 @@ fn render_hide_responses_button(
 }
 
 pub fn render_switch_control_to_user_button(
-    text: &'static str,
-    tooltip: &'static str,
+    text: impl Into<String>,
+    tooltip: impl Into<String>,
     props: ButtonProps,
     appearance: &Appearance,
 ) -> Box<dyn Element> {
     let theme = appearance.theme();
+    let text = text.into();
+    let tooltip = tooltip.into();
     let text = Container::new(
         Text::new(
             text,
@@ -807,7 +817,7 @@ pub fn render_switch_control_to_user_button(
         appearance,
         text,
         props.keystroke,
-        tooltip.to_string(),
+        tooltip,
         props.is_active,
         false,
         |ctx| {

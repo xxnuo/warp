@@ -6,6 +6,7 @@ use settings::Setting;
 use warp_core::send_telemetry_from_ctx;
 use warp_core::ui::color::blend::Blend;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     ChildAnchor, ChildView, ConstrainedBox, OffsetPositioning, ParentAnchor, ParentElement,
     ParentOffsetBounds, Stack,
@@ -168,7 +169,7 @@ impl GenericMenuItem for NewEnvironmentMenuItem {
     }
 
     fn name(&self) -> String {
-        "New environment".to_string()
+        tr("agent_input_footer.environment.new_environment")
     }
 
     fn icon(&self, _app: &AppContext) -> Option<Icon> {
@@ -205,7 +206,7 @@ impl EnvironmentSelector {
         let button = ctx.add_typed_action_view(|_ctx| {
             ActionButton::new("", AgentInputButtonTheme)
                 .with_icon(Icon::Globe4)
-                .with_tooltip("Choose an environment")
+                .with_tooltip(tr("agent_input_footer.environment.choose_environment"))
                 .with_size(ButtonSize::AgentInputButton)
                 .with_disabled_theme(DisabledTheme)
                 .on_click(|ctx| {
@@ -430,9 +431,9 @@ impl EnvironmentSelector {
         let label = if let Some(id) = self.target.selected_environment_id(ctx) {
             CloudAmbientAgentEnvironment::get_by_id(&id, ctx)
                 .map(|env| env.model().string_model.display_name())
-                .unwrap_or_else(|| "New environment".to_string())
+                .unwrap_or_else(|| tr("agent_input_footer.environment.new_environment"))
         } else {
-            "New environment".to_string()
+            tr("agent_input_footer.environment.new_environment")
         };
 
         let is_configuring = self.is_configuring(ctx);
@@ -441,9 +442,9 @@ impl EnvironmentSelector {
             button.set_label(label, ctx);
             button.set_tooltip(
                 if is_configuring {
-                    Some("Choose an environment")
+                    Some(tr("agent_input_footer.environment.choose_environment"))
                 } else {
-                    Some("Agent environment")
+                    Some(tr("agent_input_footer.environment.agent_environment"))
                 },
                 ctx,
             );

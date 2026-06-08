@@ -1,4 +1,5 @@
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{Container, CrossAxisAlignment, Element, Flex, ParentElement, Text};
 use warpui::{AppContext, Entity, SingletonEntity, TypedActionView, View, ViewContext};
 
@@ -40,9 +41,9 @@ impl WebSearchView {
         let loading_icon = yellow_running_icon(appearance);
 
         let text = if let Some(q) = query {
-            format!("Searching the web for \"{q}\"")
+            tr_with("ai_block.searching_web_for", &[("query", q)])
         } else {
-            "Searching the web".to_string()
+            tr("ai_block.loading.searching_web")
         };
 
         super::search_results_common::render_loading_header(text, loading_icon, app)
@@ -55,9 +56,9 @@ impl WebSearchView {
         app: &AppContext,
     ) -> Box<dyn Element> {
         let title_text = if query.is_empty() {
-            "Searched the web".to_string()
+            tr("ai_block.searched_web")
         } else {
-            format!("Searched the web for \"{query}\"")
+            tr_with("ai_block.searched_web_for", &[("query", query)])
         };
 
         let body = if self.collapsible.is_expanded {
@@ -69,7 +70,7 @@ impl WebSearchView {
         render_collapsible_search_results(
             title_text,
             pages.len(),
-            "URLs",
+            &tr("ai_block.search_results.urls_label"),
             &self.collapsible,
             body,
             |ctx| {
@@ -108,7 +109,7 @@ impl WebSearchView {
 
         if pages.is_empty() {
             let no_results = Text::new_inline(
-                "No URLs found".to_string(),
+                tr("ai_block.web_search.no_urls_found"),
                 appearance.ui_font_family(),
                 appearance.monospace_font_size(),
             )

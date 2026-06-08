@@ -1,9 +1,8 @@
 //! This module contains common utilities for rendering Blocklist AI UI.
-use std::sync::LazyLock;
-
 use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     ChildAnchor, ConstrainedBox, Container, CrossAxisAlignment, Flex, Hoverable, MainAxisAlignment,
     MainAxisSize, MouseStateHandle, OffsetPositioning, ParentAnchor, ParentElement,
@@ -21,13 +20,13 @@ use crate::ui_components::icons::Icon;
 const PROVIDER_BUTTON_ICON_SIZE: f32 = 14.;
 const PROVIDER_BUTTON_ICON_TEXT_GAP: f32 = 8.;
 
-/// Text to use as a label throughout the app for user interactions that will attach selected
-/// block(s) or text selections to a new AI query.
-pub static ATTACH_AS_AGENT_MODE_CONTEXT_TEXT: LazyLock<&'static str> =
-    LazyLock::new(|| "Attach as agent context");
+pub fn attach_as_agent_mode_context_text() -> String {
+    tr("ai_block.attach_as_agent_context")
+}
 
-/// Label we use for the the command palette action to create a new local Oz agent pane.
-pub static NEW_AGENT_PANE_LABEL: LazyLock<&'static str> = LazyLock::new(|| "New Agent Pane");
+pub fn new_agent_pane_label() -> String {
+    tr("ai_block.new_agent_pane")
+}
 
 /// Claude/Anthropic brand color (official brand orange #D97757).
 /// Reference: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md
@@ -78,7 +77,7 @@ pub fn render_ai_follow_up_icon(
             let tooltip_background = appearance.theme().tooltip_background();
             let tool_tip = appearance
                 .ui_builder()
-                .tool_tip("Follow up with existing conversation".to_owned())
+                .tool_tip(tr("ai_block.follow_up_existing_conversation"))
                 .with_style(UiComponentStyles {
                     font_size: Some(12.),
                     background: Some(warpui::elements::Fill::Solid(tooltip_background)),
@@ -147,18 +146,20 @@ pub fn format_credits(credits: f32) -> String {
     if credits.fract() < 0.1 {
         let whole = credits.trunc() as i32;
         if whole == 1 {
-            format!("{whole} credit")
+            tr("ai_block.credits.one")
         } else {
-            format!("{whole} credits")
+            let count = whole.to_string();
+            tr_with("ai_block.credits.many", &[("count", &count)])
         }
     } else {
-        format!("{credits:.1} credits")
+        let count = format!("{credits:.1}");
+        tr_with("ai_block.credits.many", &[("count", &count)])
     }
 }
 
 /// Renders a secondary button with an MCP/skill provider icon and a text label.
 pub(crate) fn render_provider_icon_button<F>(
-    button_label: &str,
+    button_label: impl Into<String>,
     button_handle: MouseStateHandle,
     appearance: &Appearance,
     icon: Icon,
@@ -170,6 +171,7 @@ where
 {
     let theme = appearance.theme();
     let font_color = theme.foreground().into_solid();
+    let button_label = button_label.into();
     let mut label_children = vec![ConstrainedBox::new(icon.to_warpui_icon(color).finish())
         .with_width(PROVIDER_BUTTON_ICON_SIZE)
         .with_height(PROVIDER_BUTTON_ICON_SIZE)
@@ -177,7 +179,7 @@ where
     label_children.push(
         Container::new(
             Span::new(
-                button_label.to_string(),
+                button_label,
                 UiComponentStyles {
                     font_family_id: Some(appearance.ui_font_family()),
                     font_size: Some(appearance.ui_font_size()),

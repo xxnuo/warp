@@ -6,6 +6,7 @@ pub use model::*;
 use pathfinder_color::ColorU;
 use warp_core::features::FeatureFlag;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, Container, CrossAxisAlignment, Expanded, Flex, ParentElement, Text,
 };
@@ -122,7 +123,7 @@ pub fn render_agent_shortcuts_view(
                     key: "!".to_owned(),
                     ..Default::default()
                 },
-                text: "input shell command".into(),
+                text: tr("agent_view.shortcuts.input_shell_command").into(),
                 ..Default::default()
             },
             app,
@@ -135,7 +136,7 @@ pub fn render_agent_shortcuts_view(
                 key: "/".to_owned(),
                 ..Default::default()
             },
-            text: "for slash commands".into(),
+            text: tr("agent_view.shortcuts.for_slash_commands").into(),
             ..Default::default()
         },
         app,
@@ -147,7 +148,7 @@ pub fn render_agent_shortcuts_view(
                 key: "@".to_owned(),
                 ..Default::default()
             },
-            text: "for file paths and attaching other context".into(),
+            text: tr("agent_view.shortcuts.for_file_paths_context").into(),
             ..Default::default()
         },
         app,
@@ -160,7 +161,7 @@ pub fn render_agent_shortcuts_view(
             shortcuts.push(render_shortcut(
                 ShortcutProps {
                     keystroke,
-                    text: "open code review".into(),
+                    text: tr("agent_view.shortcuts.open_code_review").into(),
                     ..Default::default()
                 },
                 app,
@@ -175,7 +176,7 @@ pub fn render_agent_shortcuts_view(
             shortcuts.push(render_shortcut(
                 ShortcutProps {
                     keystroke,
-                    text: "toggle conversation list".into(),
+                    text: tr("agent_view.shortcuts.toggle_conversation_list").into(),
                     ..Default::default()
                 },
                 app,
@@ -186,7 +187,7 @@ pub fn render_agent_shortcuts_view(
     shortcuts.push(render_shortcut(
         ShortcutProps {
             keystroke: Keystroke::parse(cmd_or_ctrl_shift("y")).expect("is valid keystroke"),
-            text: "search and continue conversations".into(),
+            text: tr("agent_view.shortcuts.search_continue_conversations").into(),
             ..Default::default()
         },
         app,
@@ -202,7 +203,7 @@ pub fn render_agent_shortcuts_view(
     shortcuts.push(render_shortcut(
         ShortcutProps {
             keystroke: new_conversation_keystroke.clone(),
-            text: "start a new conversation".into(),
+            text: tr("agent_view.shortcuts.start_new_conversation").into(),
             ..Default::default()
         },
         app,
@@ -215,7 +216,7 @@ pub fn render_agent_shortcuts_view(
             shortcuts.push(render_shortcut(
                 ShortcutProps {
                     keystroke,
-                    text: "toggle auto-accept".into(),
+                    text: tr("agent_view.shortcuts.toggle_auto_accept").into(),
                     ..Default::default()
                 },
                 app,
@@ -230,7 +231,7 @@ pub fn render_agent_shortcuts_view(
                 ctrl: true,
                 ..Default::default()
             },
-            text: "pause agent".into(),
+            text: tr("agent_view.shortcuts.pause_agent").into(),
             ..Default::default()
         },
         app,
@@ -242,7 +243,7 @@ pub fn render_agent_shortcuts_view(
                 key: "escape".to_owned(),
                 ..Default::default()
             },
-            text: "go back to terminal".into(),
+            text: tr("agent_view.shortcuts.go_back_to_terminal").into(),
             ..Default::default()
         },
         app,

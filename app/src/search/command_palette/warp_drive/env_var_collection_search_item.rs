@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use ordered_float::OrderedFloat;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{Container, Flex, Highlight, ParentElement, Text};
 use warpui::fonts::{Properties, Weight};
 use warpui::{AppContext, Element, SingletonEntity};
@@ -63,7 +64,7 @@ impl SearchItem for EnvVarCollectionSearchItem {
                 .string_model
                 .title
                 .clone()
-                .unwrap_or("Untitled".to_owned())
+                .unwrap_or_else(|| tr("common.untitled"))
                 .to_owned(),
             appearance.ui_font_family(),
             appearance.monospace_font_size(),
@@ -163,14 +164,16 @@ impl SearchItem for EnvVarCollectionSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!(
-            "Environment Variables: {}",
-            self.cloud_env_var_collection
-                .model()
-                .string_model
-                .title
-                .clone()
-                .unwrap_or("Untitled".to_owned())
+        let title = self
+            .cloud_env_var_collection
+            .model()
+            .string_model
+            .title
+            .clone()
+            .unwrap_or_else(|| tr("common.untitled"));
+        tr_with(
+            "command_palette.warp_drive.a11y.environment_variables",
+            &[("title", &title)],
         )
     }
 }

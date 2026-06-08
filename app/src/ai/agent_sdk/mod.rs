@@ -33,6 +33,7 @@ use warp_cli::task::{MessageCommand, TaskCommand};
 use warp_cli::{CliCommand, GlobalOptions, OZ_HARNESS_ENV};
 use warp_core::features::FeatureFlag;
 use warp_graphql::object_permissions::OwnerType;
+use warp_i18n::{tr, tr_with};
 use warp_isolation_platform::IsolationPlatformError;
 #[cfg(not(target_family = "wasm"))]
 use warp_logging::log_file_path;
@@ -1527,7 +1528,11 @@ fn launch_command(
     let auth_state = AuthStateProvider::handle(ctx).as_ref(ctx).get();
     if !auth_state.is_logged_in() {
         return Err(anyhow::anyhow!(
-            "You are not logged in - please log in with `{cli_name} login` to continue."
+            "{}",
+            tr_with(
+                "ai.agent_sdk.auth.not_logged_in",
+                &[("cli_name", &cli_name)]
+            )
         ));
     }
 
@@ -1549,15 +1554,27 @@ fn launch_command(
                 dispatched = true;
                 let auth_state = AuthStateProvider::handle(ctx).as_ref(ctx).get();
                 let message = if auth_state.is_api_key_authenticated() {
-                    "Your API key is invalid. Please provide a valid key via '--api-key' or the WARP_API_KEY environment variable.".to_string()
+                    tr("ai.agent_sdk.auth.invalid_api_key")
                 } else {
-                    format!("Your credentials are invalid. Please log in again with `{cli_name} login`.")
+                    tr_with(
+                        "ai.agent_sdk.auth.invalid_credentials",
+                        &[("cli_name", &cli_name)],
+                    )
                 };
                 report_fatal_error(anyhow::anyhow!(message), ctx);
             }
             AuthManagerEvent::AuthFailed(err) => {
                 dispatched = true;
-                report_fatal_error(anyhow::anyhow!("Authentication failed: {err:#}"), ctx);
+                report_fatal_error(
+                    anyhow::anyhow!(
+                        "{}",
+                        tr_with(
+                            "ai.agent_sdk.admin.authentication_failed_with_error",
+                            &[("error", &format!("{err:#}"))]
+                        )
+                    ),
+                    ctx,
+                );
             }
             _ => {}
         }

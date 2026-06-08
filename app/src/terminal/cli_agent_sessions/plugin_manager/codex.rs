@@ -178,12 +178,12 @@ impl CliAgentPluginManager for CodexPluginManager {
         Ok(())
     }
 
-    fn install_success_message(&self) -> &'static str {
-        "Warp plugin installed. Please restart Codex to activate."
+    fn install_success_message(&self) -> String {
+        "Warp plugin installed. Please restart Codex to activate.".to_string()
     }
 
-    fn update_success_message(&self) -> &'static str {
-        "Warp plugin updated. Please restart Codex to activate."
+    fn update_success_message(&self) -> String {
+        "Warp plugin updated. Please restart Codex to activate.".to_string()
     }
 
     fn install_instructions(&self) -> &'static PluginInstructions {

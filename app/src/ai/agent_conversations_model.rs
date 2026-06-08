@@ -20,6 +20,7 @@ use warp_core::features::FeatureFlag;
 use warp_core::report_error;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::WarpTheme;
+use warp_i18n::tr;
 use warpui::color::ColorU;
 use warpui::r#async::Timer;
 use warpui::windowing::{StateEvent, WindowManager};
@@ -389,7 +390,7 @@ impl AgentRunDisplayStatus {
                     .status_message
                     .as_ref()
                     .map(|m| m.message.clone())
-                    .unwrap_or_else(|| "Task blocked".to_string()),
+                    .unwrap_or_else(|| tr("ai.agent_conversations.task_blocked")),
             },
             AmbientAgentTaskState::Cancelled => Self::TaskCancelled,
             AmbientAgentTaskState::Unknown => Self::TaskUnknown,
@@ -492,24 +493,28 @@ impl AgentRunDisplayStatus {
 impl std::fmt::Display for AgentRunDisplayStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AgentRunDisplayStatus::TaskQueued => write!(f, "Queued"),
-            AgentRunDisplayStatus::TaskPending => write!(f, "Pending"),
-            AgentRunDisplayStatus::TaskClaimed => write!(f, "Claimed"),
+            AgentRunDisplayStatus::TaskQueued => write!(f, "{}", tr("agent_status.queued")),
+            AgentRunDisplayStatus::TaskPending => write!(f, "{}", tr("agent_status.pending")),
+            AgentRunDisplayStatus::TaskClaimed => write!(f, "{}", tr("agent_status.claimed")),
             AgentRunDisplayStatus::TaskInProgress
-            | AgentRunDisplayStatus::ConversationInProgress => write!(f, "In progress"),
-            AgentRunDisplayStatus::TaskSucceeded | AgentRunDisplayStatus::ConversationSucceeded => {
-                write!(f, "Done")
+            | AgentRunDisplayStatus::ConversationInProgress => {
+                write!(f, "{}", tr("agent_status.in_progress"))
             }
-            AgentRunDisplayStatus::TaskFailed => write!(f, "Failed"),
+            AgentRunDisplayStatus::TaskSucceeded | AgentRunDisplayStatus::ConversationSucceeded => {
+                write!(f, "{}", tr("agent_status.done"))
+            }
+            AgentRunDisplayStatus::TaskFailed => write!(f, "{}", tr("agent_status.failed")),
             AgentRunDisplayStatus::TaskError | AgentRunDisplayStatus::ConversationError => {
-                write!(f, "Error")
+                write!(f, "{}", tr("agent_status.error"))
             }
             AgentRunDisplayStatus::TaskBlocked { .. }
-            | AgentRunDisplayStatus::ConversationBlocked { .. } => write!(f, "Blocked"),
-            AgentRunDisplayStatus::TaskCancelled | AgentRunDisplayStatus::ConversationCancelled => {
-                write!(f, "Cancelled")
+            | AgentRunDisplayStatus::ConversationBlocked { .. } => {
+                write!(f, "{}", tr("agent_status.blocked"))
             }
-            AgentRunDisplayStatus::TaskUnknown => write!(f, "Failed"),
+            AgentRunDisplayStatus::TaskCancelled | AgentRunDisplayStatus::ConversationCancelled => {
+                write!(f, "{}", tr("agent_status.cancelled"))
+            }
+            AgentRunDisplayStatus::TaskUnknown => write!(f, "{}", tr("agent_status.failed")),
         }
     }
 }

@@ -5,6 +5,7 @@ use std::{fs, io};
 
 use async_trait::async_trait;
 use serde_json::Value;
+use warp_i18n::tr;
 
 use super::{
     compare_versions, run_cli_command_logged, CliAgentPluginManager, PluginInstallError,
@@ -98,19 +99,19 @@ impl CliAgentPluginManager for GeminiPluginManager {
         if still_outdated {
             log.push_str("Post-update version check: plugin is still outdated\n");
             return Err(PluginInstallError {
-                message: "Plugin update did not take effect".to_owned(),
+                message: tr("terminal.cli_agent.plugin.update_no_effect"),
                 log,
             });
         }
         Ok(())
     }
 
-    fn install_success_message(&self) -> &'static str {
-        "Warp plugin installed. Please restart Gemini CLI to activate."
+    fn install_success_message(&self) -> String {
+        tr("terminal.cli_agent.plugin.installed_restart_gemini")
     }
 
-    fn update_success_message(&self) -> &'static str {
-        "Warp plugin updated. Please restart Gemini CLI to activate."
+    fn update_success_message(&self) -> String {
+        tr("terminal.cli_agent.plugin.updated_restart_gemini")
     }
 
     fn install_instructions(&self) -> &'static PluginInstructions {
@@ -123,28 +124,28 @@ impl CliAgentPluginManager for GeminiPluginManager {
 }
 
 static INSTALL_INSTRUCTIONS: LazyLock<PluginInstructions> = LazyLock::new(|| PluginInstructions {
-    title: "Install Warp Plugin for Gemini CLI",
-    subtitle: "Run the following command, then restart Gemini CLI.",
+    title: "terminal.cli_agent.plugin.gemini.install.title",
+    subtitle: "terminal.cli_agent.plugin.gemini.install.subtitle",
     steps: &[PluginInstructionStep {
-        description: "Install the Warp extension",
+        description: "terminal.cli_agent.plugin.gemini.install.step.install_extension",
         command:
             "gemini extensions install https://github.com/warpdotdev/gemini-cli-warp --consent",
         executable: true,
         link: None,
     }],
-    post_install_notes: &["Restart Gemini CLI to activate the plugin."],
+    post_install_notes: &["terminal.cli_agent.plugin.gemini.install.note.restart"],
 });
 
 static UPDATE_INSTRUCTIONS: LazyLock<PluginInstructions> = LazyLock::new(|| PluginInstructions {
-    title: "Update Warp Plugin for Gemini CLI",
-    subtitle: "Run the following command, then restart Gemini CLI.",
+    title: "terminal.cli_agent.plugin.gemini.update.title",
+    subtitle: "terminal.cli_agent.plugin.gemini.update.subtitle",
     steps: &[PluginInstructionStep {
-        description: "Update the Warp extension",
+        description: "terminal.cli_agent.plugin.gemini.update.step.update_extension",
         command: "gemini extensions update gemini-warp",
         executable: true,
         link: None,
     }],
-    post_install_notes: &["Restart Gemini CLI to activate the update."],
+    post_install_notes: &["terminal.cli_agent.plugin.gemini.update.note.restart"],
 });
 
 fn check_installed(extensions_dir: &Path) -> bool {

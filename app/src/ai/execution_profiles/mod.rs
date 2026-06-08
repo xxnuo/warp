@@ -5,6 +5,7 @@ pub use cloud_object_models::{
 };
 use markdown_parser::{FormattedTextFragment, FormattedTextInline};
 use warp_core::features::FeatureFlag;
+use warp_i18n::tr;
 use warpui::{AppContext, SingletonEntity};
 
 use super::llms::{LLMContextWindow, LLMInfo, LLMPreferences, LLMProvider};
@@ -22,10 +23,8 @@ pub(crate) const LONG_CONTEXT_PRICING_WARNING_URL: &str =
     "https://developers.openai.com/api/docs/pricing";
 pub(crate) fn long_context_pricing_warning_title() -> FormattedTextInline {
     vec![
-        FormattedTextFragment::plain_text(
-            "OpenAI automatically applies long-context pricing when context exceeds 272,000 tokens. ",
-        ),
-        FormattedTextFragment::hyperlink("Learn more", LONG_CONTEXT_PRICING_WARNING_URL),
+        FormattedTextFragment::plain_text(tr("ai.execution_profiles.long_context_pricing")),
+        FormattedTextFragment::hyperlink(tr("common.learn_more"), LONG_CONTEXT_PRICING_WARNING_URL),
     ]
 }
 
@@ -222,7 +221,7 @@ impl StringModel for AIExecutionProfile {
         if self.is_default_profile {
             "Default".to_string()
         } else if self.name.trim().is_empty() {
-            "Untitled".to_string()
+            tr("common.untitled")
         } else {
             self.name.clone()
         }

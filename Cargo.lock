@@ -9184,6 +9184,7 @@ dependencies = [
  "ui_components",
  "uuid",
  "warp_core",
+ "warp_i18n",
  "warp_logging",
  "warpui",
  "warpui_core",
@@ -14016,6 +14017,7 @@ dependencies = [
  "rust-embed 8.7.2",
  "rustls",
  "warp_core",
+ "warp_i18n",
  "warpui",
  "warpui_core",
 ]
@@ -14778,6 +14780,7 @@ dependencies = [
  "warp_editor",
  "warp_files",
  "warp_graphql",
+ "warp_i18n",
  "warp_isolation_platform",
  "warp_js",
  "warp_logging",
@@ -15098,6 +15101,14 @@ dependencies = [
  "anyhow",
  "cynic",
  "cynic-codegen",
+]
+
+[[package]]
+name = "warp_i18n"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "sys-locale",
 ]
 
 [[package]]

@@ -8,6 +8,7 @@
 //! then a "Custom host…" entry.
 
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
     Expanded, Flex, Hoverable, MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement,
@@ -49,8 +50,6 @@ pub enum HostPickerEvent {
     Closed,
 }
 
-const CUSTOM_HOST_LABEL: &str = "Custom host…";
-const DEFAULT_BADGE: &str = "Default";
 const EDITOR_PLACEHOLDER: &str = "my-worker-host";
 
 // ── Internal action plumbing ────────────────────────────────────────
@@ -429,7 +428,7 @@ pub(crate) fn build_menu_items(
     if let Some(slug) = default_host {
         items.push(menu_item_for_known(
             slug,
-            Some(DEFAULT_BADGE),
+            Some(tr("ai_block.host_picker.default_badge")),
             InternalAction::SelectKnown(slug.to_string()),
         ));
         known_slugs.push(slug.to_string());
@@ -471,7 +470,7 @@ pub(crate) fn build_menu_items(
         }
     }
     items.push(MenuItem::Item(
-        MenuItemFields::new(CUSTOM_HOST_LABEL).with_on_select_action(
+        MenuItemFields::new(tr("ai_block.host_picker.custom_host")).with_on_select_action(
             DropdownAction::select_action_and_close(InternalAction::EnterCustomMode),
         ),
     ));
@@ -483,13 +482,13 @@ pub(crate) fn build_menu_items(
 /// badge when it matches the workspace default.
 pub(crate) fn menu_label_for(slug: &str, default_host: Option<&str>) -> String {
     if default_host == Some(slug) {
-        format_known_label(slug, Some(DEFAULT_BADGE))
+        format_known_label(slug, Some(tr("ai_block.host_picker.default_badge")))
     } else {
         format_known_label(slug, None)
     }
 }
 
-fn format_known_label(slug: &str, badge: Option<&str>) -> String {
+fn format_known_label(slug: &str, badge: Option<String>) -> String {
     match badge {
         Some(badge) => format!("{slug}  ({badge})"),
         None => slug.to_string(),
@@ -498,7 +497,7 @@ fn format_known_label(slug: &str, badge: Option<&str>) -> String {
 
 fn menu_item_for_known(
     slug: &str,
-    badge: Option<&str>,
+    badge: Option<String>,
     action: InternalAction,
 ) -> MenuItem<DropdownAction> {
     MenuItem::Item(

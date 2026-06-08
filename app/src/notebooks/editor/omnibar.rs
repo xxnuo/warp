@@ -10,6 +10,7 @@ use warp_editor::content::text::{
 };
 use warp_editor::model::RichTextEditorModel;
 use warp_editor::render::model::RenderState;
+use warp_i18n::{tr, tr_with};
 use warpui::accessibility::{AccessibilityContent, ActionAccessibilityContent, WarpA11yRole};
 use warpui::elements::{
     AnchorPair, Border, ConstrainedBox, Container, CornerRadius, DropShadow, Flex, MainAxisSize,
@@ -441,14 +442,20 @@ impl TypedActionView for Omnibar {
                 .style_toggle_a11y(BufferTextStyle::InlineCode),
             OmnibarAction::ConvertBlock(style) => {
                 ActionAccessibilityContent::Custom(AccessibilityContent::new_without_help(
-                    format!("Convert to {}", BlockType::from(style).label()),
+                    tr_with(
+                        "notebooks.editor.a11y.convert_to_block",
+                        &[("block", BlockType::from(style).label())],
+                    ),
                     WarpA11yRole::UserAction,
                 ))
             }
             OmnibarAction::OpenLinkEditor => ActionAccessibilityContent::from_debug(),
-            OmnibarAction::UnstyleLink => ActionAccessibilityContent::Custom(
-                AccessibilityContent::new_without_help("Remove link", WarpA11yRole::UserAction),
-            ),
+            OmnibarAction::UnstyleLink => {
+                ActionAccessibilityContent::Custom(AccessibilityContent::new_without_help(
+                    tr("notebooks.editor.a11y.remove_link"),
+                    WarpA11yRole::UserAction,
+                ))
+            }
         }
     }
 }

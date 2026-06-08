@@ -1,6 +1,7 @@
 use vec1::{vec1, Vec1};
 use warp_core::features::FeatureFlag;
 use warp_core::ui::builder::AnimatedButtonOptions;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ConstrainedBox, Container, CrossAxisAlignment, Element, Flex, Icon,
     MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement, SavePosition, Shrinkable,
@@ -43,11 +44,11 @@ pub enum ResourceCenterFooterItem {
 }
 
 impl ResourceCenterFooterItem {
-    pub fn ui_label(&self) -> &'static str {
+    pub fn ui_label(&self) -> String {
         match self {
-            ResourceCenterFooterItem::Docs => "Docs",
-            ResourceCenterFooterItem::Slack => "Slack",
-            ResourceCenterFooterItem::Feedback => "Feedback",
+            ResourceCenterFooterItem::Docs => tr("resource_center.footer.docs"),
+            ResourceCenterFooterItem::Slack => tr("resource_center.footer.slack"),
+            ResourceCenterFooterItem::Feedback => tr("resource_center.footer.feedback"),
         }
     }
 
@@ -327,12 +328,14 @@ impl ResourceCenterView {
         let current_page = self.page_views.get(self.current_view_index).map(|x| x.page);
 
         let header_text = match current_page {
-            Some(ResourceCenterPage::Keybindings) => "Keyboard Shortcuts".to_string(),
+            Some(ResourceCenterPage::Keybindings) => {
+                tr("resource_center.header.keyboard_shortcuts")
+            }
             _ => {
                 if FeatureFlag::AvatarInTabBar.is_enabled() {
                     String::new()
                 } else {
-                    "Warp Essentials".to_string()
+                    tr("resource_center.header.warp_essentials")
                 }
             }
         };
@@ -428,7 +431,7 @@ impl ResourceCenterView {
         let button = appearance
             .ui_builder()
             .button(ButtonVariant::Text, mouse_state)
-            .with_text_label(item.ui_label().to_string())
+            .with_text_label(item.ui_label())
             .with_style(
                 UiComponentStyles::default().set_padding(Coords::default().left(SCROLLBAR_OFFSET)),
             )

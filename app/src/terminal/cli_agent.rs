@@ -16,6 +16,7 @@ use warp_cli::agent::Harness;
 use warp_completer::parsers::simple::top_level_command;
 use warp_editor::content::buffer::Buffer;
 use warp_editor::content::markdown::MarkdownStyle;
+use warp_i18n::tr;
 use warp_util::path::EscapeChar;
 use warpui::{AppContext, SingletonEntity};
 
@@ -457,7 +458,7 @@ pub fn build_review_prompt(review: &AgentReviewCommentBatch) -> String {
                     path
                 }
             }
-            AttachedReviewCommentTarget::General => "General".to_string(),
+            AttachedReviewCommentTarget::General => tr("common.general"),
         };
         text.push_str(&format!("\n- {location}: {body}"));
     }

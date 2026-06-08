@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
+use warp_i18n::tr;
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, Highlight, Icon, ParentElement, Text,
 };
@@ -170,10 +171,10 @@ impl SearchItem for RuleSearchItem {
             if !name.is_empty() {
                 name.clone()
             } else {
-                "Rule".to_string()
+                tr("ai_context_menu.rules.rule")
             }
         } else {
-            "Rule".to_string()
+            tr("ai_context_menu.rules.rule")
         };
 
         // Create title element

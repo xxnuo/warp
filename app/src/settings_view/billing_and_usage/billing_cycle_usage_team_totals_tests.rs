@@ -35,8 +35,8 @@ fn entries_two_per_source() -> Vec<BillingCycleUsageEntry> {
     ]
 }
 
-fn titles(summaries: &[TeamTotalCardSummary]) -> Vec<&'static str> {
-    summaries.iter().map(|s| s.title).collect()
+fn titles(summaries: &[TeamTotalCardSummary]) -> Vec<String> {
+    summaries.iter().map(|s| s.title.clone()).collect()
 }
 
 #[test]

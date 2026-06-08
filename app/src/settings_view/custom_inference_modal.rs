@@ -3,6 +3,7 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use ::ai::api_keys::CustomEndpoint;
 use url::Url;
 use warp_editor::editor::NavigationKey;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Empty,
     Expanded, Flex, MainAxisSize, MouseStateHandle, ParentElement, Radius, Text,
@@ -109,7 +110,10 @@ impl CustomEndpointModal {
                 ..Default::default()
             };
             let mut editor = EditorView::single_line(options, ctx);
-            editor.set_placeholder_text("e.g., Zach's external models", ctx);
+            editor.set_placeholder_text(
+                &tr("settings.custom_inference.endpoint_name_placeholder"),
+                ctx,
+            );
             if let Some(ep) = endpoint {
                 editor.set_buffer_text(&ep.name, ctx);
             }
@@ -129,7 +133,10 @@ impl CustomEndpointModal {
                 ..Default::default()
             };
             let mut editor = EditorView::single_line(options, ctx);
-            editor.set_placeholder_text("Please include 'https://'", ctx);
+            editor.set_placeholder_text(
+                &tr("settings.custom_inference.endpoint_url_placeholder"),
+                ctx,
+            );
             if let Some(ep) = endpoint {
                 editor.set_buffer_text(&ep.url, ctx);
             }
@@ -150,7 +157,7 @@ impl CustomEndpointModal {
                 ..Default::default()
             };
             let mut editor = EditorView::single_line(options, ctx);
-            editor.set_placeholder_text("e.g., sk-...", ctx);
+            editor.set_placeholder_text(&tr("settings.custom_inference.api_key_placeholder"), ctx);
             if let Some(ep) = endpoint {
                 editor.set_buffer_text(&ep.api_key, ctx);
             }
@@ -204,7 +211,7 @@ impl CustomEndpointModal {
             });
         }
         let remove_endpoint_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Remove", DangerSecondaryTheme)
+            ActionButton::new(tr("tab_configs.remove"), DangerSecondaryTheme)
                 .with_icon(Icon::Trash)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(CustomEndpointModalAction::RemoveEndpoint);
@@ -246,7 +253,8 @@ impl CustomEndpointModal {
                 ..Default::default()
             };
             let mut editor = EditorView::single_line(options, ctx);
-            editor.set_placeholder_text("e.g., GLM-5-FP8", ctx);
+            editor
+                .set_placeholder_text(&tr("settings.custom_inference.model_name_placeholder"), ctx);
             if let Some(n) = name {
                 editor.set_buffer_text(n, ctx);
             }
@@ -266,7 +274,10 @@ impl CustomEndpointModal {
                 ..Default::default()
             };
             let mut editor = EditorView::single_line(options, ctx);
-            editor.set_placeholder_text("e.g., GLM-5", ctx);
+            editor.set_placeholder_text(
+                &tr("settings.custom_inference.model_alias_placeholder"),
+                ctx,
+            );
             if let Some(a) = alias {
                 editor.set_buffer_text(a, ctx);
             }
@@ -625,7 +636,7 @@ impl View for CustomEndpointModal {
 
         let label_font_family = appearance.ui_font_family();
         let label_text_color = theme.active_ui_text_color().into();
-        let label = move |text: &'static str| {
+        let label = move |text: String| {
             Text::new(text, label_font_family, LABEL_FONT_SIZE)
                 .with_color(label_text_color)
                 .finish()
@@ -647,7 +658,7 @@ impl View for CustomEndpointModal {
         column.add_child(
             Container::new(
                 Text::new(
-                    "Provide your endpoint details below. You can add as many models from the endpoint as you'd like and can also provide aliases for the model picker in your input.",
+                    tr("settings.custom_inference.description"),
                     appearance.ui_font_family(),
                     LABEL_FONT_SIZE,
                 )
@@ -661,7 +672,7 @@ impl View for CustomEndpointModal {
 
         // Endpoint name
         column.add_child(
-            Container::new(label("Endpoint name"))
+            Container::new(label(tr("settings.custom_inference.endpoint_name")))
                 .with_margin_bottom(4.)
                 .finish(),
         );
@@ -680,7 +691,7 @@ impl View for CustomEndpointModal {
 
         // Endpoint URL
         column.add_child(
-            Container::new(label("Endpoint URL"))
+            Container::new(label(tr("settings.custom_inference.endpoint_url")))
                 .with_margin_bottom(4.)
                 .finish(),
         );
@@ -706,7 +717,7 @@ impl View for CustomEndpointModal {
 
         // API key
         column.add_child(
-            Container::new(label("API key"))
+            Container::new(label(tr("settings.custom_inference.api_key")))
                 .with_margin_bottom(4.)
                 .finish(),
         );
@@ -730,12 +741,12 @@ impl View for CustomEndpointModal {
             .with_cross_axis_alignment(CrossAxisAlignment::Center)
             .with_spacing(MODEL_ROW_SPACING)
             .with_child(
-                ConstrainedBox::new(label("Model name"))
+                ConstrainedBox::new(label(tr("settings.custom_inference.model_name")))
                     .with_width(MODEL_INPUT_WIDTH)
                     .finish(),
             )
             .with_child(
-                ConstrainedBox::new(label("Model alias (optional)"))
+                ConstrainedBox::new(label(tr("settings.custom_inference.model_alias_optional")))
                     .with_width(MODEL_INPUT_WIDTH)
                     .finish(),
             );
@@ -814,7 +825,7 @@ impl View for CustomEndpointModal {
                         ButtonVariant::Secondary,
                         self.add_model_button_mouse_state.clone(),
                     )
-                    .with_text_label("+ Add model".to_string())
+                    .with_text_label(tr("settings.custom_inference.add_model"))
                     .with_style(UiComponentStyles {
                         font_size: Some(14.),
                         padding: Some(Coords::uniform(6.).left(8.).right(8.)),
@@ -849,7 +860,7 @@ impl View for CustomEndpointModal {
                     ButtonVariant::Secondary,
                     self.cancel_button_mouse_state.clone(),
                 )
-                .with_text_label("Cancel".to_string())
+                .with_text_label(tr("common.cancel"))
                 .with_style(button_style)
                 .build()
                 .on_click(move |ctx, _, _| {
@@ -862,9 +873,9 @@ impl View for CustomEndpointModal {
             .ui_builder()
             .button(ButtonVariant::Accent, self.save_button_mouse_state.clone())
             .with_text_label(if is_editing {
-                "Save".to_string()
+                tr("common.save")
             } else {
-                "Add endpoint".to_string()
+                tr("settings.custom_inference.add_endpoint")
             })
             .with_style(button_style);
         if !is_valid {

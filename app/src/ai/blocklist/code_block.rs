@@ -2,6 +2,7 @@ use std::iter;
 use std::path::Path;
 
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Empty,
     Expanded, Flex, HighlightedRange, MainAxisAlignment, MainAxisSize, MouseStateHandle,
@@ -62,7 +63,7 @@ fn render_file_icon(path: &Path, appearance: &Appearance, app: &AppContext) -> B
 fn render_button<F>(
     appearance: &Appearance,
     icon: Icon,
-    tooltip_text: &str,
+    tooltip_text: impl Into<String>,
     mouse_handle: MouseStateHandle,
     formatted_text: String,
     on_click: F,
@@ -72,7 +73,7 @@ where
     F: FnMut(String, &mut EventContext) + 'static,
 {
     let ui_builder = appearance.ui_builder().clone();
-    let tooltip_text = tooltip_text.to_owned();
+    let tooltip_text = tooltip_text.into();
     let mut on_click = on_click;
     let button_element = if let Some(color) = color {
         icon_button_with_color(appearance, icon, false, mouse_handle, color)
@@ -217,7 +218,7 @@ fn render_linked_code_block_internal(
             let insert_button = render_button(
                 appearance,
                 Icon::AtSign,
-                "Add as Context",
+                tr("ai_block.code_block.add_as_context"),
                 mouse_handles.insert_button,
                 insert_text,
                 on_insert,
@@ -236,7 +237,7 @@ fn render_linked_code_block_internal(
             let copy_button = render_button(
                 appearance,
                 Icon::Copy,
-                "Copy",
+                tr("common.copy"),
                 mouse_handles.copy_button,
                 code_clone.clone(),
                 on_copy,
@@ -255,7 +256,7 @@ fn render_linked_code_block_internal(
             let open_button = render_button(
                 appearance,
                 Icon::LinkExternal,
-                "Open in Warp",
+                tr("ai_block.code_block.open_in_warp"),
                 mouse_handles.open_button,
                 code_clone.clone(),
                 on_open,
@@ -324,7 +325,7 @@ fn render_plain_code_block_internal(
             let copy_button = render_button(
                 appearance,
                 Icon::Copy,
-                "Copy",
+                tr("common.copy"),
                 mouse_handles.copy_button,
                 code_clone.clone(),
                 on_copy,
@@ -339,7 +340,7 @@ fn render_plain_code_block_internal(
             let insert_button = render_button(
                 appearance,
                 Icon::TerminalInput,
-                "Run in terminal",
+                tr("ai_block.code_block.run_in_terminal"),
                 mouse_handles.insert_button,
                 code_clone.clone(),
                 on_execute,

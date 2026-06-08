@@ -1,5 +1,6 @@
 use enum_iterator::{all, Sequence};
 use itertools::{Either, Itertools};
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ClippedScrollStateHandle, ClippedScrollable, ConstrainedBox, Container,
     CornerRadius, CrossAxisAlignment, Element, Fill, Flex, MainAxisSize, MouseStateHandle,
@@ -29,7 +30,6 @@ use crate::editor::{
     TextOptions,
 };
 use crate::search_bar::SearchBar;
-use crate::settings_view;
 use crate::settings_view::keybindings::{KeybindingChangedEvent, KeybindingChangedNotifier};
 use crate::util::bindings::{filter_bindings_including_keystroke, CommandBinding};
 use crate::workspace::tab_settings::TabSettings;
@@ -90,7 +90,7 @@ impl KeybindingsView {
 
         search_editor.update(ctx, |editor, ctx| {
             editor.clear_buffer_and_reset_undo_stack(ctx);
-            editor.set_placeholder_text(settings_view::keybindings::SEARCH_PLACEHOLDER, ctx);
+            editor.set_placeholder_text(&tr("settings.keybindings.search_placeholder"), ctx);
         });
 
         let search_bar = {
@@ -346,7 +346,11 @@ impl KeybindingsView {
                         .build()
                         .finish(),
                 )
-                .with_child(self.render_text("To toggle this panel".into(), None, appearance))
+                .with_child(self.render_text(
+                    tr("resource_center.keybindings.toggle_panel"),
+                    None,
+                    appearance,
+                ))
                 .with_cross_axis_alignment(CrossAxisAlignment::Center)
                 .finish();
 
@@ -361,7 +365,7 @@ impl KeybindingsView {
             appearance
                 .ui_builder()
                 .link(
-                    "here.".into(),
+                    tr("resource_center.keybindings.here"),
                     None,
                     Some(Box::new(|ctx| {
                         ctx.dispatch_typed_action(WorkspaceAction::ConfigureKeybindingSettings {
@@ -384,7 +388,7 @@ impl KeybindingsView {
         Container::new(
             column
                 .with_child(self.render_text(
-                    "Go to settings > keyboard shortcuts to configure custom keybindings".into(),
+                    tr("resource_center.keybindings.configure_custom"),
                     None,
                     appearance,
                 ))
@@ -412,15 +416,19 @@ impl KeybindingsView {
             Flex::column().with_cross_axis_alignment(CrossAxisAlignment::Stretch);
 
         let title = match section {
-            KeybindingSection::Essentials => "Essentials",
-            KeybindingSection::Blocks => "Blocks",
-            KeybindingSection::InputEditor => "Input Editor",
-            KeybindingSection::Terminal => "Terminal",
-            KeybindingSection::Fundamentals => "Fundamentals",
+            KeybindingSection::Essentials => tr("resource_center.keybindings.section.essentials"),
+            KeybindingSection::Blocks => tr("resource_center.keybindings.section.blocks"),
+            KeybindingSection::InputEditor => {
+                tr("resource_center.keybindings.section.input_editor")
+            }
+            KeybindingSection::Terminal => tr("resource_center.keybindings.section.terminal"),
+            KeybindingSection::Fundamentals => {
+                tr("resource_center.keybindings.section.fundamentals")
+            }
         };
 
         let mut section_header = self.render_text(
-            title.into(),
+            title,
             Some(UiComponentStyles {
                 font_color: Some(appearance.theme().active_ui_text_color().into()),
                 font_size: Some(SECTION_HEADER_FONT_SIZE),

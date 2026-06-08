@@ -228,6 +228,19 @@ trait NewSessionSearcher {
     /// matches should have this value as a ceiling.
     fn compute_max_match(&self, query_str: &str) -> Option<f64>;
 }
+
+fn matched_indices_for_description(
+    option: &NewSessionOption,
+    matched_indices: Vec<usize>,
+) -> Vec<usize> {
+    let description_len = option.description().chars().count();
+    if matched_indices.iter().all(|index| *index < description_len) {
+        matched_indices
+    } else {
+        Vec::new()
+    }
+}
+
 #[derive(Default)]
 struct FuzzyNewSessionSearcher {
     shell_id_to_options: HashMap<NewSessionOptionId, Arc<NewSessionOption>>,
@@ -247,20 +260,25 @@ impl NewSessionSearcher for FuzzyNewSessionSearcher {
                 // both the search term and the description to ensure that we are matching the two
                 // with the same casing.
                 match_indices_case_insensitive(
-                    new_session_option.description().to_lowercase().as_str(),
+                    new_session_option.search_text().to_lowercase().as_str(),
                     search_term.to_lowercase().as_str(),
                 )
                 .map(|result| {
+                    let matched_indices =
+                        matched_indices_for_description(new_session_option, result.matched_indices);
                     // If for some reason the variant (ex: "Create New Tab: Powershell") ranks higher
                     // than a match for a base string (ex: "Create New Tab"), we want to cap the score
                     // to be one less than the base string.
                     if let Some(max_match) = max_match {
                         FuzzyMatchResult {
                             score: std::cmp::min(result.score, max_match.round() as i64 - 1),
-                            matched_indices: result.matched_indices,
+                            matched_indices,
                         }
                     } else {
-                        result
+                        FuzzyMatchResult {
+                            score: result.score,
+                            matched_indices,
+                        }
                     }
                 })
                 .map(|result| (result, new_session_option))
@@ -307,7 +325,7 @@ mod full_text_searcher {
     use warpui::r#async::executor::Background;
 
     use crate::search::command_palette::new_session::data_source::{
-        NewSessionSearcher, SearcherAction, SEARCHER_BASE_STRINGS,
+        matched_indices_for_description, NewSessionSearcher, SearcherAction, SEARCHER_BASE_STRINGS,
     };
     use crate::search::command_palette::new_session::search_item::SearchItem;
     use crate::search::command_palette::new_session::{NewSessionOption, NewSessionOptionId};
@@ -347,10 +365,13 @@ mod full_text_searcher {
             Ok(search_result
                 .into_iter()
                 .filter_map(|result| {
-                    let matched_indices = result.highlights.new_session_option;
                     let new_session_option = self
                         .shell_id_to_options
                         .get(&NewSessionOptionId(result.values.id))?;
+                    let matched_indices = matched_indices_for_description(
+                        new_session_option,
+                        result.highlights.new_session_option,
+                    );
 
                     // If for some reason the variant (ex: "Create New Tab: Powershell") ranks higher
                     // than a match for a base string (ex: "Create New Tab"), we want to cap the score
@@ -427,7 +448,7 @@ mod full_text_searcher {
         fn rebuild_search_index(&mut self) -> Result<(), anyhow::Error> {
             self.clear_search_index();
             let documents = self.shell_id_to_options.iter().map(|(id, option)| {
-                let binding_description = option.description().to_lowercase();
+                let binding_description = option.search_text().to_lowercase();
 
                 NewSessionDocument {
                     new_session_option: binding_description.clone(),

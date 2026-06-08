@@ -37,11 +37,26 @@ pub const AI_FEATURES: &[&str] = &[
     "Remote Control with Claude Code, Codex, and other agents",
 ];
 
+pub const AI_FEATURE_KEYS: &[&str] = &[
+    "onboarding.intention.ai_feature.warp_agents",
+    "onboarding.intention.ai_feature.oz_cloud_agents",
+    "onboarding.intention.ai_feature.next_command_predictions",
+    "onboarding.intention.ai_feature.prompt_suggestions",
+    "onboarding.intention.ai_feature.codebase_context",
+    "onboarding.intention.ai_feature.remote_control",
+    "onboarding.intention.ai_feature.agents_over_ssh",
+];
+
 /// User-facing names of the Warp Drive features enabled when the terminal
 /// intention is selected with Warp Drive turned on. Shared by the login slide's
 /// skip-login confirmation dialog so the list stays in sync with any future
 /// surfaces that need it.
 pub const WARP_DRIVE_FEATURES: &[&str] = &["Warp Drive", "Session Sharing"];
+
+pub const WARP_DRIVE_FEATURE_KEYS: &[&str] = &[
+    "onboarding.feature.warp_drive",
+    "onboarding.feature.session_sharing",
+];
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "bin")] {

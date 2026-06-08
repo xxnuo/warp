@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
+use warp_i18n::{tr, tr_with};
 
 use super::ChipValue;
 use crate::terminal::model::block::{Block, BlockMetadata};
@@ -168,11 +169,13 @@ pub enum ChipDisabledReason {
 impl ChipDisabledReason {
     pub fn tooltip_text(&self) -> String {
         match self {
-            Self::RequiresLocalSession => "Requires a local session".to_string(),
+            Self::RequiresLocalSession => tr("context_chips.requires_local_session"),
             Self::RequiresExecutable { command } if command == "gh" => {
-                "Requires the GitHub CLI".to_string()
+                tr("context_chips.requires_github_cli")
             }
-            Self::RequiresExecutable { command } => format!("Requires the `{command}` command"),
+            Self::RequiresExecutable { command } => {
+                tr_with("context_chips.requires_command", &[("command", command)])
+            }
         }
     }
 }

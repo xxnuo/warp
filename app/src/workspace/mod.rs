@@ -44,7 +44,7 @@ use warpui::elements::DropTargetData;
 use warpui::keymap::{BindingDescription, EditableBinding, FixedBinding};
 use warpui::AppContext;
 
-use crate::ai::blocklist::NEW_AGENT_PANE_LABEL;
+use crate::ai::blocklist::new_agent_pane_label;
 use crate::channel::{Channel, ChannelState};
 use crate::features::FeatureFlag;
 use crate::palette::PaletteMode;
@@ -1192,7 +1192,7 @@ pub fn init(app: &mut AppContext) {
     app.register_editable_bindings([
         EditableBinding::new(
             "workspace:toggle_ai_assistant",
-            *NEW_AGENT_PANE_LABEL,
+            new_agent_pane_label(),
             WorkspaceAction::NewPaneInAgentMode {
                 entrypoint: AgentModeEntrypoint::NewPaneBinding,
                 zero_state_prompt_suggestion_type: None,

@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::collections::HashSet;
 
 use chrono::TimeZone;
+use warp_i18n::tr;
 use warpui::{AppContext, EntityId, SingletonEntity, WindowId};
 
 use crate::ai::agent::api::ServerConversationToken;
@@ -74,7 +75,7 @@ impl ConversationNavigationData {
         let initial_query = conversation.initial_query();
         let title = conversation
             .title()
-            .unwrap_or_else(|| "Untitled conversation".to_string());
+            .unwrap_or_else(|| tr("agent_view.entry_block.untitled_conversation"));
         let last_updated = conversation
             .latest_exchange()
             .map(|exchange| exchange.start_time)

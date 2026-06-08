@@ -1,3 +1,4 @@
+use warp_i18n::tr;
 use warpui::elements::{Flex, MouseStateHandle, ParentElement};
 use warpui::fonts::Weight;
 use warpui::ui_components::components::{UiComponent, UiComponentStyles};
@@ -58,7 +59,7 @@ impl WarpDriveItem for WarpDriveNotebook {
     fn preview(&self, appearance: &Appearance) -> Option<Box<dyn Element>> {
         let title_text = self.notebook.model().title.clone();
         let title_to_render = if title_text.is_empty() {
-            "Untitled".to_string()
+            tr("drive.untitled")
         } else {
             title_text
         };

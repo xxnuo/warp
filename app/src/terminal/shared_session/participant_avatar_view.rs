@@ -3,6 +3,7 @@ use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::vec2f;
 use session_sharing_protocol::common::{ParticipantId, ParticipantInfo, Role};
 use session_sharing_protocol::sharer::RoleUpdateReason;
+use warp_i18n::tr;
 use warpui::accessibility::AccessibilityContent;
 use warpui::elements::{
     Border, ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
@@ -163,18 +164,26 @@ impl ParticipantAvatarView {
             .into_item()];
 
         match self.role {
-            Some(Role::Reader) => items.extend([MenuItemFields::new("Make editor")
-                .with_on_select_action(ParticipantAvatarAction::UpdateRole {
-                    participant_id,
-                    role: Role::Executor,
-                })
-                .into_item()]),
-            Some(Role::Executor) => items.extend([MenuItemFields::new("Make viewer")
-                .with_on_select_action(ParticipantAvatarAction::UpdateRole {
-                    participant_id,
-                    role: Role::Reader,
-                })
-                .into_item()]),
+            Some(Role::Reader) => {
+                items.extend([
+                    MenuItemFields::new(tr("shared_session.participants.make_editor"))
+                        .with_on_select_action(ParticipantAvatarAction::UpdateRole {
+                            participant_id,
+                            role: Role::Executor,
+                        })
+                        .into_item(),
+                ])
+            }
+            Some(Role::Executor) => {
+                items.extend([
+                    MenuItemFields::new(tr("shared_session.participants.make_viewer"))
+                        .with_on_select_action(ParticipantAvatarAction::UpdateRole {
+                            participant_id,
+                            role: Role::Reader,
+                        })
+                        .into_item(),
+                ])
+            }
             // Sharer does not have context menu
             _ => {}
         }
@@ -541,7 +550,10 @@ pub fn render_revoke_all_button(
                 );
 
             stack.add_positioned_child(
-                render_tooltip("Revoke all edit permissions".to_string(), appearance),
+                render_tooltip(
+                    tr("shared_session.participants.revoke_all_edit_permissions"),
+                    appearance,
+                ),
                 OffsetPositioning::offset_from_parent(
                     vec2f(0., 3.),
                     ParentOffsetBounds::Unbounded,
@@ -583,7 +595,7 @@ pub fn render_viewer_role_button(
     let button = icon_button(appearance, icon, false, mouse_state_handle.clone())
         .with_tooltip(move || {
             ui_builder
-                .tool_tip("Change role".to_string())
+                .tool_tip(tr("shared_session.participants.change_role"))
                 .build()
                 .finish()
         })

@@ -7,6 +7,7 @@ use warp_cli::agent::Harness;
 use warp_core::features::FeatureFlag;
 use warp_core::send_telemetry_from_ctx;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warp_terminal::model::BlockId;
 use warpui::elements::Align;
 use warpui::prelude::{Empty, Vector2F};
@@ -37,9 +38,6 @@ use crate::terminal::view::{
 use crate::terminal::CLIAgent;
 use crate::workspace::view::cloud_agent_capacity_modal::CloudAgentCapacityModalVariant;
 use crate::workspaces::user_workspaces::UserWorkspaces;
-
-const CHILD_AGENT_GITHUB_AUTH_REQUIRED_BLOCKED_ACTION: &str =
-    "GitHub authentication required before starting the child agent.";
 
 impl TerminalView {
     fn active_ambient_agent_conversation_id(&self, ctx: &AppContext) -> Option<AIConversationId> {
@@ -302,8 +300,9 @@ impl TerminalView {
                 if self.active_ambient_agent_conversation_is_child(ctx) {
                     self.update_active_ambient_agent_conversation_status(
                         ConversationStatus::Blocked {
-                            blocked_action: CHILD_AGENT_GITHUB_AUTH_REQUIRED_BLOCKED_ACTION
-                                .to_string(),
+                            blocked_action: tr(
+                                "ambient_agent.child_agent_github_auth_required_blocked_action",
+                            ),
                         },
                         None,
                         ctx,
@@ -911,7 +910,7 @@ impl TerminalView {
             let message = progress.setup_status_text();
 
             render_cloud_mode_loading_screen(
-                message,
+                &message,
                 appearance,
                 &ui_state.loading_shimmer_handle,
                 &ui_state.tip_model,
