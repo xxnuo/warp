@@ -383,25 +383,7 @@ impl TelemetryApi {
         rudder_stack_destination: RudderStackDestination,
     ) -> Result<()> {
         msg.attach_context();
-
-        let path = match msg {
-            RudderMessage::Identify(_) => "/v1/identify",
-            RudderMessage::Track(_) => "/v1/track",
-            RudderMessage::Page(_) => "/v1/page",
-            RudderMessage::Screen(_) => "/v1/screen",
-            RudderMessage::Group(_) => "/v1/group",
-            RudderMessage::Alias(_) => "/v1/alias",
-            RudderMessage::Batch(_) => "/v1/batch",
-        };
-
-        self.client
-            .post(&format!("{}{}", rudder_stack_destination.root_url, path))
-            .basic_auth(rudder_stack_destination.write_key, Some(""))
-            .json(&msg)
-            .send()
-            .await?
-            .error_for_status()?;
-
+        let _ = (&self.client, msg, rudder_stack_destination);
         Ok(())
     }
 }
