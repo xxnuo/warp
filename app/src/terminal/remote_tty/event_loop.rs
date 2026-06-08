@@ -12,7 +12,6 @@ use crate::terminal::bootstrap::init_shell_script_for_shell;
 use crate::terminal::event_listener::ChannelEventListener;
 use crate::terminal::model::ansi::Processor;
 use crate::terminal::session_settings::SessionSettings;
-use crate::terminal::shell::ShellType;
 use crate::terminal::writeable_pty::Message as EventLoopMessage;
 use crate::terminal::{SizeInfo, TerminalModel};
 
@@ -115,8 +114,8 @@ impl EventLoop {
                 if let Err(e) = Self::write_env_vars(&mut sink, is_honor_ps1_enabled).await {
                     log::error!("Failed to write env vars to pty {e:?}");
                 }
-                if let Err(e) = Self::write_zsh_init_shell_script(&mut sink).await {
-                    log::error!("Failed to write zsh bootstrap bytes to pty {e:?}");
+                if let Err(e) = Self::write_init_shell_script(&mut sink).await {
+                    log::error!("Failed to write shell bootstrap bytes to pty {e:?}");
                 }
 
                 while let Ok(message) = receiver.recv().await {
@@ -154,18 +153,17 @@ impl EventLoop {
             .detach();
     }
 
-    /// Writes the ZSH init shell script to the "PTY", mimicking how we send the init shell script
+    /// Writes the init shell script to the "PTY", mimicking how we send the init shell script
     /// when there is a local pty:
     /// <https://github.com/warpdotdev/warp-internal/blob/747da2df83f2caa97e781ce284ceb226fb97a66c/app/src/terminal/local_tty/unix.rs#L338-L347>.
-    async fn write_zsh_init_shell_script(sink: &mut impl Sink) -> anyhow::Result<()> {
-        let zsh_init_shell_script = init_shell_script_for_shell(ShellType::Zsh, &crate::ASSETS);
-        sink.send(Message::new_binary(
-            zsh_init_shell_script.as_bytes().to_vec(),
-        ))
-        .await?;
+    async fn write_init_shell_script(sink: &mut impl Sink) -> anyhow::Result<()> {
+        let init_shell_script =
+            init_shell_script_for_shell(super::REMOTE_TTY_SHELL, &crate::ASSETS);
+        sink.send(Message::new_binary(init_shell_script.as_bytes().to_vec()))
+            .await?;
 
         sink.send(Message::new_binary(
-            ShellType::Zsh.execute_command_bytes().to_vec(),
+            super::REMOTE_TTY_SHELL.execute_command_bytes().to_vec(),
         ))
         .await?;
 

@@ -15,7 +15,7 @@ use crate::terminal::event_listener::ChannelEventListener;
 use crate::terminal::model::session::Sessions;
 use crate::terminal::model_events::ModelEventDispatcher;
 use crate::terminal::remote_tty::event_loop::EventLoop;
-use crate::terminal::shell::{ShellName, ShellType};
+use crate::terminal::shell::ShellName;
 use crate::terminal::writeable_pty::pty_controller::{EventLoopSendError, EventLoopSender};
 use crate::terminal::writeable_pty::terminal_manager_util::{
     init_pty_controller_model, wire_up_pty_controller_with_view,
@@ -76,7 +76,7 @@ impl TerminalManager {
             ShellLaunchState::ShellSpawned {
                 available_shell: None,
                 display_name: ShellName::blank(),
-                shell_type: ShellType::Zsh,
+                shell_type: super::REMOTE_TTY_SHELL,
             },
             ctx,
         );
