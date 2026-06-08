@@ -6585,10 +6585,13 @@ impl SettingsWidget for OtherAIWidget {
             &view.thinking_display_mode_dropdown,
         ));
 
+        let orchestration_message_display_label = tr("settings.ai.orchestration_messages.display");
+        let orchestration_message_display_description =
+            tr("settings.ai.orchestration_messages.display.description");
         column.add_child(render_dropdown_item(
             appearance,
-            "Orchestration message display",
-            Some("Controls whether orchestration messages stay expanded."),
+            &orchestration_message_display_label,
+            Some(&orchestration_message_display_description),
             None,
             LocalOnlyIconState::for_setting(
                 OrchestrationMessageDisplayMode::storage_key(),

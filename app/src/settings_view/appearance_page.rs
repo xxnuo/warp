@@ -4900,7 +4900,7 @@ impl SettingsWidget for HideTitleBarSearchBarInVerticalTabsWidget {
         let tab_settings = TabSettings::as_ref(app);
 
         render_body_item::<AppearancePageAction>(
-            "Hide search bar in vertical tab layout".into(),
+            tr("settings.appearance.hide_title_bar_search_bar_vertical_tabs"),
             None,
             LocalOnlyIconState::for_setting(
                 HideTitleBarSearchBarInVerticalTabs::storage_key(),
@@ -4921,10 +4921,9 @@ impl SettingsWidget for HideTitleBarSearchBarInVerticalTabsWidget {
                     );
                 })
                 .finish(),
-            Some(
-                "When using the vertical tab layout, hide the search bar in the title bar. Search stays available via the command palette and keyboard shortcuts."
-                    .to_string(),
-            ),
+            Some(tr(
+                "settings.appearance.hide_title_bar_search_bar_vertical_tabs.description",
+            )),
         )
     }
 }

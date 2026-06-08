@@ -16,9 +16,9 @@ use super::{
     AISettings, AccessibilitySettings, AliasExpansionSettings, AppEditorSettings,
     BlockVisibilitySettings, ChangelogSettings, CodeSettings, DebugSettings, EmacsBindingsSettings,
     FontSettings, FontSettingsChangedEvent, GPUSettings, I18nSettings, I18nSettingsChangedEvent,
-    InputBoxType, InputModeSettings, InputSettings, PaneSettings, SameLinePromptBlockSettings,
-    ScrollSettings, SelectionSettings, SshSettings, ThemeSettings, VimBannerSettings,
-    WarpDrivePrivacySettings,
+    InputBoxType, InputModeSettings, InputSettings, LocalControlSettings, PaneSettings,
+    SameLinePromptBlockSettings, ScrollSettings, SelectionSettings, SshSettings, ThemeSettings,
+    VimBannerSettings, WarpDrivePrivacySettings,
 };
 use crate::ai::cloud_agent_settings::CloudAgentSettings;
 use crate::banner::BannerState;

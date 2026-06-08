@@ -9398,24 +9398,24 @@ impl Workspace {
             let mut items = vec![];
             if has_tabs_above {
                 let label = if is_vertical {
-                    "Move group up"
+                    tr("workspace.menu.move_group_up")
                 } else {
-                    "Move group left"
+                    tr("workspace.menu.move_group_left")
                 };
                 items.push(
-                    MenuItemFields::new(tr("workspace.menu.move_group_up"))
+                    MenuItemFields::new(label)
                         .with_on_select_action(WorkspaceAction::MoveTabGroupUp(group_id))
                         .into_item(),
                 );
             }
             if has_tabs_below {
                 let label = if is_vertical {
-                    "Move group down"
+                    tr("workspace.menu.move_group_down")
                 } else {
-                    "Move group right"
+                    tr("workspace.menu.move_group_right")
                 };
                 items.push(
-                    MenuItemFields::new(tr("workspace.menu.move_group_down"))
+                    MenuItemFields::new(label)
                         .with_on_select_action(WorkspaceAction::MoveTabGroupDown(group_id))
                         .into_item(),
                 );
@@ -9438,24 +9438,24 @@ impl Workspace {
             }
             if has_tabs_above {
                 let label = if is_vertical {
-                    "Close tabs above"
+                    tr("workspace.menu.close_tabs_above")
                 } else {
-                    "Close tabs to the left"
+                    tr("workspace.menu.close_tabs_to_the_left")
                 };
                 items.push(
-                    MenuItemFields::new(tr("workspace.menu.close_tabs_above"))
+                    MenuItemFields::new(label)
                         .with_on_select_action(WorkspaceAction::CloseTabsAboveGroup(group_id))
                         .into_item(),
                 );
             }
             if has_tabs_below {
                 let label = if is_vertical {
-                    "Close tabs below"
+                    tr("workspace.menu.close_tabs_below")
                 } else {
-                    "Close tabs to the right"
+                    tr("workspace.menu.close_tabs_to_the_right")
                 };
                 items.push(
-                    MenuItemFields::new(tr("workspace.menu.close_tabs_below"))
+                    MenuItemFields::new(label)
                         .with_on_select_action(WorkspaceAction::CloseTabsBelowGroup(group_id))
                         .into_item(),
                 );
@@ -19008,9 +19008,9 @@ impl Workspace {
             let title = group
                 .name
                 .clone()
-                .unwrap_or_else(|| "New Group".to_string());
             // Cap width so long names ellipsize and the tab bar's unbounded
             // measurement stays finite.
+                .unwrap_or_else(|| tr("workspace.new_group"));
             ConstrainedBox::new(
                 Text::new_inline(title, font_family, 12.)
                     .with_clip(ClipConfig::ellipsis())

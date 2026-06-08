@@ -7,6 +7,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use settings::macros::define_settings_group;
 use settings::{SecureSetting, Setting, SupportedPlatforms, SyncToCloud};
+use warp_i18n::tr;
 use warpui::{AppContext, ModelContext};
 use warpui_extras::secure_storage;
 
@@ -51,11 +52,11 @@ impl LocalControlMode {
         matches!(self, Self::EnabledEverywhere)
     }
 
-    pub fn as_dropdown_label(self) -> &'static str {
+    pub fn as_dropdown_label(self) -> String {
         match self {
-            Self::Disabled => "Disabled",
-            Self::EnabledWithinWarp => "Enabled within Warp",
-            Self::EnabledEverywhere => "Enabled everywhere, including outside Warp",
+            Self::Disabled => tr("settings.scripting.local_control.disabled"),
+            Self::EnabledWithinWarp => tr("settings.scripting.local_control.enabled_within_warp"),
+            Self::EnabledEverywhere => tr("settings.scripting.local_control.enabled_everywhere"),
         }
     }
 }

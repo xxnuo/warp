@@ -294,6 +294,7 @@ impl Display for SettingsSection {
             SettingsSection::Keybindings => tr("settings.section.keybindings"),
             SettingsSection::Privacy => tr("settings.section.privacy"),
             SettingsSection::Referrals => tr("settings.section.referrals"),
+            SettingsSection::Scripting => tr("settings.section.scripting"),
             SettingsSection::SharedBlocks => tr("settings.section.shared_blocks"),
             SettingsSection::Teams => tr("settings.section.teams"),
             SettingsSection::WarpDrive => tr("settings.section.warp_drive"),

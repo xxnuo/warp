@@ -440,24 +440,30 @@ settings::macros::implement_setting_for_enum!(
 
 impl OrchestrationMessageDisplayMode {
     /// Display name for the settings dropdown.
-    pub fn display_name(&self) -> &'static str {
+    pub fn display_name(&self) -> String {
         match self {
-            OrchestrationMessageDisplayMode::ShowAndCollapse => "Show & collapse",
-            OrchestrationMessageDisplayMode::AlwaysShow => "Always show",
-            OrchestrationMessageDisplayMode::AlwaysCollapse => "Always collapse",
+            OrchestrationMessageDisplayMode::ShowAndCollapse => {
+                tr("settings.ai.orchestration_messages.show_and_collapse")
+            }
+            OrchestrationMessageDisplayMode::AlwaysShow => {
+                tr("settings.ai.orchestration_messages.always_show")
+            }
+            OrchestrationMessageDisplayMode::AlwaysCollapse => {
+                tr("settings.ai.orchestration_messages.always_collapse")
+            }
         }
     }
 
-    pub fn command_palette_description(&self) -> &'static str {
+    pub fn command_palette_description(&self) -> String {
         match self {
             OrchestrationMessageDisplayMode::ShowAndCollapse => {
-                "Set child-agent message display: show & collapse"
+                tr("settings.ai.orchestration_messages.command_show_and_collapse")
             }
             OrchestrationMessageDisplayMode::AlwaysShow => {
-                "Set child-agent message display: always show"
+                tr("settings.ai.orchestration_messages.command_always_show")
             }
             OrchestrationMessageDisplayMode::AlwaysCollapse => {
-                "Set child-agent message display: always collapse"
+                tr("settings.ai.orchestration_messages.command_always_collapse")
             }
         }
     }
