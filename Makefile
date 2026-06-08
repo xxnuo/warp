@@ -11,6 +11,9 @@ DMG_NAME_SUFFIX ?=
 run:
 	./script/run
 
+i18n-check:
+	cargo run -p warp_i18n --bin warp-i18n-check --quiet
+
 arch-deps:
 	./script/install_cargo_release_deps
 
