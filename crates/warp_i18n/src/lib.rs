@@ -6,12 +6,19 @@ use std::sync::{OnceLock, RwLock};
 pub mod check;
 
 pub const AUTO_LOCALE: &str = "auto";
-pub const FALLBACK_LOCALE: &str = "en-US";
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TextDirection {
     LeftToRight,
     RightToLeft,
+}
+
+type Catalog = BTreeMap<String, String>;
+
+struct CatalogSource {
+    id: &'static str,
+    source: &'static str,
+    catalog: OnceLock<Catalog>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -22,20 +29,7 @@ pub struct LocaleDescriptor {
     pub direction: TextDirection,
 }
 
-pub const SUPPORTED_LOCALES: &[LocaleDescriptor] = &[
-    LocaleDescriptor {
-        id: "en-US",
-        name: "English (United States)",
-        native_name: "English (United States)",
-        direction: TextDirection::LeftToRight,
-    },
-    LocaleDescriptor {
-        id: "zh-CN",
-        name: "Chinese (Simplified)",
-        native_name: "简体中文",
-        direction: TextDirection::LeftToRight,
-    },
-];
+include!(concat!(env!("OUT_DIR"), "/locale_registry.rs"));
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Locale {
@@ -61,11 +55,7 @@ impl Locale {
     }
 }
 
-type Catalog = BTreeMap<String, String>;
-
 static ACTIVE_LOCALE: OnceLock<RwLock<Locale>> = OnceLock::new();
-static EN_US: OnceLock<Catalog> = OnceLock::new();
-static ZH_CN: OnceLock<Catalog> = OnceLock::new();
 
 pub fn init(locale: impl AsRef<str>) -> Locale {
     set_locale(locale)
@@ -188,35 +178,29 @@ fn lookup(key: &str) -> Option<&'static str> {
 }
 
 fn catalog(locale: &str) -> Option<&'static Catalog> {
-    match canonical_locale_id(locale)? {
-        "en-US" => Some(fallback_catalog()),
-        "zh-CN" => Some(ZH_CN.get_or_init(|| parse_catalog(include_str!("../locales/zh-CN.json")))),
-        _ => None,
-    }
+    let locale = canonical_locale_id(locale)?;
+    CATALOG_SOURCES
+        .iter()
+        .find(|source| source.id == locale)
+        .map(|source| source.catalog.get_or_init(|| parse_catalog(source.source)))
 }
 
 fn fallback_catalog() -> &'static Catalog {
-    EN_US.get_or_init(|| parse_catalog(include_str!("../locales/en-US.json")))
+    catalog(FALLBACK_LOCALE).expect("fallback locale must have a catalog")
 }
 
 fn parse_catalog(source: &str) -> Catalog {
     serde_json::from_str(source).expect("locale catalog must be valid JSON")
 }
 
-fn canonical_locale_id(locale: &str) -> Option<&'static str> {
-    let normalized = locale
+fn normalize_locale_id(locale: &str) -> String {
+    locale
         .trim()
         .split('.')
         .next()
         .unwrap_or_default()
         .replace('_', "-")
-        .to_ascii_lowercase();
-
-    match normalized.as_str() {
-        "en" | "en-us" | "en-gb" | "en-au" | "en-ca" | "en-nz" | "en-ie" | "en-za" => Some("en-US"),
-        "zh" | "zh-cn" | "zh-hans" | "zh-hans-cn" | "zh-sg" | "zh-my" => Some("zh-CN"),
-        _ => None,
-    }
+        .to_ascii_lowercase()
 }
 
 #[cfg(not(target_family = "wasm"))]

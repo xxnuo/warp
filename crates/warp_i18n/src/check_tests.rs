@@ -20,6 +20,7 @@ impl TempWorkspace {
         fs::create_dir_all(path.join("app/src")).unwrap();
         fs::create_dir_all(path.join("crates/onboarding/src")).unwrap();
         fs::create_dir_all(path.join("crates/ui_components/src")).unwrap();
+        fs::write(path.join("crates/warp_i18n/locales.json"), registry()).unwrap();
         Self { path }
     }
 
@@ -41,6 +42,28 @@ fn write(path: &Path, contents: &str) {
     fs::write(path, contents).unwrap();
 }
 
+fn registry() -> &'static str {
+    r#"{
+  "fallback": "en-US",
+  "locales": [
+    {
+      "id": "en-US",
+      "name": "English (United States)",
+      "native_name": "English (United States)",
+      "direction": "ltr",
+      "aliases": ["en", "en-US"]
+    },
+    {
+      "id": "zh-CN",
+      "name": "Chinese (Simplified)",
+      "native_name": "Chinese (Simplified)",
+      "direction": "ltr",
+      "aliases": ["zh", "zh-CN"]
+    }
+  ]
+}"#
+}
+
 fn set(values: &[&str]) -> BTreeSet<String> {
     values.iter().map(|value| value.to_string()).collect()
 }
@@ -58,8 +81,11 @@ fn extracts_literal_translation_keys() {
     let source = r#"
         use warp_i18n::{tr, tr_with};
 
+        const STATIC_KEY: &str = "common.static";
+
         fn main() {
             let _ = tr("common.next");
+            let _ = tr(STATIC_KEY);
             let _ = tr_with("workspace.title", &[("title", title)]);
             let _ = tr(dynamic_key);
             let _ = serde_json::from_str::<String>("{}");
@@ -68,8 +94,51 @@ fn extracts_literal_translation_keys() {
 
     assert_eq!(
         literal_tr_keys(source),
-        set(&["common.next", "workspace.title"])
+        set(&["common.next", "common.static", "workspace.title"])
     );
+}
+
+#[test]
+fn extracts_literal_translation_call_args() {
+    let source = r#"
+        use warp_i18n::{tr, tr_with};
+
+        fn main() {
+            let _ = tr("common.next");
+            let _ = tr_with("workspace.title", &[("title", title), ("count", &count)]);
+            let _ = tr_with("workspace.dynamic", args);
+        }
+    "#;
+
+    let calls = literal_tr_calls(source);
+    assert_eq!(calls.len(), 3);
+    assert_eq!(calls[0].args, TranslationArgs::None);
+    assert_eq!(
+        calls[1].args,
+        TranslationArgs::Static(set(&["count", "title"]))
+    );
+    assert_eq!(calls[2].args, TranslationArgs::Dynamic);
+}
+
+#[test]
+fn ignores_translation_lookalikes_outside_code() {
+    let source = r##"
+        fn main() {
+            let _ = "tr(\"string.literal\")";
+            let _ = b"tr(\"byte.string\")";
+            let _ = c"tr(\"c.string\")";
+            let _ = r#"tr("raw.string")"#;
+            let _ = br#"tr("byte.raw.string")"#;
+            let _ = cr#"tr("c.raw.string")"#;
+            // tr("line.comment")
+            /*
+                tr("block.comment")
+            */
+            let _ = tr("common.next");
+        }
+    "##;
+
+    assert_eq!(literal_tr_keys(source), set(&["common.next"]));
 }
 
 #[test]
@@ -149,6 +218,51 @@ fn main() {
         .errors
         .iter()
         .any(|error| error.contains("source references missing i18n key common.missing")));
+}
+
+#[test]
+fn check_workspace_reports_source_arg_drift() {
+    let workspace = TempWorkspace::new("arg_drift");
+    write(
+        &workspace.path().join("crates/warp_i18n/locales/en-US.json"),
+        r#"{
+  "common.count": "{count} items",
+  "common.next": "Next"
+}"#,
+    );
+    write(
+        &workspace.path().join("crates/warp_i18n/locales/zh-CN.json"),
+        r#"{
+  "common.count": "{count} 个项目",
+  "common.next": "下一步"
+}"#,
+    );
+    write(
+        &workspace.path().join("app/src/main.rs"),
+        r#"
+use warp_i18n::{tr, tr_with};
+
+fn main() {
+    let _ = tr("common.count");
+    let _ = tr_with("common.count", &[("total", "1")]);
+    let _ = tr_with("common.next", &[("count", "1")]);
+    let _ = tr_with("common.count", dynamic_args);
+}
+"#,
+    );
+
+    let report = check_workspace(workspace.path());
+    assert!(report
+        .errors
+        .iter()
+        .any(|error| error.contains("common.count requires i18n args [count], but tr was used")));
+    assert!(report.errors.iter().any(|error| error
+        .contains("common.count i18n args differ from catalog: expected [count], got [total]")));
+    assert!(report.errors.iter().any(|error| {
+        error.contains("common.next i18n args differ from catalog: expected [], got [count]")
+    }));
+    assert!(report.errors.iter().any(|error| error
+        .contains("common.count i18n args are dynamic and cannot be checked against [count]")));
 }
 
 #[test]

@@ -1,0 +1,35 @@
+{
+  "fallback": "en-US",
+  "locales": [
+    {
+      "id": "en-US",
+      "name": "English (United States)",
+      "native_name": "English (United States)",
+      "direction": "ltr",
+      "aliases": [
+        "en",
+        "en-US",
+        "en-GB",
+        "en-AU",
+        "en-CA",
+        "en-NZ",
+        "en-IE",
+        "en-ZA"
+      ]
+    },
+    {
+      "id": "zh-CN",
+      "name": "Chinese (Simplified)",
+      "native_name": "简体中文",
+      "direction": "ltr",
+      "aliases": [
+        "zh",
+        "zh-CN",
+        "zh-Hans",
+        "zh-Hans-CN",
+        "zh-SG",
+        "zh-MY"
+      ]
+    }
+  ]
+}
