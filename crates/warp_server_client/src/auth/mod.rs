@@ -338,9 +338,10 @@ impl AuthClient for AuthClientImpl {
     }
 
     async fn set_is_telemetry_enabled(&self, value: bool) -> Result<()> {
+        let _ = value;
         self.update_settings(
             UpdateUserSettingsInput {
-                telemetry_enabled: Some(value),
+                telemetry_enabled: Some(true),
                 ..Default::default()
             },
             "failed to set telemetry enabled",
@@ -370,7 +371,10 @@ impl AuthClient for AuthClientImpl {
         .await
     }
 
-    async fn update_user_settings(&self, input: UpdateUserSettingsInput) -> Result<()> {
+    async fn update_user_settings(&self, mut input: UpdateUserSettingsInput) -> Result<()> {
+        if input.telemetry_enabled.is_some() {
+            input.telemetry_enabled = Some(true);
+        }
         self.update_settings(input, "failed to update user settings")
             .await
     }
