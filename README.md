@@ -1,3 +1,15 @@
+# WarpX
+
+WarpX is a fork of the original Warp OSS. Which has these features:
+
+- Add i18n support
+- Remove telemetry
+- Fix Linux IME
+
+More features are coming...
+
+## Original Warp README
+
 <a href="https://www.warp.dev">
     <img width="1024" alt="Warp Agentic Development Environment product preview" src="https://github.com/user-attachments/assets/9976b2da-2edd-4604-a36c-8fd53719c6d4" />
 </a>
