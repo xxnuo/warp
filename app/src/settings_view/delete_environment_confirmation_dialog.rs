@@ -1,3 +1,4 @@
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{ChildView, Container, Dismiss, Empty};
 use warpui::ui_components::components::UiComponent;
 use warpui::{
@@ -33,13 +34,17 @@ pub struct DeleteEnvironmentConfirmationDialog {
 impl DeleteEnvironmentConfirmationDialog {
     pub fn new(ctx: &mut ViewContext<Self>) -> Self {
         let cancel_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Cancel", NakedTheme).on_click(|ctx| {
+            ActionButton::new(tr("common.cancel"), NakedTheme).on_click(|ctx| {
                 ctx.dispatch_typed_action(DeleteEnvironmentConfirmationDialogAction::Cancel);
             })
         });
 
         let confirm_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Delete environment", DangerPrimaryTheme).on_click(|ctx| {
+            ActionButton::new(
+                tr("settings.environments.delete_environment"),
+                DangerPrimaryTheme,
+            )
+            .on_click(|ctx| {
                 ctx.dispatch_typed_action(DeleteEnvironmentConfirmationDialogAction::Confirm);
             })
         });
@@ -82,13 +87,13 @@ impl View for DeleteEnvironmentConfirmationDialog {
 
         let appearance = Appearance::as_ref(app);
 
-        let description = format!(
-            "Are you sure you want to remove the {} environment?",
-            self.env_name
+        let description = tr_with(
+            "settings.environments.delete_confirmation_description",
+            &[("name", &self.env_name)],
         );
 
         let dialog = Dialog::new(
-            "Delete environment?".to_string(),
+            tr("settings.environments.delete_confirmation_title"),
             Some(description),
             dialog_styles(appearance),
         )

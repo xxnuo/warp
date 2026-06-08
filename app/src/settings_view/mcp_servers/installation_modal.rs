@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use markdown_parser::parse_markdown;
 use warp_core::ui::external_product_icon::ExternalProductIcon;
 use warp_core::ui::icons::Icon;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Align, Border, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Empty,
     Flex, FormattedTextElement, HighlightedHyperlink, Hoverable, MainAxisAlignment,
@@ -75,14 +76,14 @@ pub struct InstallationModalBody {
 impl InstallationModalBody {
     pub fn new(ctx: &mut ViewContext<Self>) -> Self {
         let cancel_button = ctx.add_typed_action_view(|_ctx| {
-            ActionButton::new("Cancel", NakedTheme).on_click(|ctx| {
+            ActionButton::new(tr("common.cancel"), NakedTheme).on_click(|ctx| {
                 ctx.dispatch_typed_action(InstallationModalBodyAction::Cancel);
             })
         });
 
         let enter_keystroke = Keystroke::parse("enter").expect("valid keystroke");
         let install_button = ctx.add_typed_action_view(|ctx| {
-            ActionButton::new("Install", PrimaryTheme)
+            ActionButton::new(tr("settings.mcp.install"), PrimaryTheme)
                 .with_keybinding(KeystrokeSource::Fixed(enter_keystroke), ctx)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(InstallationModalBodyAction::Install);
@@ -257,7 +258,7 @@ impl InstallationModalBody {
 
         // Renders MCP title text
         let title = Text::new(
-            format!("Install {name}"),
+            tr_with("settings.mcp.install_named_server", &[("name", &name)]),
             appearance.ui_font_family(),
             appearance.header_font_size(),
         )
@@ -423,13 +424,13 @@ impl InstallationModalBody {
         .finish();
 
         let source_text = if is_shared {
-            "Shared from team"
+            tr("settings.mcp.shared_from_team")
         } else {
-            "From another device"
+            tr("settings.mcp.from_another_device")
         };
 
         let label_text = Text::new_inline(
-            source_text.to_string(),
+            source_text,
             appearance.ui_font_family(),
             appearance.ui_font_size(),
         )
@@ -548,7 +549,7 @@ impl View for InstallationModalBody {
                 .finish()
         } else {
             Text::new(
-                "No MCP server selected",
+                tr("settings.mcp.no_server_selected"),
                 appearance.ui_font_family(),
                 appearance.ui_font_size(),
             )

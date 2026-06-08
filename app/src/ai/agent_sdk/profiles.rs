@@ -2,6 +2,7 @@ use comfy_table::Cell;
 use serde::Serialize;
 use warp_cli::agent::AgentProfileCommand;
 use warp_cli::GlobalOptions;
+use warp_i18n::tr;
 use warpui::{AppContext, ModelContext, SingletonEntity};
 
 use crate::ai::agent_sdk::output::{self, TableFormat};
@@ -45,7 +46,7 @@ impl ProfilesCommandRunner {
                     let name = profile.data().display_name().to_string();
                     let id = match profile.sync_id() {
                         Some(SyncId::ServerId(server_id)) => server_id.to_string(),
-                        _ => "Unsynced".to_string(),
+                        _ => tr("ai.agent_sdk.unsynced"),
                     };
                     ProfileInfo { id, name }
                 })
@@ -72,7 +73,10 @@ struct ProfileInfo {
 
 impl TableFormat for ProfileInfo {
     fn header() -> Vec<Cell> {
-        vec![Cell::new("ID"), Cell::new("Name")]
+        vec![
+            Cell::new(tr("ai.agent_sdk.profile.table.id")),
+            Cell::new(tr("ai.agent_sdk.profile.table.name")),
+        ]
     }
 
     fn row(&self) -> Vec<Cell> {

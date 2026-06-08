@@ -16,6 +16,7 @@ use warp_core::features::FeatureFlag;
 use warp_core::send_telemetry_from_ctx;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::AnsiColorIdentifier;
+use warp_i18n::{tr, tr_with};
 #[cfg(feature = "local_fs")]
 use warp_util::path::{CleanPathResult, LineAndColumnArg};
 use warpui::clipboard::ClipboardContent;
@@ -495,10 +496,7 @@ impl Input {
                     .map(|name| name.trim())
                     .filter(|name| !name.is_empty())
                 else {
-                    show_error_toast(
-                        "Please provide a tab name after /rename-tab".to_owned(),
-                        ctx,
-                    );
+                    show_error_toast(tr("terminal.slash_commands.rename_tab_missing_name"), ctx);
                     return true;
                 };
 
@@ -594,10 +592,9 @@ impl Input {
                             let window_id = ctx.window_id();
                             ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                                 toast_stack.add_ephemeral_toast(
-                                    DismissibleToast::error(
-                                        "The /open-file command is only available for local sessions"
-                                            .to_owned(),
-                                    ),
+                                    DismissibleToast::error(tr(
+                                        "terminal.slash_commands.open_file_local_only",
+                                    )),
                                     window_id,
                                     ctx,
                                 );
@@ -630,15 +627,18 @@ impl Input {
                             }
                             Ok(_) => {
                                 show_error_toast(
-                                    "The /open-file command only works for files, not directories"
-                                        .to_owned(),
+                                    tr("terminal.slash_commands.open_file_files_only"),
                                     ctx,
                                 );
                                 return true;
                             }
                             Err(_) => {
+                                let path = file_path.display().to_string();
                                 show_error_toast(
-                                    format!("File not found: {}", file_path.display()),
+                                    tr_with(
+                                        "terminal.slash_commands.open_file_not_found",
+                                        &[("path", &path)],
+                                    ),
                                     ctx,
                                 );
                                 return true;
@@ -655,10 +655,7 @@ impl Input {
                 }
                 #[cfg(not(feature = "local_fs"))]
                 {
-                    show_error_toast(
-                        "The /open-file command is not supported in this build".to_owned(),
-                        ctx,
-                    );
+                    show_error_toast(tr("terminal.slash_commands.open_file_not_supported"), ctx);
                     return true;
                 }
             }
@@ -668,7 +665,10 @@ impl Input {
                     .as_ref(ctx)
                     .active_conversation(self.terminal_view_id)
                 else {
-                    show_error_toast("No active conversation to export".to_owned(), ctx);
+                    show_error_toast(
+                        tr("terminal.slash_commands.no_active_conversation_export"),
+                        ctx,
+                    );
                     return true;
                 };
 
@@ -681,8 +681,8 @@ impl Input {
                 // Show a toast to confirm the export
                 let window_id = ctx.window_id();
                 ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
-                    let toast = DismissibleToast::default(String::from(
-                        "Conversation exported to clipboard",
+                    let toast = DismissibleToast::default(tr(
+                        "terminal.slash_commands.conversation_exported_clipboard",
                     ));
                     toast_stack.add_ephemeral_toast(toast, window_id, ctx);
                 });
@@ -698,7 +698,7 @@ impl Input {
                 #[cfg(target_family = "wasm")]
                 {
                     show_error_toast(
-                        "Export conversation to file unsupported in web".to_owned(),
+                        tr("terminal.slash_commands.export_file_unsupported_web"),
                         ctx,
                     );
                     return true;
@@ -884,7 +884,7 @@ impl Input {
                     .shared_session_status()
                     .is_sharer_or_viewer()
                 {
-                    show_error_toast("Session is already being shared".to_owned(), ctx);
+                    show_error_toast(tr("terminal.slash_commands.session_already_shared"), ctx);
                     return true;
                 }
                 ctx.emit(Event::StartRemoteControl);
@@ -896,17 +896,14 @@ impl Input {
                     .active_conversation(self.terminal_view_id);
                 if conversation.is_none() {
                     show_error_toast(
-                        "Cannot show conversation cost: no active conversation".to_owned(),
+                        tr("terminal.slash_commands.cost_no_active_conversation"),
                         ctx,
                     );
                 } else if conversation.is_some_and(|c| c.is_empty()) {
-                    show_error_toast(
-                        "Cannot show conversation cost: conversation is empty".to_owned(),
-                        ctx,
-                    );
+                    show_error_toast(tr("terminal.slash_commands.cost_conversation_empty"), ctx);
                 } else if conversation.is_some_and(|c| !c.status().is_done()) {
                     show_error_toast(
-                        "Cannot show conversation cost: conversation is in progress".to_owned(),
+                        tr("terminal.slash_commands.cost_conversation_in_progress"),
                         ctx,
                     );
                 } else {
@@ -953,10 +950,7 @@ impl Input {
                     // so the user knows why nothing happened. The chip falls
                     // back to `&` compose mode here; the slash-command flow
                     // does not because it has no compose-draft state to seed.
-                    show_error_toast(
-                        "Nothing to hand off — start a conversation first.".to_owned(),
-                        ctx,
-                    );
+                    show_error_toast(tr("terminal.slash_commands.handoff_no_conversation"), ctx);
                 }
             }
             fork if command.name == commands::FORK.name => {

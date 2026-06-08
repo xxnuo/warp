@@ -1,3 +1,4 @@
+use warp_i18n::tr;
 use warpui::elements::{Align, MouseStateHandle, Shrinkable};
 use warpui::ui_components::button::ButtonVariant;
 use warpui::ui_components::components::{Coords, UiComponent, UiComponentStyles};
@@ -56,7 +57,7 @@ impl View for NeedsSsoLinkView {
                         ButtonVariant::Accent,
                         self.mouse_state_handles.link_sso_handle.clone(),
                     )
-                    .with_text_label("Link SSO".to_string())
+                    .with_text_label(tr("auth.sso.link_button"))
                     .with_style(UiComponentStyles {
                         padding: Some(Coords {
                             top: 10.,
@@ -77,8 +78,8 @@ impl View for NeedsSsoLinkView {
         .finish();
 
         LoginErrorModal::new(app)
-            .with_header("Your organization has enabled SSO for your account")
-            .with_detail("Click the button below to link your Warp account to your SSO provider.")
+            .with_header(tr("auth.sso.header"))
+            .with_detail(tr("auth.sso.detail"))
             .with_action(link_sso_button)
             .build()
             .finish()

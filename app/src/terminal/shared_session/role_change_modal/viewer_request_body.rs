@@ -1,4 +1,5 @@
 use session_sharing_protocol::common::Role;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Container, CrossAxisAlignment, Flex, MainAxisAlignment, MouseStateHandle, ParentElement, Text,
 };
@@ -39,10 +40,10 @@ impl ViewerRequestBody {
         }
     }
 
-    fn role_label(&self) -> &str {
+    fn requested_mode_header(&self) -> String {
         match self.role {
-            Role::Executor => "edit",
-            _ => "view",
+            Role::Executor => tr("shared_session.role_change.requested_edit_mode"),
+            _ => tr("shared_session.role_change.requested_view_mode"),
         }
     }
 
@@ -64,13 +65,16 @@ impl View for ViewerRequestBody {
 
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
-        let header = format!("You have requested {} mode", self.role_label());
-        let text = format!("Waiting for {}...", self.display_name);
+        let header = self.requested_mode_header();
+        let text = tr_with(
+            "shared_session.role_change.waiting_for",
+            &[("name", self.display_name.as_str())],
+        );
 
         let cancel_button = appearance
             .ui_builder()
             .button(ButtonVariant::Outlined, self.mouse_state_handle.clone())
-            .with_centered_text_label(String::from("Cancel request"))
+            .with_centered_text_label(tr("shared_session.role_change.cancel_request"))
             .with_style(UiComponentStyles {
                 font_size: Some(TEXT_FONT_SIZE),
                 font_weight: Some(Weight::Bold),

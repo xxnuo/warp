@@ -1,6 +1,7 @@
 //! WASM-only view functions for the Workspace.
 
 use warp_core::channel::ChannelState;
+use warp_i18n::tr;
 use warpui::elements::{ChildView, Element};
 use warpui::{AppContext, SingletonEntity, ViewContext, ViewHandle};
 
@@ -43,14 +44,16 @@ impl Workspace {
         ctx: &mut ViewContext<Self>,
     ) -> ViewHandle<ActionButton> {
         ctx.add_typed_action_view(|_ctx| {
-            ActionButton::new("Open in Warp", PrimaryTheme).on_click(move |ctx| {
-                // Get the current URL and dispatch action to open it on desktop
-                if let Some(url) = parse_current_url() {
-                    ctx.dispatch_typed_action(WorkspaceAction::OpenLinkOnDesktop(url));
-                } else {
-                    log::warn!("Could not get URL for Open in Warp button");
-                }
-            })
+            ActionButton::new(tr("workspace.wasm.open_in_warp"), PrimaryTheme).on_click(
+                move |ctx| {
+                    // Get the current URL and dispatch action to open it on desktop
+                    if let Some(url) = parse_current_url() {
+                        ctx.dispatch_typed_action(WorkspaceAction::OpenLinkOnDesktop(url));
+                    } else {
+                        log::warn!("Could not get URL for Open in Warp button");
+                    }
+                },
+            )
         })
     }
 
@@ -59,9 +62,11 @@ impl Workspace {
     ) -> ViewHandle<ActionButton> {
         let url = build_oz_runs_url();
         ctx.add_typed_action_view(|_ctx| {
-            ActionButton::new("View all cloud runs", SecondaryTheme).on_click(move |ctx| {
-                ctx.dispatch_typed_action(WorkspaceAction::OpenLink(url.clone()));
-            })
+            ActionButton::new(tr("workspace.wasm.view_all_cloud_runs"), SecondaryTheme).on_click(
+                move |ctx| {
+                    ctx.dispatch_typed_action(WorkspaceAction::OpenLink(url.clone()));
+                },
+            )
         })
     }
 

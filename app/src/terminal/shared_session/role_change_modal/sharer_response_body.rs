@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use session_sharing_protocol::common::{ParticipantId, Role, RoleRequestId};
 use warp_core::features::FeatureFlag;
+use warp_i18n::tr;
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, MainAxisAlignment, MouseStateHandle,
     ParentElement, Text,
@@ -143,7 +144,7 @@ impl SharerResponseBody {
                     ButtonVariant::Outlined,
                     role_request_params.button_mouse_states.deny_button,
                 )
-                .with_centered_text_label(String::from("Deny"))
+                .with_centered_text_label(tr("shared_session.role_change.deny"))
                 .with_style(UiComponentStyles {
                     font_size: Some(BUTTON_FONT_SIZE),
                     font_weight: Some(Weight::Bold),
@@ -173,7 +174,7 @@ impl SharerResponseBody {
                 ButtonVariant::Outlined,
                 role_request_params.button_mouse_states.approve_button,
             )
-            .with_centered_text_label(String::from("Approve"))
+            .with_centered_text_label(tr("shared_session.role_change.approve"))
             .with_style(UiComponentStyles {
                 font_size: Some(BUTTON_FONT_SIZE),
                 font_weight: Some(Weight::Bold),
@@ -264,9 +265,9 @@ impl View for SharerResponseBody {
 
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
-        let header = "Edit Requests";
-        let text1 = "This grants the ability to execute commands on your";
-        let text2 = "behalf. Use with caution.";
+        let header = tr("shared_session.role_change.edit_requests");
+        let text1 = tr("shared_session.role_change.execute_permission_line1");
+        let text2 = tr("shared_session.role_change.execute_permission_line2");
 
         let text_body = Container::new(
             Flex::column()

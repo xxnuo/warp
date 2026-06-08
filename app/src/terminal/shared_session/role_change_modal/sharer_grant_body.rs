@@ -1,3 +1,4 @@
+use warp_i18n::tr;
 use warpui::elements::{
     Container, CrossAxisAlignment, Flex, MainAxisAlignment, MouseStateHandle, ParentElement, Text,
 };
@@ -59,7 +60,7 @@ impl SharerGrantBody {
                     width: Some(BUTTON_WIDTH),
                     ..Default::default()
                 })
-                .with_centered_text_label(String::from("Cancel"))
+                .with_centered_text_label(tr("common.cancel"))
                 .build()
                 .with_cursor(Cursor::PointingHand)
                 .on_click(move |ctx, _, _| ctx.dispatch_typed_action(SharerGrantBodyAction::Cancel))
@@ -82,7 +83,7 @@ impl SharerGrantBody {
                 width: Some(BUTTON_WIDTH),
                 ..Default::default()
             })
-            .with_centered_text_label(String::from("Make Editor"))
+            .with_centered_text_label(tr("shared_session.participants.make_editor"))
             .build()
             .with_cursor(Cursor::PointingHand)
             .on_click(move |ctx, _, _| {
@@ -110,8 +111,8 @@ impl View for SharerGrantBody {
         let appearance = Appearance::as_ref(app);
         let button_row = self.render_button_row(appearance);
 
-        let text1 = "This grants the ability to execute commands on your";
-        let text2 = "behalf. Use with caution.";
+        let text1 = tr("shared_session.role_change.execute_permission_line1");
+        let text2 = tr("shared_session.role_change.execute_permission_line2");
         let text_body = Container::new(
             Flex::column()
                 .with_child(
@@ -145,7 +146,10 @@ impl View for SharerGrantBody {
                     self.dont_show_again_mouse_state.clone(),
                     Some(TEXT_FONT_SIZE),
                 )
-                .with_label(Span::new("Don't show again.", Default::default()))
+                .with_label(Span::new(
+                    tr("shared_session.role_change.dont_show_again"),
+                    Default::default(),
+                ))
                 .check(self.dont_show_again)
                 .build()
                 .with_cursor(Cursor::PointingHand)

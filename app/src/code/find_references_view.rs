@@ -15,6 +15,7 @@ use warp_core::ui::theme::color::internal_colors;
 use warp_editor::content::buffer::InitialBufferState;
 use warp_editor::render::element::VerticalExpansionBehavior;
 use warp_files::FileModel;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Border, ChildAnchor, ChildView, ClippedScrollStateHandle, ClippedScrollable, ConstrainedBox,
     Container, CornerRadius, CrossAxisAlignment, Fill, Flex, Hoverable, MouseStateHandle,
@@ -496,9 +497,10 @@ fn render_header(
 
     // "Showing X references" title
     let title_text = if total_refs == 1 {
-        "Showing 1 reference".to_string()
+        tr("code.find_references.showing_one")
     } else {
-        format!("Showing {total_refs} references")
+        let count = total_refs.to_string();
+        tr_with("code.find_references.showing_other", &[("count", &count)])
     };
 
     let title = Align::new(

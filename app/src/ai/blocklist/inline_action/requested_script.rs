@@ -5,6 +5,7 @@ use std::rc::Rc;
 
 use pathfinder_geometry::vector::Vector2F;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Flex, Hoverable,
     MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement, Radius, Shrinkable, Text,
@@ -338,12 +339,12 @@ fn script_status(
     is_collapsed: bool,
     is_viewing_detail: bool,
     app: &AppContext,
-) -> (&str, Box<dyn Element>) {
+) -> (String, Box<dyn Element>) {
     let appearance = Appearance::as_ref(app);
     let label = match (is_executing, is_collapsed) {
-        (true, _) => "Running...",
-        (false, true) => "Expand to show script",
-        (false, false) => "Hide",
+        (true, _) => tr("ai_block.requested_script.running"),
+        (false, true) => tr("ai_block.requested_script.expand_to_show_script"),
+        (false, false) => tr("common.hide"),
     };
     let is_expanded = (is_executing && is_viewing_detail) || (!is_executing && !is_collapsed);
     let icon = ConstrainedBox::new(

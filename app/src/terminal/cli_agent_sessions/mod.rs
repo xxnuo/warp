@@ -6,6 +6,7 @@ pub(crate) mod plugin_manager;
 use std::collections::{HashMap, HashSet};
 
 use event::{CLIAgentEvent, CLIAgentEventSource, CLIAgentEventType};
+use warp_i18n::tr;
 use warpui::{Entity, EntityId, ModelContext, ModelHandle, SingletonEntity};
 
 use self::listener::CLIAgentSessionListener;
@@ -217,7 +218,7 @@ impl CLIAgentSession {
                     .payload
                     .summary
                     .clone()
-                    .or_else(|| Some("Waiting for your answer".to_owned())),
+                    .or_else(|| Some(tr("terminal.cli_agent.waiting_for_answer"))),
             },
             CLIAgentEventType::PermissionReplied => {
                 if !matches!(self.status, CLIAgentSessionStatus::Blocked { .. }) {

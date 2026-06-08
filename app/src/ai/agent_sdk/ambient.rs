@@ -17,6 +17,7 @@ use warp_cli::task::{
 use warp_cli::{GlobalOptions, SortOrderArg};
 use warp_core::channel::ChannelState;
 use warp_core::features::FeatureFlag;
+use warp_i18n::{tr, tr_with};
 use warpui::platform::TerminationMode;
 use warpui::r#async::{Spawnable, Timer};
 use warpui::{AppContext, ModelContext, SingletonEntity};
@@ -891,7 +892,7 @@ impl AmbientAgentRunner {
 
     /// Format artifacts for display.
     fn format_artifacts(artifacts: &[Artifact]) -> String {
-        let mut lines = vec!["Artifacts:".to_string()];
+        let mut lines = vec![tr("ai.agent_sdk.ambient.artifacts")];
 
         for artifact in artifacts {
             match artifact {
@@ -903,25 +904,39 @@ impl AmbientAgentRunner {
                     ..
                 } => {
                     let pr_display = match (repo, number) {
-                        (Some(repo), Some(num)) => format!("  PR: {} #{}", repo, num),
-                        _ => "  PR:".to_string(),
+                        (Some(repo), Some(num)) => tr_with(
+                            "ai.agent_sdk.ambient.artifact.pr_with_repo",
+                            &[("repo", repo), ("number", &num.to_string())],
+                        ),
+                        _ => tr("ai.agent_sdk.ambient.artifact.pr"),
                     };
                     lines.push(pr_display);
-                    lines.push(format!("    Branch: {}", branch));
-                    lines.push(format!("    Link: {}", url));
+                    lines.push(tr_with(
+                        "ai.agent_sdk.ambient.artifact.branch",
+                        &[("branch", branch)],
+                    ));
+                    lines.push(tr_with(
+                        "ai.agent_sdk.ambient.artifact.link",
+                        &[("url", url)],
+                    ));
                 }
                 Artifact::Plan {
                     notebook_uid,
                     title,
                     ..
                 } => {
-                    let plan_title = title.as_deref().unwrap_or("Untitled Plan");
-                    lines.push(format!("  Plan: {}", plan_title));
+                    let untitled_plan = tr("ai.agent_sdk.ambient.artifact.untitled_plan");
+                    let plan_title = title.as_deref().unwrap_or(&untitled_plan);
+                    lines.push(tr_with(
+                        "ai.agent_sdk.ambient.artifact.plan",
+                        &[("title", plan_title)],
+                    ));
                     if let Some(id) = notebook_uid {
-                        lines.push(format!(
-                            "    Link: {}/drive/notebook/{}",
-                            ChannelState::server_root_url(),
-                            id
+                        let url =
+                            format!("{}/drive/notebook/{}", ChannelState::server_root_url(), id);
+                        lines.push(tr_with(
+                            "ai.agent_sdk.ambient.artifact.link",
+                            &[("url", &url)],
                         ));
                     }
                 }
@@ -930,8 +945,12 @@ impl AmbientAgentRunner {
                     description,
                     ..
                 } => {
-                    let desc = description.as_deref().unwrap_or("No description");
-                    lines.push(format!("  Screenshot: {} ({})", artifact_uid, desc));
+                    let no_description = tr("ai.agent_sdk.ambient.artifact.no_description");
+                    let desc = description.as_deref().unwrap_or(&no_description);
+                    lines.push(tr_with(
+                        "ai.agent_sdk.ambient.artifact.screenshot",
+                        &[("id", artifact_uid), ("description", desc)],
+                    ));
                 }
                 Artifact::File {
                     filename,
@@ -940,10 +959,19 @@ impl AmbientAgentRunner {
                     ..
                 } => {
                     let label = super::super::artifacts::file_button_label(filename, filepath);
-                    lines.push(format!("  File: {}", label));
-                    lines.push(format!("    Path: {}", filepath));
+                    lines.push(tr_with(
+                        "ai.agent_sdk.ambient.artifact.file",
+                        &[("label", &label)],
+                    ));
+                    lines.push(tr_with(
+                        "ai.agent_sdk.ambient.artifact.path",
+                        &[("path", filepath)],
+                    ));
                     if let Some(description) = description {
-                        lines.push(format!("    Description: {}", description));
+                        lines.push(tr_with(
+                            "ai.agent_sdk.ambient.artifact.description",
+                            &[("description", description)],
+                        ));
                     }
                 }
             }

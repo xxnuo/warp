@@ -1,3 +1,4 @@
+use warp_i18n::tr;
 use warpui::elements::MouseStateHandle;
 use warpui::Element;
 
@@ -39,17 +40,17 @@ pub fn render_inline_ssh_wrapper_banner(
     let (style, title) = if state.wrapper_enabled {
         (
             InlineBannerStyle::LowPriority,
-            "Warp SSH wrapper enabled".to_string(),
+            tr("terminal.inline_banner.ssh.wrapper_enabled"),
         )
     } else {
         (
             InlineBannerStyle::VeryLowPriority,
-            "Warp SSH wrapper disabled".to_string(),
+            tr("terminal.inline_banner.ssh.wrapper_disabled"),
         )
     };
     let buttons = vec![
         InlineBannerTextButton {
-            text: "Learn more".to_string(),
+            text: tr("common.learn_more"),
             text_color: label_text_color,
             button_state: InlineBannerButtonState {
                 on_click_event: TerminalAction::LegacySSHBanner(SSHBannerAction::LearnMore),
@@ -60,7 +61,7 @@ pub fn render_inline_ssh_wrapper_banner(
             variant: InlineBannerTextButtonVariant::Secondary,
         },
         InlineBannerTextButton {
-            text: "Settings".to_string(),
+            text: tr("common.settings"),
             text_color: label_text_color,
             button_state: InlineBannerButtonState {
                 on_click_event: TerminalAction::LegacySSHBanner(SSHBannerAction::Settings),

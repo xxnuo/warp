@@ -15,6 +15,7 @@ use warp_core::ui::icons::Icon;
 use warp_core::ui::theme::{
     AnsiColor, AnsiColors, Details, Fill, Image, TerminalColors, WarpTheme,
 };
+use warp_i18n::tr;
 use warpui_core::assets::asset_cache::AssetSource;
 use warpui_core::elements::{
     Container, CrossAxisAlignment, Flex, MainAxisAlignment, MainAxisSize, ParentElement,
@@ -42,12 +43,12 @@ impl AssetProvider for Assets {
 }
 
 fn main() -> Result<()> {
-    // Initialize logging for the onboarding binary.
     warp_logging::init(warp_logging::LogConfig {
         is_cli: false,
         log_destination: None,
         ..Default::default()
     })?;
+    warp_i18n::init_from_environment();
 
     let app_builder = warpui::platform::AppBuilder::new(
         platform::AppCallbacks::default(),
@@ -55,10 +56,8 @@ fn main() -> Result<()> {
         None,
     );
     let _ = app_builder.run(move |ctx| {
-        // Register Appearance singleton so views can access Appearance::handle(ctx).
         ctx.add_singleton_model(|ctx| build_appearance(phenomenon(), ctx));
 
-        // Register telemetry context provider for logging telemetry events.
         ctx.add_singleton_model(MockTelemetryContextProvider::new_context_provider);
 
         ctx.add_window(AddWindowOptions::default(), |ctx| {
@@ -88,7 +87,7 @@ impl OnboardingMainView {
         let models = vec![
             OnboardingModelInfo {
                 id: LLMId::from("auto"),
-                title: "Auto".to_string(),
+                title: tr("common.auto"),
                 icon: Icon::Oz,
                 requires_upgrade: false,
                 is_default: true,
@@ -203,9 +202,9 @@ impl View for FinishedOnboardingView {
         let appearance = Appearance::as_ref(app);
 
         let header_text = if self.selected_settings.is_some() {
-            "Finished Onboarding"
+            tr("onboarding.finished.finished")
         } else {
-            "Skipped Onboarding"
+            tr("onboarding.finished.skipped")
         };
 
         let header = appearance
@@ -220,8 +219,17 @@ impl View for FinishedOnboardingView {
             .finish();
 
         let details_text = match &self.selected_settings {
-            Some(selected_settings) => format!("SelectedSettings: {selected_settings:?}"),
-            None => "SelectedSettings: (none)".to_string(),
+            Some(selected_settings) => {
+                format!(
+                    "{}: {selected_settings:?}",
+                    tr("onboarding.finished.selected_settings")
+                )
+            }
+            None => format!(
+                "{}: {}",
+                tr("onboarding.finished.selected_settings"),
+                tr("onboarding.finished.none")
+            ),
         };
 
         let details = appearance

@@ -6,6 +6,7 @@ use anyhow::Result;
 use chrono::{OutOfRangeError, Utc};
 use futures::stream::AbortHandle;
 use warp_core::user_preferences::GetUserPreferences as _;
+use warp_i18n::tr;
 use warpui::{AppContext, Entity, ModelContext, SingletonEntity};
 
 use super::execution_context::WarpAiExecutionContext;
@@ -287,7 +288,7 @@ impl Requests {
                             );
                         }
                         _ => {
-                            let response = "We're experiencing technical difficulties right now. Please try again later.".to_owned();
+                            let response = tr("ai_assistant.technical_difficulties");
                             let response_in_markdown = markdown_segments_from_text(
                                 transcript_part_index,
                                 TranscriptPartSubType::Answer,

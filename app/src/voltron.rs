@@ -18,6 +18,7 @@ use std::path::PathBuf;
 use enclose::enclose;
 use pathfinder_geometry::vector::Vector2F;
 use vec1::Vec1;
+use warp_i18n::tr;
 use warpui::accessibility::AccessibilityContent;
 use warpui::elements::{
     resizable_state_handle, Border, ChildAnchor, ChildView, Clipped, ConstrainedBox, Container,
@@ -88,12 +89,16 @@ pub enum VoltronItem {
 }
 
 impl VoltronItem {
-    pub fn as_str(&self) -> &'static str {
+    pub fn localization_key(&self) -> &'static str {
         match self {
-            VoltronItem::AiCommands => "A.I. Command Search",
-            VoltronItem::Workflows => "Workflows",
-            VoltronItem::History => "History Search",
+            VoltronItem::AiCommands => "voltron.ai_command_search",
+            VoltronItem::Workflows => "voltron.workflows",
+            VoltronItem::History => "voltron.history_search",
         }
+    }
+
+    pub fn display_name(&self) -> String {
+        tr(self.localization_key())
     }
 }
 
@@ -117,7 +122,7 @@ pub struct VoltronMetadata {
 /// then properly propagated to corresponding views.
 pub trait VoltronFeatureViewMeta {
     /// Placeholder text to show in the editor.
-    fn editor_placeholder_text(&self) -> &'static str;
+    fn editor_placeholder_text(&self) -> String;
 
     /// Voltron captures all the editor events and passes them to the currently focused feature by
     /// calling this method. Note that it does not call `ctx.notify()`, so it's up to the feature
@@ -258,7 +263,7 @@ impl Voltron {
         }
     }
 
-    fn placeholder(&mut self, ctx: &mut ViewContext<Self>) -> Option<&'static str> {
+    fn placeholder(&mut self, ctx: &mut ViewContext<Self>) -> Option<String> {
         if let Some(current_feature) = self.current_feature() {
             Some(match current_feature.feature_view_handle {
                 VoltronFeatureViewHandle::Workflows(view_handle) => {
@@ -332,7 +337,7 @@ impl Voltron {
             None => {
                 log::info!(
                     "Trying to open {} in Voltron, but no such feature registered",
-                    feature_name.as_str()
+                    feature_name.localization_key()
                 );
                 // Close voltron as a feature was requested that isn't registered.
                 self.close(ctx);
@@ -353,7 +358,7 @@ impl Voltron {
             let items: Vec<MenuItem<VoltronAction>> = features
                 .into_iter()
                 .map(|view| {
-                    let item = MenuItemFields::new(view.name.as_str())
+                    let item = MenuItemFields::new(view.name.display_name())
                         .with_on_select_action(VoltronAction::SelectAndRefresh(view.name));
                     let label = view.feature_view_handle.custom_action().and_then(enclose!(
                         (context) | action | {
@@ -404,7 +409,7 @@ impl Voltron {
                             .with_text_and_icon_label(
                                 TextAndIcon::new(
                                     TextAndIconAlignment::TextFirst,
-                                    current_feature.name.as_str().to_string(),
+                                    current_feature.name.display_name(),
                                     Icon::new(icon_path, appearance.theme().active_ui_text_color()),
                                     MainAxisSize::Min,
                                     MainAxisAlignment::SpaceBetween,

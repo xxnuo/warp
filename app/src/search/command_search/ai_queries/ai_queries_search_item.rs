@@ -1,6 +1,7 @@
 use chrono::{DateTime, Local};
 use ordered_float::OrderedFloat;
 use warp_core::ui::builder::MIN_FONT_SIZE;
+use warp_i18n::tr_with;
 use warpui::elements::{
     Align, ConstrainedBox, Container, CrossAxisAlignment, Flex, Highlight, Icon, MainAxisAlignment,
     MainAxisSize, ParentElement, Shrinkable, Text,
@@ -178,6 +179,9 @@ impl SearchItem for AIQuerySearchResultItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("AI query: {}", self.query_text)
+        tr_with(
+            "search.a11y.ai_query",
+            &[("query", self.query_text.as_str())],
+        )
     }
 }

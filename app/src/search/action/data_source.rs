@@ -153,13 +153,23 @@ impl ActionSearcher for FuzzyActionSearcher {
                 // with the same casing.
                 match_indices_case_insensitive(
                     binding
-                        .description
-                        .in_context(DescriptionContext::Default)
+                        .search_text(DescriptionContext::Default)
                         .to_lowercase()
                         .as_str(),
                     search_term.to_lowercase().as_str(),
                 )
-                .map(|result| (result, binding))
+                .map(|result| {
+                    (
+                        FuzzyMatchResult {
+                            score: result.score,
+                            matched_indices: matched_indices_for_description(
+                                binding,
+                                result.matched_indices,
+                            ),
+                        },
+                        binding,
+                    )
+                })
             })
             .map(|(match_result, binding)| {
                 MatchedBinding::new(match_result, binding.clone()).into()
@@ -187,7 +197,9 @@ mod full_text_searcher {
     use warp_search_core::define_search_schema;
     use warpui::keymap::{BindingId, DescriptionContext};
 
-    use crate::search::action::data_source::{is_excluded_binding, ActionSearcher, SearcherAction};
+    use crate::search::action::data_source::{
+        is_excluded_binding, matched_indices_for_description, ActionSearcher, SearcherAction,
+    };
     use crate::search::action::search_item::MatchedBinding;
     use crate::search::data_source::QueryResult;
     use crate::search::searcher::{
@@ -240,7 +252,8 @@ mod full_text_searcher {
                         return None;
                     }
 
-                    let matched_indices = match_result.highlights.action;
+                    let matched_indices =
+                        matched_indices_for_description(binding, match_result.highlights.action);
                     Some(
                         MatchedBinding::new(
                             FuzzyMatchResult {
@@ -282,8 +295,7 @@ mod full_text_searcher {
             self.clear_search_index();
             let documents = self.all_bindings.iter().map(|(id, binding)| {
                 let binding_description = binding
-                    .description
-                    .in_context(DescriptionContext::Default)
+                    .search_text(DescriptionContext::Default)
                     .to_lowercase();
 
                 ActionDocument {
@@ -306,4 +318,20 @@ mod full_text_searcher {
 // Context on why the search_drive action is excluded can be seen here: https://github.com/warpdotdev/warp-internal/pull/11705
 fn is_excluded_binding(binding: &CommandBinding) -> bool {
     binding.name == *"workspace:search_drive"
+}
+
+fn matched_indices_for_description(
+    binding: &CommandBinding,
+    matched_indices: Vec<usize>,
+) -> Vec<usize> {
+    let description_len = binding
+        .description
+        .in_context(DescriptionContext::Default)
+        .chars()
+        .count();
+    if matched_indices.iter().all(|index| *index < description_len) {
+        matched_indices
+    } else {
+        Vec::new()
+    }
 }

@@ -5,6 +5,7 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng as _};
 use warp_core::settings::ToggleableSetting;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, ConstrainedBox, Container, CrossAxisAlignment, Expanded, Flex, FormattedTextElement,
     HighlightedHyperlink, MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement,
@@ -31,9 +32,6 @@ use crate::view_components::compactible_action_button::{
     render_compact_and_regular_button_rows, CompactibleActionButton, MEDIUM_SIZE_SWITCH_THRESHOLD,
 };
 use crate::{send_telemetry_from_ctx, TelemetryEvent};
-
-const ACCEPT_LABEL: &str = "Generate tests";
-const CANCEL_LABEL: &str = "Dismiss";
 
 #[derive(Debug, Clone)]
 pub enum SuggestedUnitTestsEvent {
@@ -82,7 +80,7 @@ impl SuggestedUnitTestsView {
         ctx: &mut ViewContext<Self>,
     ) -> Self {
         let accept_button = CompactibleActionButton::new(
-            ACCEPT_LABEL.to_string(),
+            tr("ai_block.suggested_unit_tests.generate_tests"),
             Some(KeystrokeSource::Binding(
                 ACCEPT_PROMPT_SUGGESTION_KEYBINDING,
             )),
@@ -94,7 +92,7 @@ impl SuggestedUnitTestsView {
         );
 
         let cancel_button = CompactibleActionButton::new(
-            CANCEL_LABEL.to_string(),
+            tr("common.dismiss"),
             Some(KeystrokeSource::Fixed(
                 REJECT_PROMPT_SUGGESTION_KEYSTROKE.clone(),
             )),
@@ -312,7 +310,7 @@ impl SuggestedUnitTestsView {
 
         let checkbox_text = appearance
             .ui_builder()
-            .span("Don't show me suggested code banners again")
+            .span(tr("ai_block.code_diff.dont_show_suggested_banners"))
             .with_style(UiComponentStyles {
                 font_color: Some(font_color),
                 font_size: Some(font_size),
@@ -325,8 +323,8 @@ impl SuggestedUnitTestsView {
         let formatted_text = FormattedTextElement::new(
             FormattedText::new([FormattedTextLine::Line(vec![
                 FormattedTextFragment::hyperlink(
-                    "Manage suggested code banner settings",
-                    "Settings > AI",
+                    tr("ai_block.code_diff.manage_suggested_banner_settings"),
+                    tr("settings.ai.path"),
                 ),
             ])]),
             font_size,

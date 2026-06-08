@@ -13,6 +13,7 @@ use pathfinder_geometry::rect::RectF;
 use pathfinder_geometry::vector::vec2f;
 use warp_core::features::FeatureFlag;
 use warp_core::ui::theme::color::internal_colors;
+use warp_i18n::tr;
 use warpui::elements::new_scrollable::{NewScrollable, ScrollableAppearance, SingleAxisConfig};
 use warpui::elements::{
     Border, ChildAnchor, ChildView, Clipped, ClippedScrollStateHandle, ConstrainedBox, Container,
@@ -51,11 +52,6 @@ use crate::view_components::action_button::{ActionButton, ButtonSize, NakedTheme
 const MAX_PROMPT_LINES: f32 = 5.;
 /// Max characters shown in a row's single-line preview before truncation.
 const PROMPT_PREVIEW_MAX_CHARS: usize = 500;
-const INITIAL_CLOUD_MODE_PROMPT_TOOLTIP: &str = "The first cloud-mode prompt cannot be changed.";
-const SEND_NOW_DURING_CLOUD_SETUP_TOOLTIP: &str =
-    "Prompts cannot be sent until environment setup is complete.";
-const SEND_NOW_TO_FULL_TERMINAL_USE_AGENT_TOOLTIP: &str = "Send to full terminal use agent";
-
 /// Returns the position-cache id used to look up a row's bounding rect during a drag.
 /// Indexed by the row's current visual index so swaps maintain stable lookups.
 fn queue_row_position_id(panel_view_id: EntityId, index: usize) -> String {
@@ -72,18 +68,16 @@ fn build_row_state(
     // The send-now tooltip is owned by `update_send_now_availability`, which swaps in a
     // "wait for the cloud agent" message while send-now is disabled; "Send now" is the default.
     let (edit_tooltip, delete_tooltip) = if is_initial_cloud_mode_prompt {
-        (
-            INITIAL_CLOUD_MODE_PROMPT_TOOLTIP,
-            INITIAL_CLOUD_MODE_PROMPT_TOOLTIP,
-        )
+        let tooltip = tr("terminal.queued_prompts.initial_cloud_mode_tooltip");
+        (tooltip.clone(), tooltip)
     } else {
-        ("Edit", "Delete")
+        (tr("common.edit"), tr("common.delete"))
     };
 
     let send_now_button = ctx.add_typed_action_view(move |_| {
         ActionButton::new("", NakedTheme)
             .with_icon(TerminalIcon::ArrowUp)
-            .with_tooltip("Send now")
+            .with_tooltip(tr("ai_block.send_now"))
             .with_size(ButtonSize::XSmall)
             .with_disabled_theme(NakedTheme)
             .on_click(move |ctx| {
@@ -304,11 +298,11 @@ impl QueuedPromptsPanelView {
             let disabled =
                 *origin == QueuedQueryOrigin::InitialCloudMode || cloud_setup_in_progress;
             let tooltip = if disabled {
-                SEND_NOW_DURING_CLOUD_SETUP_TOOLTIP
+                tr("terminal.queued_prompts.send_now_during_cloud_setup_tooltip")
             } else if lrc_subagent_in_progress {
-                SEND_NOW_TO_FULL_TERMINAL_USE_AGENT_TOOLTIP
+                tr("terminal.queued_prompts.send_now_to_full_terminal_use_agent_tooltip")
             } else {
-                "Send now"
+                tr("ai_block.send_now")
             };
             send_now_button.update(ctx, |button, ctx| {
                 button.set_disabled(disabled, ctx);
@@ -1000,7 +994,7 @@ fn render_row(props: RenderRowProps<'_>, app: &AppContext) -> Box<dyn Element> {
                 if drag_state.is_hovered() {
                     stack.add_positioned_overlay_child(
                         ui_builder
-                            .tool_tip(INITIAL_CLOUD_MODE_PROMPT_TOOLTIP.to_owned())
+                            .tool_tip(tr("terminal.queued_prompts.initial_cloud_mode_tooltip"))
                             .build()
                             .finish(),
                         OffsetPositioning::offset_from_parent(

@@ -15,6 +15,7 @@ use conpty_api::ConptyApiError;
 use environment::get_shell_environment_variables;
 pub use environment::get_user_and_system_env_variable;
 use thiserror::Error;
+use warp_i18n::tr;
 use warpui::{AppContext, SingletonEntity};
 use windows::core::{HSTRING, PCWSTR, PWSTR};
 use windows::Win32::Foundation::{HANDLE, WAIT_OBJECT_0};
@@ -167,9 +168,9 @@ pub(super) fn spawn(
             // rather than panicking so a rogue persisted/round-tripped
             // sandbox starter degrades gracefully on Windows.
             log::error!("Docker sandbox shell starter reached the Windows PTY spawn path");
-            return Err(PtySpawnError::UnsupportedShellStarter(
-                "Docker sandbox shells are not supported on Windows".to_owned(),
-            ));
+            return Err(PtySpawnError::UnsupportedShellStarter(tr(
+                "terminal.local_tty.windows.docker_sandbox_not_supported",
+            )));
         }
     };
     let mut process_information = PROCESS_INFORMATION::default();

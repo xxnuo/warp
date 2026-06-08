@@ -4,6 +4,7 @@
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::Fill;
 use warp_editor::model::CoreEditorModel;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ConstrainedBox, Container, CrossAxisAlignment, Flex, MouseStateHandle,
     ParentElement, Shrinkable,
@@ -72,14 +73,14 @@ impl NavBar {
         });
 
         let up_label_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Previous", NakedTheme)
+            ActionButton::new(tr("code.editor.previous"), NakedTheme)
                 .with_size(ButtonSize::InlineActionHeader)
                 .with_icon(Icon::ArrowUp)
                 .on_click(|ctx| ctx.dispatch_typed_action(NavBarAction::NavigateUp))
         });
 
         let down_label_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Next", NakedTheme)
+            ActionButton::new(tr("common.next"), NakedTheme)
                 .with_size(ButtonSize::InlineActionHeader)
                 .with_icon(Icon::ArrowDown)
                 .on_click(|ctx| ctx.dispatch_typed_action(NavBarAction::NavigateDown))
@@ -148,7 +149,7 @@ impl NavBar {
     ) -> Box<dyn Element> {
         let diff_text = appearance
             .ui_builder()
-            .span("Hunk:")
+            .span(tr("code.editor.hunk_label"))
             .with_style(UiComponentStyles {
                 font_color: Some(appearance.theme().sub_text_color(background).into()),
                 ..Default::default()
@@ -200,7 +201,7 @@ impl NavBar {
                     ButtonVariant::Outlined,
                     self.mouse_state_handles.revert_mouse_state.clone(),
                 )
-                .with_text_label("Reject".to_string())
+                .with_text_label(tr("code.reject"))
                 .build()
                 .on_click(|ctx, _, _| ctx.dispatch_typed_action(NavBarAction::Revert))
                 .finish(),

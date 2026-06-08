@@ -1,6 +1,7 @@
 use asset_macro::bundled_asset;
 use markdown_parser::{FormattedText, FormattedTextFragment, FormattedTextLine};
 use warp_core::ui::theme::WarpTheme;
+use warp_i18n::tr;
 use warpui::assets::asset_cache::{AssetCache, AssetState};
 use warpui::elements::{
     Border, Container, CrossAxisAlignment, Flex, HighlightedHyperlink, Hoverable, Icon,
@@ -78,10 +79,8 @@ pub fn warpify_description(
     let theme = appearance.theme();
 
     let description = FormattedText::new(vec![FormattedTextLine::Line(vec![
-        FormattedTextFragment::plain_text(
-            "Bring Warp's features to your remote session. Blocks, full text editing, auto-complete, Oz, and more. "
-        ),
-        FormattedTextFragment::hyperlink("Learn more", SSH_DOCS_URL),
+        FormattedTextFragment::plain_text(tr("terminal.ssh.warpify.description")),
+        FormattedTextFragment::hyperlink(tr("common.learn_more"), SSH_DOCS_URL),
     ])]);
     warpify::render::build_description_row(description, theme, appearance, hyperlink_index.clone())
         .with_hyperlink_font_color(appearance.theme().accent().into_solid())

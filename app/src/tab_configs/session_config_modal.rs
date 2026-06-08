@@ -1,12 +1,12 @@
 use std::path::PathBuf;
 
 use pathfinder_geometry::vector::vec2f;
+use warp_i18n::tr;
 use warpui::elements::{
-    ChildAnchor, ChildView, ConstrainedBox, Container, CrossAxisAlignment, Flex,
-    FormattedTextElement, MouseStateHandle, OffsetPositioning, ParentAnchor, ParentElement,
-    ParentOffsetBounds, Stack,
+    ChildAnchor, ChildView, ConstrainedBox, Container, CrossAxisAlignment, Flex, MouseStateHandle,
+    OffsetPositioning, ParentAnchor, ParentElement, ParentOffsetBounds, Stack, Text,
 };
-use warpui::fonts::Weight;
+use warpui::fonts::{Properties, Weight};
 use warpui::keymap::macros::id;
 use warpui::keymap::{FixedBinding, Keystroke};
 use warpui::platform::file_picker::FilePickerConfiguration;
@@ -86,7 +86,7 @@ impl SessionConfigModal {
         });
 
         let submit_button = ctx.add_view(|ctx| {
-            ActionButton::new("Get Warping", PrimaryTheme)
+            ActionButton::new(tr("common.get_warping"), PrimaryTheme)
                 .with_full_width(true)
                 .with_keybinding(
                     KeystrokeSource::Fixed(Keystroke::parse("enter").unwrap_or_default()),
@@ -163,28 +163,23 @@ impl SessionConfigModal {
     fn render_header(&self, appearance: &Appearance) -> Box<dyn Element> {
         let theme = appearance.theme();
 
-        let title = FormattedTextElement::from_str(
-            "Create your first tab config",
+        let title = Text::new(
+            tr("tab_configs.create_first_config"),
             appearance.ui_font_family(),
             24.,
         )
         .with_color(blended_colors::text_main(theme, theme.background()))
-        .with_weight(Weight::Semibold)
+        .with_style(Properties::default().weight(Weight::Semibold))
         .finish();
 
         let subtitle_text = if self.show_session_type_row {
-            "Set up a reusable starting point for your tabs. \
-             Pick a repo, choose a session type, and optionally attach a worktree. \
-             Use it whenever you want to open a new tab with this setup."
+            tr("tab_configs.create_first_config_subtitle_with_session_type")
         } else {
-            "Set up a reusable starting point for your tabs. \
-             Pick a repo, optionally attach a worktree, and \
-             use it whenever you want to open a new tab with this setup."
+            tr("tab_configs.create_first_config_subtitle")
         };
-        let subtitle =
-            FormattedTextElement::from_str(subtitle_text, appearance.ui_font_family(), 14.)
-                .with_color(blended_colors::text_sub(theme, theme.background()))
-                .finish();
+        let subtitle = Text::new(subtitle_text, appearance.ui_font_family(), 14.)
+            .with_color(blended_colors::text_sub(theme, theme.background()))
+            .finish();
 
         Flex::column()
             .with_cross_axis_alignment(CrossAxisAlignment::Start)

@@ -1,6 +1,7 @@
 use std::ops::Sub;
 
 use chrono::{DateTime, Duration, Local, Utc};
+use warp_i18n::{tr, tr_with};
 
 // Some conversion ratios for time units.
 const SEC_TO_MS: f64 = 1000.;
@@ -98,12 +99,13 @@ pub fn human_readable_approx_duration(duration: Duration, sentence_case: bool) -
     // Minutes and seconds are both abbreviated, so skip pluralization.
     let minutes = ms / MIN_TO_MS;
     if minutes >= 1. {
-        return format!("{} min ago", minutes as i32);
+        let count = (minutes as i32).to_string();
+        return tr_with("time_ago.minute_short", &[("count", &count)]);
     }
     if sentence_case {
-        "Just now".to_owned()
+        tr("time_ago.just_now_sentence")
     } else {
-        "just now".to_owned()
+        tr("time_ago.just_now")
     }
 }
 
@@ -111,11 +113,27 @@ pub fn human_readable_approx_duration(duration: Duration, sentence_case: bool) -
 /// unit pluralized if the value is not 1.
 fn truncated_quantity_with_unit(num: f64, unit: &str) -> String {
     let truncated_int = num as i32;
-    if truncated_int == 1 {
-        format!("{truncated_int} {unit} ago")
+    let count = truncated_int.to_string();
+    let key = if truncated_int == 1 {
+        match unit {
+            "year" => "time_ago.year_one",
+            "month" => "time_ago.month_one",
+            "week" => "time_ago.week_one",
+            "day" => "time_ago.day_one",
+            "hour" => "time_ago.hour_one",
+            _ => "time_ago.unit_one",
+        }
     } else {
-        format!("{truncated_int} {unit}s ago")
-    }
+        match unit {
+            "year" => "time_ago.year_other",
+            "month" => "time_ago.month_other",
+            "week" => "time_ago.week_other",
+            "day" => "time_ago.day_other",
+            "hour" => "time_ago.hour_other",
+            _ => "time_ago.unit_other",
+        }
+    };
+    tr_with(key, &[("count", &count), ("unit", unit)])
 }
 
 /// Formats a monotonic `Instant` as a human-readable relative timestamp.
@@ -124,27 +142,30 @@ pub fn format_elapsed_since(created_at: instant::Instant) -> String {
     let secs = created_at.elapsed().as_secs();
 
     if secs < 60 {
-        "Just now".to_string()
+        tr("time_ago.just_now_sentence")
     } else if secs < 3600 {
         let mins = secs / 60;
         if mins == 1 {
-            "1 minute ago".to_string()
+            tr("time_ago.minute_one")
         } else {
-            format!("{mins} minutes ago")
+            let count = mins.to_string();
+            tr_with("time_ago.minute_other", &[("count", &count)])
         }
     } else if secs < 86400 {
         let hours = secs / 3600;
         if hours == 1 {
-            "1 hour ago".to_string()
+            tr("time_ago.hour_one")
         } else {
-            format!("{hours} hours ago")
+            let count = hours.to_string();
+            tr_with("time_ago.hour_other", &[("count", &count)])
         }
     } else {
         let days = secs / 86400;
         if days == 1 {
-            "1 day ago".to_string()
+            tr("time_ago.day_one")
         } else {
-            format!("{days} days ago")
+            let count = days.to_string();
+            tr_with("time_ago.day_other", &[("count", &count)])
         }
     }
 }

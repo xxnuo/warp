@@ -5,6 +5,7 @@
 
 use markdown_parser::{FormattedText, FormattedTextFragment, FormattedTextLine};
 use warp_core::ui::theme::{AnsiColorIdentifier, Fill};
+use warp_i18n::{tr, tr_with};
 use warpui::elements::new_scrollable::SingleAxisConfig;
 use warpui::elements::{
     Align, Border, ChildView, ClippedScrollStateHandle, ConstrainedBox, Container, CornerRadius,
@@ -145,7 +146,7 @@ impl FirstTimeCloudAgentSetupView {
         // Title - 20px medium weight
         column.add_child(
             Text::new(
-                "Start a new Oz cloud agent",
+                tr("ambient_agent.first_time_setup.title"),
                 appearance.ui_font_family(),
                 20.,
             )
@@ -156,11 +157,9 @@ impl FirstTimeCloudAgentSetupView {
 
         // Description with "Visit docs" link
         let description_fragments = vec![
-            FormattedTextFragment::plain_text(
-                "Use Oz cloud agents to run parallel agents, build agents that run autonomously, and check in on your agents from anywhere. ",
-            ),
+            FormattedTextFragment::plain_text(tr("ambient_agent.first_time_setup.description")),
             FormattedTextFragment::hyperlink(
-                "Visit docs",
+                tr("ambient_agent.first_time_setup.visit_docs"),
                 "https://docs.warp.dev/agent-platform/cloud-agents/overview",
             ),
         ];
@@ -189,7 +188,7 @@ impl FirstTimeCloudAgentSetupView {
 
         // Bold/semibold text in foreground color (per Figma: font-semibold text-[#e3e2df])
         Text::new(
-            "Cloud agents require an environment that they'll run in to get their task done. Create your first environment below. You'll be able to edit the environment later, or add new environments when you need them.",
+            tr("ambient_agent.first_time_setup.subheading"),
             appearance.ui_font_family(),
             appearance.ui_font_size(),
         )
@@ -209,10 +208,14 @@ impl FirstTimeCloudAgentSetupView {
 
         // Badge with blue border
         let badge = Container::new(
-            Text::new("Free credits", appearance.ui_font_family(), 12.)
-                .with_style(Properties::default().weight(Weight::Semibold))
-                .with_color(theme.accent().into())
-                .finish(),
+            Text::new(
+                tr("ambient_agent.first_time_setup.free_credits"),
+                appearance.ui_font_family(),
+                12.,
+            )
+            .with_style(Properties::default().weight(Weight::Semibold))
+            .with_color(theme.accent().into())
+            .finish(),
         )
         .with_horizontal_padding(6.)
         .with_vertical_padding(4.)
@@ -222,11 +225,12 @@ impl FirstTimeCloudAgentSetupView {
 
         // Banner text - dynamic based on credits
         let credits_text = if credits == 1 {
-            "You have 1 free credit to use on Oz cloud agents.".to_string()
+            tr("ambient_agent.first_time_setup.credits_one")
         } else {
-            format!(
-                "You have {} free credits to use on Oz cloud agents.",
-                credits
+            let credits = credits.to_string();
+            tr_with(
+                "ambient_agent.first_time_setup.credits_many",
+                &[("credits", &credits)],
             )
         };
         let text = Text::new(credits_text, appearance.ui_font_family(), 12.)

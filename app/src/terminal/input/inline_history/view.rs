@@ -5,6 +5,7 @@ use pathfinder_color::ColorU;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::ChildView;
 use warpui::{AppContext, Element, Entity, EntityId, ModelHandle, View, ViewContext, ViewHandle};
 
@@ -131,7 +132,7 @@ fn build_tab_configs(is_agent_view: bool) -> Vec<InlineMenuTabConfig<HistoryTab>
     if !is_agent_view {
         return vec![InlineMenuTabConfig {
             id: HistoryTab::All,
-            label: "All".to_string(),
+            label: tr("common.all"),
             filters: HashSet::new(),
         }];
     }
@@ -139,17 +140,17 @@ fn build_tab_configs(is_agent_view: bool) -> Vec<InlineMenuTabConfig<HistoryTab>
     vec![
         InlineMenuTabConfig {
             id: HistoryTab::All,
-            label: "All".to_string(),
+            label: tr("common.all"),
             filters: HashSet::new(),
         },
         InlineMenuTabConfig {
             id: HistoryTab::Commands,
-            label: "Commands".to_string(),
+            label: tr("search.filter.commands"),
             filters: HashSet::from([QueryFilter::Commands]),
         },
         InlineMenuTabConfig {
             id: HistoryTab::Prompts,
-            label: "Prompts".to_string(),
+            label: tr("search.filter.prompts"),
             filters: HashSet::from([QueryFilter::PromptHistory]),
         },
     ]
@@ -262,7 +263,7 @@ impl InlineHistoryMenuView {
 
         let menu_view = if FeatureFlag::InlineMenuHeaders.is_enabled() {
             let configure_button = ctx.add_view(|_| {
-                ActionButton::new("Configure", ConfigureButtonTheme)
+                ActionButton::new(tr("common.configure"), ConfigureButtonTheme)
                     .with_icon(Icon::Settings)
                     .with_size(ButtonSize::Small)
                     .on_click(|ctx| {
@@ -273,7 +274,7 @@ impl InlineHistoryMenuView {
                     })
             });
             let header_config = InlineMenuHeaderConfig {
-                label: "History".to_string(),
+                label: tr("search.filter.history"),
                 trailing_element: Some(Box::new(move |_app: &AppContext| {
                     ChildView::new(&configure_button).finish()
                 })),

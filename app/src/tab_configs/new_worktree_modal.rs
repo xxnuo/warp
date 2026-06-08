@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Element,
     Fill as ElementFill, Flex, MainAxisAlignment, MainAxisSize, MouseStateHandle, Padding,
@@ -67,8 +68,7 @@ const CLOSE_ICON_SIZE: f32 = 14.;
 /// Font size for inline validation error messages.
 const ERROR_FONT_SIZE: f32 = 12.;
 /// Error shown when the user-entered worktree branch name contains invalid characters.
-const INVALID_BRANCH_NAME_ERROR: &str =
-    "Name can only contain letters, numbers, hyphens, and underscores";
+const INVALID_BRANCH_NAME_ERROR_KEY: &str = "tab_configs.invalid_branch_name";
 
 /// Returns `true` if `name` is a valid worktree branch name.
 ///
@@ -324,7 +324,7 @@ impl View for NewWorktreeModal {
         // ── Header (custom — Modal wrapper has no title) ────────────────
         let header = {
             let title = Text::new_inline(
-                "New worktree".to_string(),
+                tr("tab_configs.new_worktree"),
                 appearance.ui_font_family(),
                 HEADER_TITLE_FONT_SIZE,
             )
@@ -406,14 +406,20 @@ impl View for NewWorktreeModal {
             .with_cross_axis_alignment(CrossAxisAlignment::Stretch);
 
         // Repo picker
-        body.add_child(Self::render_section_label("Select repository", appearance));
+        body.add_child(Self::render_section_label(
+            &tr("tab_configs.select_repository"),
+            appearance,
+        ));
         body.add_child(ChildView::new(&self.repo_picker).finish());
 
         // Branch picker (with gap)
         body.add_child(
-            Container::new(Self::render_section_label("Select branch", appearance))
-                .with_margin_top(SECTION_GAP)
-                .finish(),
+            Container::new(Self::render_section_label(
+                &tr("tab_configs.select_branch"),
+                appearance,
+            ))
+            .with_margin_top(SECTION_GAP)
+            .finish(),
         );
         body.add_child(ChildView::new(&self.branch_picker).finish());
 
@@ -463,7 +469,7 @@ impl View for NewWorktreeModal {
             .with_child(checkbox_element)
             .with_child(
                 Text::new_inline(
-                    "Autogenerate worktree branch name".to_string(),
+                    tr("tab_configs.autogenerate_worktree_branch_name"),
                     appearance.ui_font_family(),
                     appearance.ui_font_size(),
                 )
@@ -482,7 +488,7 @@ impl View for NewWorktreeModal {
         if !self.autogenerate_branch_name {
             body.add_child(
                 Container::new(Self::render_section_label(
-                    "Worktree branch name",
+                    &tr("tab_configs.worktree_branch_name"),
                     appearance,
                 ))
                 .with_margin_top(SECTION_GAP)
@@ -494,7 +500,7 @@ impl View for NewWorktreeModal {
                 body.add_child(
                     Container::new(
                         Text::new_inline(
-                            INVALID_BRANCH_NAME_ERROR.to_string(),
+                            tr(INVALID_BRANCH_NAME_ERROR_KEY),
                             appearance.ui_font_family(),
                             ERROR_FONT_SIZE,
                         )
@@ -539,7 +545,7 @@ impl View for NewWorktreeModal {
         let cancel_button = appearance
             .ui_builder()
             .button(ButtonVariant::Text, self.cancel_button_mouse_state.clone())
-            .with_text_label("Cancel".to_string())
+            .with_text_label(tr("common.cancel"))
             .with_style(text_button_base)
             .with_style(UiComponentStyles {
                 font_color: Some(main_text.into()),
@@ -561,7 +567,7 @@ impl View for NewWorktreeModal {
             let mut builder = appearance
                 .ui_builder()
                 .button(ButtonVariant::Text, self.open_button_mouse_state.clone())
-                .with_text_label("Open".to_string())
+                .with_text_label(tr("common.open"))
                 .with_style(text_button_base)
                 .with_style(UiComponentStyles {
                     font_color: Some(font_color.into()),

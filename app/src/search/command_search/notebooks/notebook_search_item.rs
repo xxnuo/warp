@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use ordered_float::OrderedFloat;
+use warp_i18n::tr_with;
 use warpui::elements::{
     ConstrainedBox, Container, Flex, Highlight, Icon, MainAxisAlignment, MainAxisSize,
     ParentElement, Text,
@@ -136,6 +137,9 @@ impl SearchItem for NotebookSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("Notebook: {}", self.model.title)
+        tr_with(
+            "search.a11y.notebook",
+            &[("name", self.model.title.as_str())],
+        )
     }
 }

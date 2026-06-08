@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, Highlight, Icon, ParentElement, Text,
 };
@@ -189,9 +190,15 @@ impl SearchItem for NotebookSearchItem {
 
     fn accessibility_label(&self) -> String {
         if let Some(description) = &self.notebook_description {
-            format!("Notebook: {} - {}", self.notebook_name, description)
+            tr_with(
+                "ai_context_menu.notebook.a11y.with_description",
+                &[("name", &self.notebook_name), ("description", description)],
+            )
         } else {
-            format!("Notebook: {}", self.notebook_name)
+            tr_with(
+                "ai_context_menu.notebook.a11y",
+                &[("name", &self.notebook_name)],
+            )
         }
     }
 
@@ -200,7 +207,7 @@ impl SearchItem for NotebookSearchItem {
 
         // Use notebook name, or "Untitled" if empty
         let display_name = if self.notebook_name.is_empty() {
-            "Untitled".to_string()
+            tr("common.untitled")
         } else {
             self.notebook_name.clone()
         };

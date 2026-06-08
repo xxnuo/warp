@@ -20,6 +20,7 @@ use url::Url;
 use warp_core::context_flag::ContextFlag;
 use warp_core::user_preferences::GetUserPreferences as _;
 use warp_graphql::billing::StripeSubscriptionPlan;
+use warp_i18n::tr;
 use warpui::clipboard::ClipboardContent;
 use warpui::elements::{
     Border, ChildAnchor, OffsetPositioning, ParentAnchor, ParentElement, ParentOffsetBounds, Stack,
@@ -424,19 +425,19 @@ pub fn init(app: &mut AppContext) {
 
     app.register_fixed_bindings([
         FixedBinding::empty(
-            "Hide All Windows",
+            tr("root_view.binding.hide_all_windows"),
             RootViewAction::ShowOrHideNonQuakeModeWindows,
             id!("RootView") & id!(flags::ACTIVATION_HOTKEY_FLAG),
         ),
         FixedBinding::empty(
-            "Show Dedicated Hotkey Window",
+            tr("root_view.binding.show_dedicated_hotkey_window"),
             RootViewAction::ToggleQuakeModeWindow,
             id!("RootView")
                 & id!(flags::QUAKE_MODE_ENABLED_CONTEXT_FLAG)
                 & !id!(flags::QUAKE_WINDOW_OPEN_FLAG),
         ),
         FixedBinding::empty(
-            "Hide Dedicated Hotkey Window",
+            tr("root_view.binding.hide_dedicated_hotkey_window"),
             RootViewAction::ToggleQuakeModeWindow,
             id!("RootView")
                 & id!(flags::QUAKE_MODE_ENABLED_CONTEXT_FLAG)
@@ -448,7 +449,7 @@ pub fn init(app: &mut AppContext) {
         // Register a binding to toggle fullscreen on Linux and Windows.
         EditableBinding::new(
             "root_view:toggle_fullscreen",
-            "Toggle fullscreen",
+            tr("root_view.binding.toggle_fullscreen"),
             RootViewAction::ToggleFullscreen,
         )
         .with_group(bindings::BindingGroup::Navigation.as_str())
@@ -457,7 +458,7 @@ pub fn init(app: &mut AppContext) {
         // Debug binding for onboarding state
         EditableBinding::new(
             "root_view:enter_onboarding_state",
-            "[Debug] Enter Onboarding State",
+            tr("root_view.binding.debug_enter_onboarding_state"),
             RootViewAction::DebugEnterOnboardingState,
         )
         .with_group(bindings::BindingGroup::Settings.as_str())
@@ -897,7 +898,10 @@ fn create_environment(arg: &CreateEnvironmentArg, ctx: &mut AppContext) {
                 workspace
                     .active_tab_pane_group()
                     .update(ctx, |pane_group, ctx| {
-                        pane_group.set_title("Create Environment", ctx);
+                        pane_group.set_title(
+                            &tr("ai.agent_management.setup_guide.workflow.create_environment"),
+                            ctx,
+                        );
 
                         if let Some(terminal_view) = pane_group.active_session_view(ctx) {
                             terminal_view.update(ctx, |_, ctx| {
@@ -930,7 +934,10 @@ fn create_environment_and_run(arg: &CreateEnvironmentArg, ctx: &mut AppContext) 
                 workspace
                     .active_tab_pane_group()
                     .update(ctx, |pane_group, ctx| {
-                        pane_group.set_title("Create Environment", ctx);
+                        pane_group.set_title(
+                            &tr("ai.agent_management.setup_guide.workflow.create_environment"),
+                            ctx,
+                        );
 
                         if let Some(terminal_view) = pane_group.active_session_view(ctx) {
                             terminal_view.update(ctx, |_, ctx| {
@@ -1055,7 +1062,8 @@ fn open_warp_drive_object(arg: &OpenWarpDriveObjectArgs, ctx: &mut AppContext) {
 
 fn display_object_missing_error_in_window(window_id: WindowId, ctx: &mut AppContext) {
     crate::workspace::ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
-        let toast = DismissibleToast::error(String::from("Resource not found or access denied"));
+        let toast =
+            DismissibleToast::error(tr("workspace.toast.resource_not_found_or_access_denied"));
         toast_stack.add_ephemeral_toast(toast, window_id, ctx);
     });
 }
@@ -2675,7 +2683,10 @@ impl RootView {
                 workspace
                     .active_tab_pane_group()
                     .update(ctx, |pane_group, ctx| {
-                        pane_group.set_title("Create Environment", ctx);
+                        pane_group.set_title(
+                            &tr("ai.agent_management.setup_guide.workflow.create_environment"),
+                            ctx,
+                        );
 
                         if let Some(terminal_view) = pane_group.active_session_view(ctx) {
                             terminal_view.update(ctx, |_, ctx| {
@@ -2720,7 +2731,10 @@ impl RootView {
             workspace
                 .active_tab_pane_group()
                 .update(ctx, |pane_group, ctx| {
-                    pane_group.set_title("Create Environment", ctx);
+                    pane_group.set_title(
+                        &tr("ai.agent_management.setup_guide.workflow.create_environment"),
+                        ctx,
+                    );
 
                     if let Some(terminal_view) = pane_group.active_session_view(ctx) {
                         terminal_view.update(ctx, |_, ctx| {

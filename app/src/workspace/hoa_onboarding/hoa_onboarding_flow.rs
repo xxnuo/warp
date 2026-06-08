@@ -7,6 +7,7 @@ use pathfinder_color::ColorU;
 use settings::Setting;
 use warp_core::ui::theme::phenomenon::PhenomenonStyle;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Empty, Flex,
     FormattedTextElement, MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement, Radius,
@@ -207,15 +208,18 @@ impl HoaOnboardingFlow {
         });
 
         let cta_button = ctx.add_view(|_ctx| {
-            ActionButton::new("See what's new", HoaWelcomeModalButtonTheme)
-                .with_full_width(true)
-                .on_click(|ctx| ctx.dispatch_typed_action(HoaOnboardingAction::AdvanceFromWelcome))
+            ActionButton::new(
+                tr("workspace.hoa.see_whats_new"),
+                HoaWelcomeModalButtonTheme,
+            )
+            .with_full_width(true)
+            .on_click(|ctx| ctx.dispatch_typed_action(HoaOnboardingAction::AdvanceFromWelcome))
         });
 
         let enter = Keystroke::parse("enter").unwrap_or_default();
 
         let next_vtabs_button = ctx.add_view(|ctx| {
-            ActionButton::new("Next", HoaPrimaryButtonTheme)
+            ActionButton::new(tr("common.next"), HoaPrimaryButtonTheme)
                 .with_keybinding(KeystrokeSource::Fixed(enter.clone()), ctx)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(HoaOnboardingAction::AdvanceFromVerticalTabs)
@@ -223,19 +227,19 @@ impl HoaOnboardingFlow {
         });
 
         let dismiss_vtabs_button = ctx.add_view(|ctx| {
-            ActionButton::new("Dismiss", HoaPrimaryButtonTheme)
+            ActionButton::new(tr("common.dismiss"), HoaPrimaryButtonTheme)
                 .with_keybinding(KeystrokeSource::Fixed(enter.clone()), ctx)
                 .on_click(|ctx| ctx.dispatch_typed_action(HoaOnboardingAction::Dismiss))
         });
 
         let next_inbox_button = ctx.add_view(|ctx| {
-            ActionButton::new("Next", HoaPrimaryButtonTheme)
+            ActionButton::new(tr("common.next"), HoaPrimaryButtonTheme)
                 .with_keybinding(KeystrokeSource::Fixed(enter.clone()), ctx)
                 .on_click(|ctx| ctx.dispatch_typed_action(HoaOnboardingAction::AdvanceFromInbox))
         });
 
         let finish_button = ctx.add_view(|ctx| {
-            ActionButton::new("Finish", HoaPrimaryButtonTheme)
+            ActionButton::new(tr("common.finish"), HoaPrimaryButtonTheme)
                 .with_keybinding(KeystrokeSource::Fixed(enter), ctx)
                 .on_click(|ctx| ctx.dispatch_typed_action(HoaOnboardingAction::Finish))
         });
@@ -373,8 +377,8 @@ impl HoaOnboardingFlow {
 
     fn render_callout_content(
         &self,
-        title: &'static str,
-        description: &'static str,
+        title: String,
+        description: String,
         extra_child: Option<Box<dyn Element>>,
         button: &ViewHandle<ActionButton>,
         appearance: &Appearance,
@@ -424,7 +428,7 @@ impl HoaOnboardingFlow {
             .finish();
 
         let checkbox_label = Text::new_inline(
-            "Switch back to horizontal tabs".to_string(),
+            tr("workspace.hoa_onboarding.switch_back_horizontal_tabs"),
             appearance.ui_font_family(),
             12.,
         )
@@ -445,8 +449,8 @@ impl HoaOnboardingFlow {
         };
 
         self.render_callout_content(
-            "Introducing vertical tabs - the new default",
-            "Vertical tabs show all open agent and terminal panes, grouped by tab. Customize what information you want to see to support your workflow.",
+            tr("workspace.hoa_onboarding.vertical_tabs_callout.title"),
+            tr("workspace.hoa_onboarding.vertical_tabs_callout.description"),
             Some(checkbox_row),
             button,
             appearance,
@@ -455,7 +459,7 @@ impl HoaOnboardingFlow {
 
     fn render_inbox_callout(&self, appearance: &Appearance) -> Box<dyn Element> {
         let title = Text::new(
-            "Meet your new agent inbox",
+            tr("workspace.hoa_onboarding.inbox_callout.title"),
             appearance.ui_font_family(),
             16.,
         )
@@ -465,7 +469,7 @@ impl HoaOnboardingFlow {
 
         // Build the description with an inline "Learn more" hyperlink.
         let learn_more_fragment = FormattedTextFragment {
-            text: "Learn more".into(),
+            text: tr("common.learn_more").into(),
             styles: FormattedTextStyles {
                 underline: true,
                 hyperlink: Some(Hyperlink::Url(
@@ -476,9 +480,9 @@ impl HoaOnboardingFlow {
         };
 
         let formatted = FormattedText::new([FormattedTextLine::Line(vec![
-            FormattedTextFragment::plain_text(
-                "Warp pipes through notifications from any CLI coding agent into a unified notification center that works across all coding agents and harnesses. ",
-            ),
+            FormattedTextFragment::plain_text(tr(
+                "workspace.hoa_onboarding.inbox_callout.description",
+            )),
             learn_more_fragment,
         ])]);
 

@@ -1,4 +1,5 @@
 use settings::Setting as _;
+use warp_i18n::tr;
 use warpui::keymap::FixedBinding;
 use warpui::{AppContext, Element, Entity, SingletonEntity, TypedActionView, View, ViewContext};
 
@@ -12,8 +13,6 @@ use crate::workspace::tab_settings::{
     HeaderToolbarChipSelection, TabSettings, TabSettingsChangedEvent,
 };
 use crate::{report_if_error, Appearance};
-
-const MODAL_TITLE: &str = "Edit toolbar";
 
 pub fn init(app: &mut AppContext) {
     use warpui::keymap::macros::*;
@@ -242,10 +241,11 @@ impl View for HeaderToolbarInlineEditor {
 
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
+        let available_section_label = tr("workspace.header_toolbar.available_items");
         render_chip_editor_sections(
             &self.chip_configurator,
             ChipEditorSectionsConfig {
-                available_section_label: "Available items",
+                available_section_label: &available_section_label,
                 is_at_defaults: is_toolbar_editor_at_defaults(&self.chip_configurator),
                 reset_action: HeaderToolbarInlineEditorAction::ResetDefault,
                 activate_action: HeaderToolbarInlineEditorAction::Activate,
@@ -336,11 +336,13 @@ impl View for HeaderToolbarEditorModal {
 
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
+        let title = tr("workspace.header_toolbar.edit_toolbar");
+        let available_section_label = tr("workspace.header_toolbar.available_items");
         render_chip_editor_modal(
             &self.chip_configurator,
             ChipEditorModalConfig {
-                title: MODAL_TITLE,
-                available_section_label: "Available items",
+                title: &title,
+                available_section_label: &available_section_label,
                 is_at_defaults: self.is_at_defaults(),
                 is_dirty: self.is_dirty,
                 cancel_action: HeaderToolbarEditorAction::Cancel,

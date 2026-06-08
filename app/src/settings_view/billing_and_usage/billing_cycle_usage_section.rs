@@ -1,8 +1,9 @@
-use chrono::{DateTime, Datelike, Local, Utc};
+use chrono::{DateTime, Datelike, Local, Timelike, Utc};
 use markdown_parser::{FormattedText, FormattedTextFragment, FormattedTextLine};
 use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::{active_locale, tr, tr_with};
 use warpui::elements::{
     Border, ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
     DropShadow, Empty, Flex, FormattedTextElement, HighlightedHyperlink, Hoverable, HyperlinkLens,
@@ -383,10 +384,14 @@ impl BillingCycleUsageSectionView {
             .with_main_axis_size(MainAxisSize::Max);
 
         row.add_child(
-            Text::new_inline("Usage", appearance.ui_font_family(), HEADER_FONT_SIZE)
-                .with_style(Properties::default().weight(Weight::Bold))
-                .with_color(theme.active_ui_text_color().into())
-                .finish(),
+            Text::new_inline(
+                tr("settings.billing.usage"),
+                appearance.ui_font_family(),
+                HEADER_FONT_SIZE,
+            )
+            .with_style(Properties::default().weight(Weight::Bold))
+            .with_color(theme.active_ui_text_color().into())
+            .finish(),
         );
 
         let mut right_side = Flex::row()
@@ -446,10 +451,19 @@ impl BillingCycleUsageSectionView {
             return None;
         }
         let theme = appearance.theme();
-        let reset_str = AIRequestUsageModel::as_ref(app)
-            .next_refresh_time_local()
-            .format("Resets %b %d, %-I:%M %p")
-            .to_string();
+        let reset_time = AIRequestUsageModel::as_ref(app).next_refresh_time_local();
+        let date = if active_locale().id() == "zh-CN" {
+            format!(
+                "{}月{}日 {:02}:{:02}",
+                reset_time.month(),
+                reset_time.day(),
+                reset_time.hour(),
+                reset_time.minute()
+            )
+        } else {
+            reset_time.format("%b %d, %-I:%M %p").to_string()
+        };
+        let reset_str = tr_with("settings.billing.resets_at", &[("date", &date)]);
         Some(
             Text::new_inline(
                 reset_str,
@@ -733,53 +747,66 @@ impl BillingCycleUsageSectionView {
 /// visibility CTA banner, or `None` to suppress the banner entirely.
 fn visibility_cta_for(
     granularity: UsageVisibilityGranularity,
-) -> Option<(&'static str, &'static str, BillingCycleUsageAction, Icon)> {
+) -> Option<(String, String, BillingCycleUsageAction, Icon)> {
     match granularity {
         UsageVisibilityGranularity::OwnOnly => Some((
-            "Upgrade to Build",
-            "to see team-level credit usage.",
+            tr("settings.billing.upgrade_to_build"),
+            tr("settings.billing.team_level_credit_usage_suffix"),
             BillingCycleUsageAction::OpenUpgrade,
             Icon::ArrowCircleBrokenUp,
         )),
         UsageVisibilityGranularity::TeamAggregate => Some((
-            "Upgrade to Business",
-            "to see per-user credit attribution.",
+            tr("settings.billing.upgrade_to_business"),
+            tr("settings.billing.per_user_credit_attribution_suffix"),
             BillingCycleUsageAction::OpenUpgrade,
             Icon::ArrowCircleBrokenUp,
         )),
         UsageVisibilityGranularity::PerUserTotals => Some((
-            "Upgrade to Enterprise",
-            "to see fine-grained credit attribution and set per-user spend limits.",
+            tr("settings.billing.upgrade_to_enterprise"),
+            tr("settings.billing.fine_grained_credit_attribution_suffix"),
             BillingCycleUsageAction::OpenUpgrade,
             Icon::ArrowCircleBrokenUp,
         )),
         // FullBreakdown viewers already have full visibility; nudge them to
         // the admin panel where per-user spend limits actually get configured.
         UsageVisibilityGranularity::FullBreakdown => Some((
-            "Open the admin panel",
-            "to set per-user spend limits.",
+            tr("settings.billing.open_admin_panel"),
+            tr("settings.billing.set_per_user_spend_limits_suffix"),
             BillingCycleUsageAction::OpenAdminPanel,
             Icon::Users,
         )),
     }
 }
 
-fn legend_style_for(cost_type: AiCreditsUsageAndCostType) -> (ColorU, &'static str) {
+fn legend_style_for(cost_type: AiCreditsUsageAndCostType) -> (ColorU, String) {
     match cost_type {
-        AiCreditsUsageAndCostType::BaseLimit => (BASE_CREDITS_DOT_COLOR, "Base"),
-        AiCreditsUsageAndCostType::BonusGrant => (BONUS_CREDITS_DOT_COLOR, "Add-ons"),
-        AiCreditsUsageAndCostType::Payg => (PAYG_CREDITS_DOT_COLOR, "Pay-as-you-go"),
-        AiCreditsUsageAndCostType::AmbientBonusGrant => (AMBIENT_CREDITS_DOT_COLOR, "Cloud-only"),
-        AiCreditsUsageAndCostType::Aggregate => (AGGREGATE_CREDITS_DOT_COLOR, "Combined"),
-        AiCreditsUsageAndCostType::Other(_) => (BASE_CREDITS_DOT_COLOR, ""),
+        AiCreditsUsageAndCostType::BaseLimit => {
+            (BASE_CREDITS_DOT_COLOR, tr("settings.billing.legend_base"))
+        }
+        AiCreditsUsageAndCostType::BonusGrant => (
+            BONUS_CREDITS_DOT_COLOR,
+            tr("settings.billing.legend_addons"),
+        ),
+        AiCreditsUsageAndCostType::Payg => (
+            PAYG_CREDITS_DOT_COLOR,
+            tr("settings.billing.legend_pay_as_you_go"),
+        ),
+        AiCreditsUsageAndCostType::AmbientBonusGrant => (
+            AMBIENT_CREDITS_DOT_COLOR,
+            tr("settings.billing.legend_cloud_only"),
+        ),
+        AiCreditsUsageAndCostType::Aggregate => (
+            AGGREGATE_CREDITS_DOT_COLOR,
+            tr("settings.billing.legend_combined"),
+        ),
+        AiCreditsUsageAndCostType::Other(_) => (BASE_CREDITS_DOT_COLOR, String::new()),
     }
 }
 
 fn render_aggregate_legend_tooltip(appearance: &Appearance) -> Box<dyn Element> {
     let theme = appearance.theme();
     let text = Text::new_inline(
-        "Other team members' usage across add-on, pay-as-you-go, and cloud-only credits."
-            .to_string(),
+        tr("settings.billing.aggregate_legend_tooltip"),
         appearance.ui_font_family(),
         12.,
     )
@@ -801,6 +828,27 @@ fn render_aggregate_legend_tooltip(appearance: &Appearance) -> Box<dyn Element> 
 fn format_period_range(start: DateTime<Utc>, end: DateTime<Utc>) -> String {
     let start = start.with_timezone(&Local);
     let end = end.with_timezone(&Local);
+    if active_locale().id() == "zh-CN" {
+        if start.year() == end.year() {
+            return format!(
+                "{}月{}日 - {}月{}日，{}年",
+                start.month(),
+                start.day(),
+                end.month(),
+                end.day(),
+                end.year()
+            );
+        }
+        return format!(
+            "{}年{}月{}日 - {}年{}月{}日",
+            start.year(),
+            start.month(),
+            start.day(),
+            end.year(),
+            end.month(),
+            end.day()
+        );
+    }
     if start.year() == end.year() {
         format!("{} - {}", start.format("%b %d"), end.format("%b %d, %Y"))
     } else {

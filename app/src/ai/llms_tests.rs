@@ -1,3 +1,4 @@
+use warp_i18n::{set_locale, tr, tr_with};
 use warpui::App;
 
 use super::*;
@@ -164,6 +165,7 @@ fn model(name: &str, alias: Option<&str>, config_key: &str) -> CustomEndpointMod
 
 #[test]
 fn custom_llm_infos_built_from_endpoints() {
+    set_locale("en-US");
     let keys = ai::api_keys::ApiKeys {
         custom_endpoints: vec![endpoint(
             "My Endpoint",
@@ -180,16 +182,18 @@ fn custom_llm_infos_built_from_endpoints() {
     assert_eq!(infos.len(), 2);
     assert_eq!(infos[0].display_name, "fast");
     assert_eq!(infos[0].id.as_str(), "uuid-1");
-    assert_eq!(
-        infos[0].description.as_deref(),
-        Some("Custom · My Endpoint")
+    let description = tr_with(
+        "ai.llms.custom_endpoint_description",
+        &[("endpoint", "My Endpoint")],
     );
+    assert_eq!(infos[0].description.as_deref(), Some(description.as_str()));
     assert_eq!(infos[1].display_name, "llama");
     assert_eq!(infos[1].id.as_str(), "uuid-2");
 }
 
 #[test]
 fn custom_llm_display_name_uses_alias_when_present() {
+    set_locale("en-US");
     let keys = ai::api_keys::ApiKeys {
         custom_endpoints: vec![endpoint(
             "ep",
@@ -254,7 +258,7 @@ fn custom_endpoint_usage_display_label_resolves_alias_name_and_generic_fallback(
     );
     assert_eq!(
         preferences.custom_endpoint_usage_display_label("unknown"),
-        CUSTOM_ENDPOINT_USAGE_FALLBACK_LABEL
+        tr("ai.llms.custom_endpoint")
     );
 }
 

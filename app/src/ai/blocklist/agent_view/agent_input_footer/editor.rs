@@ -4,6 +4,7 @@
 //! drag/drop chips between left, right, and unused banks.
 
 use settings::Setting as _;
+use warp_i18n::tr;
 use warpui::keymap::FixedBinding;
 use warpui::{AppContext, Element, Entity, SingletonEntity, TypedActionView, View, ViewContext};
 
@@ -18,9 +19,6 @@ use crate::terminal::session_settings::{
     SessionSettingsChangedEvent, ToolbarChipSelection,
 };
 use crate::{report_if_error, Appearance};
-
-const AGENT_MODAL_TITLE: &str = "Edit agent toolbelt";
-const CLI_MODAL_TITLE: &str = "Edit CLI agent toolbelt";
 
 /// Controls which set of items and settings the editor modal operates on.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -233,10 +231,11 @@ impl View for AgentToolbarInlineEditor {
 
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
+        let available_section_label = tr("agent_input_footer.editor.available_chips");
         render_chip_editor_sections(
             &self.chip_configurator,
             ChipEditorSectionsConfig {
-                available_section_label: "Available chips",
+                available_section_label: &available_section_label,
                 is_at_defaults: self.is_at_defaults(),
                 reset_action: AgentToolbarInlineEditorAction::ResetDefault,
                 activate_action: AgentToolbarInlineEditorAction::Activate,
@@ -325,10 +324,10 @@ impl AgentToolbarEditorModal {
         self.is_dirty = false;
     }
 
-    fn modal_title(&self) -> &'static str {
+    fn modal_title(&self) -> String {
         match self.mode {
-            AgentToolbarEditorMode::AgentView => AGENT_MODAL_TITLE,
-            AgentToolbarEditorMode::CLIAgent => CLI_MODAL_TITLE,
+            AgentToolbarEditorMode::AgentView => tr("agent_input_footer.editor.agent_title"),
+            AgentToolbarEditorMode::CLIAgent => tr("agent_input_footer.editor.cli_title"),
         }
     }
 }
@@ -382,11 +381,13 @@ impl View for AgentToolbarEditorModal {
 
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
+        let title = self.modal_title();
+        let available_section_label = tr("agent_input_footer.editor.available_chips");
         render_chip_editor_modal(
             &self.chip_configurator,
             ChipEditorModalConfig {
-                title: self.modal_title(),
-                available_section_label: "Available chips",
+                title: &title,
+                available_section_label: &available_section_label,
                 is_at_defaults: self.is_at_defaults(),
                 is_dirty: self.is_dirty,
                 cancel_action: AgentToolbarEditorAction::Cancel,

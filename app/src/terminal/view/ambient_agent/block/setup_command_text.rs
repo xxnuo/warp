@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::Icon;
+use warp_i18n::tr;
 use warpui::elements::ParentElement;
 use warpui::prelude::{
     ConstrainedBox, Container, CrossAxisAlignment, Cursor, Flex, Hoverable, MouseStateHandle, Text,
@@ -184,9 +185,9 @@ impl View for CloudModeSetupTextBlock {
                             .setup_command_state()
                             .is_running(self.group_id)
                         {
-                            "Running setup commands..."
+                            tr("ambient_agent.running_setup_commands")
                         } else {
-                            "Ran setup commands"
+                            tr("ambient_agent.ran_setup_commands")
                         },
                         appearance.ai_font_family(),
                         appearance.monospace_font_size(),

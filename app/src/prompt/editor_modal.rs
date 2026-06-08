@@ -3,6 +3,7 @@ use pathfinder_geometry::vector::vec2f;
 use serde::Serialize;
 use settings::Setting as _;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ChildAnchor, ChildView, Clipped, ConstrainedBox, Container, CornerRadius,
     CrossAxisAlignment, Empty, Flex, Hoverable, MainAxisAlignment, MainAxisSize, MouseStateHandle,
@@ -50,11 +51,6 @@ const DROPDOWN_WIDTH: f32 = 72.;
 
 const MODAL_CONTENT_FONT_SIZE: f32 = 14.;
 const CHECKBOX_SIZE: f32 = 16.;
-
-const MODAL_TITLE: &str = "Edit prompt";
-const WARP_PROMPT_SECTION_HEADER: &str = "Warp terminal prompt";
-const SHELL_PROMPT_SECTION_HEADER: &str = "Shell prompt (PS1)";
-const RESTORE_DEFAULT_BUTTON: &str = "Restore default";
 
 pub fn init(app: &mut AppContext) {
     use warpui::keymap::macros::*;
@@ -173,7 +169,8 @@ impl EditorModal {
             // If the "default Warp prompt" i.e. no context chips, is selected, then default to no Warp prompt separator.
             _ => WarpPromptSeparator::None,
         };
-        let warp_prompt_separator_label = warp_prompt_separator.dropdown_item_label().to_owned();
+        let warp_prompt_separator_label =
+            warp_prompt_separator_dropdown_label(warp_prompt_separator);
 
         let warp_prompt_separator_dropdown = ctx.add_typed_action_view(|ctx| {
             let mut dropdown = Dropdown::new(ctx);
@@ -181,25 +178,25 @@ impl EditorModal {
             dropdown.set_menu_width(DROPDOWN_WIDTH, ctx);
             let items = vec![
                 DropdownItem::new(
-                    WarpPromptSeparator::None.dropdown_item_label(),
+                    warp_prompt_separator_dropdown_label(WarpPromptSeparator::None),
                     EditorModalAction::SetWarpPromptSeparator {
                         separator: WarpPromptSeparator::None,
                     },
                 ),
                 DropdownItem::new(
-                    WarpPromptSeparator::PercentSign.dropdown_item_label(),
+                    warp_prompt_separator_dropdown_label(WarpPromptSeparator::PercentSign),
                     EditorModalAction::SetWarpPromptSeparator {
                         separator: WarpPromptSeparator::PercentSign,
                     },
                 ),
                 DropdownItem::new(
-                    WarpPromptSeparator::DollarSign.dropdown_item_label(),
+                    warp_prompt_separator_dropdown_label(WarpPromptSeparator::DollarSign),
                     EditorModalAction::SetWarpPromptSeparator {
                         separator: WarpPromptSeparator::DollarSign,
                     },
                 ),
                 DropdownItem::new(
-                    WarpPromptSeparator::ChevronSymbol.dropdown_item_label(),
+                    warp_prompt_separator_dropdown_label(WarpPromptSeparator::ChevronSymbol),
                     EditorModalAction::SetWarpPromptSeparator {
                         separator: WarpPromptSeparator::ChevronSymbol,
                     },
@@ -381,6 +378,21 @@ impl Entity for EditorModal {
     type Event = EditorModalEvent;
 }
 
+fn warp_prompt_separator_dropdown_label(separator: WarpPromptSeparator) -> String {
+    match separator {
+        WarpPromptSeparator::None => tr("prompt.editor.separator.none"),
+        WarpPromptSeparator::PercentSign => WarpPromptSeparator::PercentSign
+            .dropdown_item_label()
+            .to_owned(),
+        WarpPromptSeparator::DollarSign => WarpPromptSeparator::DollarSign
+            .dropdown_item_label()
+            .to_owned(),
+        WarpPromptSeparator::ChevronSymbol => WarpPromptSeparator::ChevronSymbol
+            .dropdown_item_label()
+            .to_owned(),
+    }
+}
+
 impl TypedActionView for EditorModal {
     type Action = EditorModalAction;
 
@@ -479,7 +491,7 @@ impl EditorModal {
     fn render_header(&self, appearance: &Appearance) -> Box<dyn Element> {
         appearance
             .ui_builder()
-            .span(MODAL_TITLE.to_string())
+            .span(tr("prompt.editor.title"))
             .with_style(UiComponentStyles {
                 font_size: Some(MODAL_TITLE_FONT_SIZE),
                 font_weight: Some(warpui::fonts::Weight::Bold),
@@ -570,7 +582,7 @@ impl EditorModal {
             |_state| {
                 appearance
                     .ui_builder()
-                    .span(RESTORE_DEFAULT_BUTTON.to_string())
+                    .span(tr("prompt.editor.restore_default"))
                     .with_style(UiComponentStyles {
                         font_size: Some(MODAL_CONTENT_FONT_SIZE),
                         ..Default::default()
@@ -594,7 +606,7 @@ impl EditorModal {
     fn render_same_line_prompt_section(&self, appearance: &Appearance) -> Box<dyn Element> {
         let label = appearance
             .ui_builder()
-            .span("Same line prompt".to_string())
+            .span(tr("prompt.editor.same_line_prompt"))
             .with_style(UiComponentStyles {
                 font_size: Some(MODAL_CONTENT_FONT_SIZE),
                 ..Default::default()
@@ -632,7 +644,7 @@ impl EditorModal {
                 Container::new(
                     appearance
                         .ui_builder()
-                        .span("Separator".to_string())
+                        .span(tr("prompt.editor.separator"))
                         .with_style(UiComponentStyles {
                             font_size: Some(MODAL_CONTENT_FONT_SIZE),
                             ..Default::default()
@@ -670,7 +682,7 @@ impl EditorModal {
             .with_child(
                 appearance
                     .ui_builder()
-                    .span(WARP_PROMPT_SECTION_HEADER.to_string())
+                    .span(tr("prompt.editor.warp_terminal_prompt"))
                     .with_style(UiComponentStyles {
                         font_size: Some(MODAL_CONTENT_FONT_SIZE),
                         font_weight: Some(warpui::fonts::Weight::Semibold),
@@ -719,7 +731,7 @@ impl EditorModal {
 
         let header = appearance
             .ui_builder()
-            .span(SHELL_PROMPT_SECTION_HEADER.to_string())
+            .span(tr("prompt.editor.shell_prompt"))
             .with_style(UiComponentStyles {
                 font_size: Some(MODAL_CONTENT_FONT_SIZE),
                 font_weight: Some(warpui::fonts::Weight::Semibold),
@@ -779,7 +791,7 @@ impl EditorModal {
 
     fn render_buttons(&self, appearance: &Appearance) -> Box<dyn Element> {
         let cancel_button = self.render_primary_button(
-            "Cancel".to_string(),
+            tr("common.cancel"),
             ButtonVariant::Outlined,
             false,
             self.mouse_state_handles.cancel_button_handle.clone(),
@@ -794,7 +806,7 @@ impl EditorModal {
             || (matches!(self.prompt_type, PromptType::Warp)
                 && self.chip_configurator.used_chips.is_empty());
         let save_button = self.render_primary_button(
-            "Save changes".to_string(),
+            tr("prompt.editor.save_changes"),
             ButtonVariant::Accent,
             save_disabled,
             self.mouse_state_handles.save_button_handle.clone(),

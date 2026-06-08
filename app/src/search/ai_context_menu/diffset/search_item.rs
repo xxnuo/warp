@@ -1,5 +1,6 @@
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, Icon, ParentElement, Text,
 };
@@ -21,17 +22,23 @@ pub struct DiffSetSearchItem {
 impl DiffSetSearchItem {
     pub fn name(&self) -> String {
         match &self.diff_mode {
-            DiffMode::Head => "Uncommitted changes".to_string(),
-            DiffMode::MainBranch => "Changes vs. main branch".to_string(),
-            DiffMode::OtherBranch(branch) => format!("Changes vs. {branch}"),
+            DiffMode::Head => tr("code_review.uncommitted_changes"),
+            DiffMode::MainBranch => tr("ai_context_menu.diffset.changes_vs_main_branch"),
+            DiffMode::OtherBranch(branch) => tr_with(
+                "ai_context_menu.diffset.changes_vs_branch",
+                &[("branch", branch)],
+            ),
         }
     }
 
     pub fn description(&self) -> String {
         match &self.diff_mode {
-            DiffMode::Head => "All uncommitted changes in the working directory".to_string(),
-            DiffMode::MainBranch => "All changes compared to the main branch".to_string(),
-            DiffMode::OtherBranch(branch) => format!("All changes compared to {branch}"),
+            DiffMode::Head => tr("ai_context_menu.diffset.uncommitted_description"),
+            DiffMode::MainBranch => tr("ai_context_menu.diffset.main_branch_description"),
+            DiffMode::OtherBranch(branch) => tr_with(
+                "ai_context_menu.diffset.branch_description",
+                &[("branch", branch)],
+            ),
         }
     }
 }

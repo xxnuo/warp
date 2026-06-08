@@ -5,6 +5,7 @@ use warp_core::ui::appearance::Appearance;
 use warp_core::ui::builder::UiBuilder;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::WarpTheme;
+use warp_i18n::tr;
 use warpui::clipboard::ClipboardContent;
 use warpui::elements::*;
 use warpui::text_layout::ClipConfig;
@@ -14,9 +15,6 @@ use warpui::{Entity, SingletonEntity as _, TypedActionView, View, ViewContext};
 
 use crate::terminal::model::terminal_model::ExitReason;
 use crate::ui_components;
-
-const FILE_ISSUE_TEXT: &str = "File issue";
-const MORE_INFO_TEXT: &str = "More info";
 
 /// A banner to display when the shell process terminates.
 ///
@@ -165,9 +163,13 @@ impl TerminationType {
 
     fn text(&self, appearance: &Appearance) -> Box<dyn Element> {
         let text = match self {
-            TerminationType::Normal => "Shell process exited",
-            TerminationType::PtySpawnFailure { .. } => "Shell process could not start!",
-            TerminationType::Premature { .. } => "Shell process exited prematurely!",
+            TerminationType::Normal => tr("terminal.shell_terminated.process_exited"),
+            TerminationType::PtySpawnFailure { .. } => {
+                tr("terminal.shell_terminated.process_could_not_start")
+            }
+            TerminationType::Premature { .. } => {
+                tr("terminal.shell_terminated.process_exited_prematurely")
+            }
         };
 
         Text::new(text, appearance.ui_font_family(), 14.)
@@ -212,7 +214,7 @@ impl TerminationType {
                 vec![
                     ui_builder
                         .button(ButtonVariant::Text, handles[0].clone())
-                        .with_text_label(FILE_ISSUE_TEXT.to_string())
+                        .with_text_label(tr("terminal.shell_terminated.file_issue"))
                         .build()
                         .on_click(|ctx, _, _| {
                             ctx.dispatch_typed_action(Action::OpenUrl(
@@ -222,7 +224,7 @@ impl TerminationType {
                         .finish(),
                     ui_builder
                         .button(ButtonVariant::Outlined, handles[1].clone())
-                        .with_text_label(MORE_INFO_TEXT.to_string())
+                        .with_text_label(tr("terminal.shell_terminated.more_info"))
                         .build()
                         .on_click(|ctx, _, _| {
                             ctx.dispatch_typed_action(Action::OpenUrl(
@@ -240,7 +242,7 @@ impl TerminationType {
                 vec![
                     ui_builder
                         .button(ButtonVariant::Text, handles[0].clone())
-                        .with_text_label("Copy error".to_string())
+                        .with_text_label(tr("terminal.shell_terminated.copy_error"))
                         .build()
                         .on_click(move |evt_ctx, _ctx, _position| {
                             evt_ctx.dispatch_typed_action(Action::CopyPtySpawnError(
@@ -250,7 +252,7 @@ impl TerminationType {
                         .finish(),
                     ui_builder
                         .button(ButtonVariant::Text, handles[1].clone())
-                        .with_text_label(FILE_ISSUE_TEXT.to_string())
+                        .with_text_label(tr("terminal.shell_terminated.file_issue"))
                         .build()
                         .on_click(|ctx, _, _| {
                             ctx.dispatch_typed_action(Action::OpenUrl(
@@ -260,7 +262,7 @@ impl TerminationType {
                         .finish(),
                     ui_builder
                         .button(ButtonVariant::Outlined, handles[2].clone())
-                        .with_text_label(MORE_INFO_TEXT.to_string())
+                        .with_text_label(tr("terminal.shell_terminated.more_info"))
                         .build()
                         .on_click(|ctx, _, _| {
                             ctx.dispatch_typed_action(Action::OpenUrl(

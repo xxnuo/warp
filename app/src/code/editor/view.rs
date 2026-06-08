@@ -32,6 +32,7 @@ use warp_editor::render::model::{
     RichTextStyles, CODE_EDITOR_HIDDEN_SECTION_EXPANSION_LINES,
 };
 use warp_editor::search::{SearchEvent, Searcher, MATCH_FILL, SELECTED_MATCH_FILL};
+use warp_i18n::tr;
 use warp_util::content_version::ContentVersion;
 use warp_util::standardized_path::StandardizedPath;
 use warpui::elements::new_scrollable::{
@@ -660,7 +661,7 @@ impl CodeEditorView {
                 let trimmed = input.trim().to_string();
                 if trimmed.is_empty() {
                     self.goto_line_dialog.update(ctx, |dialog, ctx| {
-                        dialog.set_error("Please enter a line number".to_string(), ctx);
+                        dialog.set_error(tr("code.editor.goto_line.enter_line_number"), ctx);
                     });
                     return;
                 }
@@ -672,7 +673,10 @@ impl CodeEditorView {
                     Ok(n) if n >= 1 => n,
                     _ => {
                         self.goto_line_dialog.update(ctx, |dialog, ctx| {
-                            dialog.set_error("Please enter a valid line number".to_string(), ctx);
+                            dialog.set_error(
+                                tr("code.editor.goto_line.enter_valid_line_number"),
+                                ctx,
+                            );
                         });
                         return;
                     }
@@ -683,7 +687,7 @@ impl CodeEditorView {
                         Err(_) => {
                             self.goto_line_dialog.update(ctx, |dialog, ctx| {
                                 dialog.set_error(
-                                    "Please enter a valid column number".to_string(),
+                                    tr("code.editor.goto_line.enter_valid_column_number"),
                                     ctx,
                                 );
                             });

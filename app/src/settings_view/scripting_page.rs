@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 
 use settings::Setting as _;
+use warp_i18n::tr;
 use warpui::elements::{ChildView, Element, MouseStateHandle};
 use warpui::{AppContext, Entity, SingletonEntity, TypedActionView, View, ViewContext, ViewHandle};
 
@@ -50,7 +51,7 @@ impl ScriptingSettingsPageView {
         Self {
             page: PageType::new_uncategorized(
                 vec![Box::new(LocalControlModeWidget)],
-                Some("Scripting"),
+                Some(tr("settings.section.scripting")),
             ),
             local_only_icon_tooltip_states: RefCell::new(HashMap::new()),
             local_control_mode_dropdown,
@@ -156,7 +157,7 @@ impl SettingsWidget for LocalControlModeWidget {
         app: &AppContext,
     ) -> Box<dyn Element> {
         render_body_item::<ScriptingSettingsPageAction>(
-            "warpctrl CLI".into(),
+            tr("settings.scripting.warpctrl_cli"),
             None,
             LocalOnlyIconState::for_setting(
                 LocalControlModeSetting::storage_key(),
@@ -167,7 +168,7 @@ impl SettingsWidget for LocalControlModeWidget {
             ToggleState::Enabled,
             appearance,
             ChildView::new(&view.local_control_mode_dropdown).finish(),
-            Some("warpctrl allows for scripting Warp's UI.  Use with care.'".to_owned()),
+            Some(tr("settings.scripting.warpctrl_cli.description")),
         )
     }
 }

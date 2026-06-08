@@ -1,6 +1,7 @@
 use pathfinder_geometry::vector::vec2f;
 use warp_core::ui::theme::phenomenon::PhenomenonStyle;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::assets::asset_cache::AssetSource;
 use warpui::elements::{
     CacheOption, ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius,
@@ -20,30 +21,30 @@ const HERO_IMAGE_PATH: &str = "async/png/onboarding/hoa_welcome_banner.png";
 
 struct FeatureItem {
     icon: Icon,
-    title: &'static str,
-    description: &'static str,
+    title_key: &'static str,
+    description_key: &'static str,
 }
 
 const FEATURE_ITEMS: &[FeatureItem] = &[
     FeatureItem {
         icon: Icon::LayoutAlt01,
-        title: "Vertical tabs",
-        description: "Rich tab titles and metadata like git branch, worktree, and PR. Fully customizable.",
+        title_key: "workspace.hoa_onboarding.welcome_banner.vertical_tabs.title",
+        description_key: "workspace.hoa_onboarding.welcome_banner.vertical_tabs.description",
     },
     FeatureItem {
         icon: Icon::Sliders,
-        title: "Tab configs",
-        description: "Tab-level schema to set your directory, startup commands, theme, and worktree with one click",
+        title_key: "workspace.hoa_onboarding.welcome_banner.tab_configs.title",
+        description_key: "workspace.hoa_onboarding.welcome_banner.tab_configs.description",
     },
     FeatureItem {
         icon: Icon::Inbox,
-        title: "Agent inbox",
-        description: "Notifications when any agent needs your attention, also accessible in a central inbox",
+        title_key: "workspace.hoa_onboarding.welcome_banner.agent_inbox.title",
+        description_key: "workspace.hoa_onboarding.welcome_banner.agent_inbox.description",
     },
     FeatureItem {
         icon: Icon::MessageCheckSquare,
-        title: "Native code review",
-        description: "Send inline comments from Warp's code review directly to Claude Code, Codex, or OpenCode",
+        title_key: "workspace.hoa_onboarding.welcome_banner.native_code_review.title",
+        description_key: "workspace.hoa_onboarding.welcome_banner.native_code_review.description",
     },
 ];
 
@@ -84,7 +85,7 @@ pub fn render_welcome_banner(
     );
 
     // "New" badge
-    let text = Text::new_inline("New".to_string(), appearance.ui_font_family(), 14.)
+    let text = Text::new_inline(tr("common.new"), appearance.ui_font_family(), 14.)
         .with_color(PhenomenonStyle::modal_badge_text())
         .finish();
     let badge = ConstrainedBox::new(
@@ -105,7 +106,7 @@ pub fn render_welcome_banner(
 
     // Title
     let title = Text::new(
-        "Introducing universal agent support: level up any coding agent with Warp",
+        tr("workspace.hoa_onboarding.welcome_banner.title"),
         appearance.ui_font_family(),
         20.,
     )
@@ -132,12 +133,12 @@ pub fn render_welcome_banner(
             .with_cross_axis_alignment(CrossAxisAlignment::Start)
             .with_spacing(2.)
             .with_child(
-                Text::new_inline(item.title.to_string(), appearance.ui_font_family(), 14.)
+                Text::new_inline(tr(item.title_key), appearance.ui_font_family(), 14.)
                     .with_color(PhenomenonStyle::modal_feature_title_text())
                     .finish(),
             )
             .with_child(
-                Text::new(item.description, appearance.ui_font_family(), 14.)
+                Text::new(tr(item.description_key), appearance.ui_font_family(), 14.)
                     .with_color(PhenomenonStyle::modal_feature_description_text())
                     .finish(),
             )

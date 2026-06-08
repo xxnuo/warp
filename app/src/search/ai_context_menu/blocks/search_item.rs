@@ -2,6 +2,7 @@ use chrono::{DateTime, Local};
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
 use warp_core::command::ExitCode;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, Highlight, Icon, ParentElement, Text,
 };
@@ -19,20 +20,23 @@ use crate::util::truncation::truncate_from_end;
 /// Calculate how long ago a timestamp was
 fn time_ago_string(timestamp: Option<&DateTime<Local>>) -> String {
     let Some(timestamp) = timestamp else {
-        return "Just now".to_string();
+        return tr("ai_context_menu.blocks.just_now");
     };
 
     let now = Local::now();
     let duration = now.signed_duration_since(*timestamp);
 
     if duration.num_seconds() < 60 {
-        "Just now".to_string()
+        tr("ai_context_menu.blocks.just_now")
     } else if duration.num_minutes() < 60 {
-        format!("{} minutes ago", duration.num_minutes())
+        let count = duration.num_minutes().to_string();
+        tr_with("ai_context_menu.blocks.minutes_ago", &[("count", &count)])
     } else if duration.num_hours() < 24 {
-        format!("{} hours ago", duration.num_hours())
+        let count = duration.num_hours().to_string();
+        tr_with("ai_context_menu.blocks.hours_ago", &[("count", &count)])
     } else {
-        format!("{} days ago", duration.num_days())
+        let count = duration.num_days().to_string();
+        tr_with("ai_context_menu.blocks.days_ago", &[("count", &count)])
     }
 }
 
@@ -135,7 +139,7 @@ impl SearchItem for BlockSearchItem {
 
         // Create sub text: last 3 lines of output
         let sub_text = if self.output_lines.is_empty() {
-            "No output".to_string()
+            tr("ai_context_menu.blocks.no_output")
         } else {
             let joined = self.output_lines.join("\n").trim().to_string();
             // Additional safety truncation for the hover card

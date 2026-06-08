@@ -5,6 +5,7 @@ use markdown_parser::{
     FormattedText, FormattedTextFragment, FormattedTextInline, FormattedTextLine,
 };
 use pathfinder_geometry::vector::Vector2F;
+use warp_i18n::tr;
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, FormattedTextElement,
     HighlightedHyperlink, HyperlinkLens, HyperlinkUrl, MainAxisAlignment, MainAxisSize,
@@ -175,7 +176,7 @@ impl<T: Action + Clone> Banner<T> {
 
     fn permanent_dismissal_button() -> BannerTextButton {
         BannerTextButton::new(
-            String::from("Don't show me again"),
+            tr("banner.dont_show_me_again"),
             Rc::new(|ctx, _, _| {
                 ctx.dispatch_typed_action(BannerAction::<T>::Dismiss(DismissalType::Permanent));
             }),

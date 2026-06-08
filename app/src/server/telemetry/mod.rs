@@ -376,7 +376,6 @@ impl TelemetryApi {
         Ok(())
     }
 
-    /// Sends a POST request to the RudderStack HTTP API.
     async fn send_rudder_request(
         &self,
         mut msg: RudderMessage,

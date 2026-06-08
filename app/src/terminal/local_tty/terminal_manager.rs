@@ -29,6 +29,7 @@ use session_sharing_protocol::sharer::{
 use settings::Setting as _;
 use warp_core::execution_mode::AppExecutionMode;
 use warp_core::send_telemetry_from_ctx;
+use warp_i18n::tr;
 use warpui::r#async::executor::Background;
 use warpui::{AppContext, ModelContext, ModelHandle, SingletonEntity, ViewHandle, WindowId};
 #[cfg(unix)]
@@ -112,8 +113,6 @@ use crate::{send_telemetry_on_executor, NetworkStatus};
 type PtyController = writeable_pty::PtyController<mio_channel::Sender<Message>>;
 type RemoteServerController =
     writeable_pty::remote_server_controller::RemoteServerController<mio_channel::Sender<Message>>;
-
-const ACL_UPDATE_FAILURE_RESPONSE: &str = "Something went wrong. Please try again.";
 
 /// Whether the given CRDT operation should be dropped when broadcasting
 /// sharer input to viewers. In ambient agent sessions the sharer is a
@@ -304,7 +303,7 @@ impl TerminalManager {
                 display_name: wsl_name_or_shell_starter
                     .as_ref()
                     .map(|wsl_name_or_shell_starter| wsl_name_or_shell_starter.name())
-                    .unwrap_or(ShellName::LessDescriptive("Shell".to_owned())),
+                    .unwrap_or(ShellName::LessDescriptive(tr("terminal.shell"))),
             },
             ctx,
         );
@@ -1671,7 +1670,7 @@ impl TerminalManager {
 
                 terminal_view.update(ctx, |view, ctx| {
                     view.show_persistent_toast(
-                        "Something went wrong. Please try sharing again.".to_string(),
+                        tr("terminal.shared_session.try_sharing_again"),
                         ToastFlavor::Error,
                         ctx,
                     );
@@ -2049,8 +2048,7 @@ impl TerminalManager {
                         );
                     }
                     LinkAccessLevelUpdateResponse::Error => {
-                        let reason_string =
-                            "Failed to update permissions for shared session".to_owned();
+                        let reason_string = tr("shared_session.viewer.failed_update_permissions");
                         view.show_persistent_toast(reason_string, ToastFlavor::Error, ctx);
                     }
                 });
@@ -2074,7 +2072,7 @@ impl TerminalManager {
                     }
                     TeamAccessLevelUpdateResponse::Error(_) => {
                         view.show_persistent_toast(
-                            ACL_UPDATE_FAILURE_RESPONSE.to_owned(),
+                            tr("command_search.error.generic"),
                             crate::view_components::ToastFlavor::Error,
                             ctx,
                         );
@@ -2093,7 +2091,7 @@ impl TerminalManager {
                 if let RemoveGuestResponse::Error(_) = response {
                     terminal_view.update(ctx, |view, ctx| {
                         view.show_persistent_toast(
-                            ACL_UPDATE_FAILURE_RESPONSE.to_owned(),
+                            tr("command_search.error.generic"),
                             crate::view_components::ToastFlavor::Error,
                             ctx,
                         );
@@ -2104,7 +2102,7 @@ impl TerminalManager {
                 if let UpdatePendingUserRoleResponse::Error(_) = response {
                     terminal_view.update(ctx, |view, ctx| {
                         view.show_persistent_toast(
-                            ACL_UPDATE_FAILURE_RESPONSE.to_owned(),
+                            tr("command_search.error.generic"),
                             crate::view_components::ToastFlavor::Error,
                             ctx,
                         );

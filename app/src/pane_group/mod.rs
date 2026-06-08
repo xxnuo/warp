@@ -25,6 +25,7 @@ use uuid::Uuid;
 use warp_cli::agent::Harness;
 use warp_core::command::ExitCode;
 use warp_core::context_flag::ContextFlag;
+use warp_i18n::tr;
 use warp_terminal::shell::{ShellName, ShellType};
 use warp_util::path::convert_wsl_to_windows_host_path;
 #[cfg(feature = "local_fs")]
@@ -347,14 +348,14 @@ pub fn init(app: &mut AppContext) {
     app.register_editable_bindings([
         EditableBinding::new(
             "pane_group:close_current_session",
-            "Close Current Session",
+            tr("pane_group.close_current_session"),
             PaneGroupAction::RemoveActive,
         )
         .with_custom_action(CustomAction::CloseCurrentSession)
         .with_context_predicate(id!("PaneGroup")),
         EditableBinding::new(
             "pane_group:add_left",
-            "Split pane left",
+            tr("pane_group.split_pane_left"),
             PaneGroupAction::Add(Direction::Left),
         )
         .with_context_predicate(id!("PaneGroup") & !id!("PaneGroup_PaneDragging"))
@@ -362,7 +363,7 @@ pub fn init(app: &mut AppContext) {
         .with_enabled(|| ContextFlag::CreateNewSession.is_enabled()),
         EditableBinding::new(
             "pane_group:add_up",
-            "Split pane up",
+            tr("pane_group.split_pane_up"),
             PaneGroupAction::Add(Direction::Up),
         )
         .with_context_predicate(id!("PaneGroup") & !id!("PaneGroup_PaneDragging"))
@@ -370,7 +371,7 @@ pub fn init(app: &mut AppContext) {
         .with_enabled(|| ContextFlag::CreateNewSession.is_enabled()),
         EditableBinding::new(
             "pane_group:navigate_left",
-            "Switch panes left",
+            tr("pane_group.switch_panes_left"),
             PaneGroupAction::NavigateLeft,
         )
         .with_context_predicate(
@@ -379,7 +380,7 @@ pub fn init(app: &mut AppContext) {
         .with_key_binding("cmdorctrl-alt-left"),
         EditableBinding::new(
             "pane_group:navigate_right",
-            "Switch panes right",
+            tr("pane_group.switch_panes_right"),
             PaneGroupAction::NavigateRight,
         )
         .with_context_predicate(
@@ -388,7 +389,7 @@ pub fn init(app: &mut AppContext) {
         .with_key_binding("cmdorctrl-alt-right"),
         EditableBinding::new(
             "pane_group:navigate_up",
-            "Switch panes up",
+            tr("pane_group.switch_panes_up"),
             PaneGroupAction::NavigateUp,
         )
         .with_context_predicate(
@@ -397,7 +398,7 @@ pub fn init(app: &mut AppContext) {
         .with_key_binding("cmdorctrl-alt-up"),
         EditableBinding::new(
             "pane_group:navigate_down",
-            "Switch panes down",
+            tr("pane_group.switch_panes_down"),
             PaneGroupAction::NavigateDown,
         )
         .with_context_predicate(
@@ -412,7 +413,7 @@ pub fn init(app: &mut AppContext) {
     app.register_editable_bindings([
         EditableBinding::new(
             "pane_group:resize_left",
-            "Resize pane > Move divider left",
+            tr("pane_group.resize_move_divider_left"),
             PaneGroupAction::ResizeLeft,
         )
         .with_context_predicate(
@@ -421,7 +422,7 @@ pub fn init(app: &mut AppContext) {
         .with_mac_key_binding("cmd-ctrl-left"),
         EditableBinding::new(
             "pane_group:resize_right",
-            "Resize pane > Move divider right",
+            tr("pane_group.resize_move_divider_right"),
             PaneGroupAction::ResizeRight,
         )
         .with_context_predicate(
@@ -430,7 +431,7 @@ pub fn init(app: &mut AppContext) {
         .with_mac_key_binding("cmd-ctrl-right"),
         EditableBinding::new(
             "pane_group:resize_up",
-            "Resize pane > Move divider up",
+            tr("pane_group.resize_move_divider_up"),
             PaneGroupAction::ResizeUp,
         )
         .with_context_predicate(
@@ -439,7 +440,7 @@ pub fn init(app: &mut AppContext) {
         .with_mac_key_binding("cmd-ctrl-up"),
         EditableBinding::new(
             "pane_group:resize_down",
-            "Resize pane > Move divider down",
+            tr("pane_group.resize_move_divider_down"),
             PaneGroupAction::ResizeDown,
         )
         .with_context_predicate(
@@ -451,7 +452,7 @@ pub fn init(app: &mut AppContext) {
     app.register_editable_bindings([
         EditableBinding::new(
             "pane_group:add_down",
-            "Split pane down",
+            tr("pane_group.split_pane_down"),
             PaneGroupAction::Add(Direction::Down),
         )
         .with_context_predicate(id!("PaneGroup") & !id!("PaneGroup_PaneDragging"))
@@ -459,7 +460,7 @@ pub fn init(app: &mut AppContext) {
         .with_enabled(|| ContextFlag::CreateNewSession.is_enabled()),
         EditableBinding::new(
             "pane_group:add_right",
-            "Split pane right",
+            tr("pane_group.split_pane_right"),
             PaneGroupAction::Add(Direction::Right),
         )
         .with_context_predicate(id!("PaneGroup") & !id!("PaneGroup_PaneDragging"))
@@ -467,7 +468,7 @@ pub fn init(app: &mut AppContext) {
         .with_enabled(|| ContextFlag::CreateNewSession.is_enabled()),
         EditableBinding::new(
             "pane_group:toggle_maximize_pane",
-            "Toggle Maximize Active Pane",
+            tr("pane_group.toggle_maximize_active_pane"),
             PaneGroupAction::ToggleMaximizePane,
         )
         .with_context_predicate(id!("PaneGroup") & !id!("PaneGroup_PaneDragging"))
@@ -3011,10 +3012,11 @@ impl PaneGroup {
         let user_default_shell_changed_banner = ctx.add_typed_action_view(|_| {
             Banner::<PaneGroupAction>::new_permanently_dismissible(
                 BannerTextContent::formatted_text(vec![
-                    FormattedTextFragment::plain_text(
-                        "Warp doesn't currently support your default shell, falling back to zsh.  ",
+                    FormattedTextFragment::plain_text(tr("pane_group.default_shell_unsupported")),
+                    FormattedTextFragment::hyperlink(
+                        tr("common.learn_more"),
+                        WARP_SHELL_COMPATIBILITY_DOCS,
                     ),
-                    FormattedTextFragment::hyperlink("Learn more", WARP_SHELL_COMPATIBILITY_DOCS),
                 ]),
             )
         });

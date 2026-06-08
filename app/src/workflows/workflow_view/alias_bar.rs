@@ -7,6 +7,7 @@ use warp_core::features::FeatureFlag;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::color::internal_colors::neutral_4;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Dismiss, Flex, Hoverable,
     MainAxisAlignment, MainAxisSize, MouseState, MouseStateHandle, ParentElement, Radius,
@@ -98,7 +99,7 @@ impl AliasBar {
                 },
                 ctx,
             );
-            view.set_placeholder_text("alias name", ctx);
+            view.set_placeholder_text(&tr("workflows.alias_name_placeholder"), ctx);
 
             view
         });
@@ -431,7 +432,7 @@ impl View for AliasBar {
                     |_state, background| {
                         appearance
                             .ui_builder()
-                            .span("Default")
+                            .span(tr("common.default"))
                             .with_style(UiComponentStyles {
                                 font_color: Some(
                                     appearance.theme().main_text_color(background).into_solid(),
@@ -467,7 +468,7 @@ impl View for AliasBar {
             .with_text_and_icon_label(
                 TextAndIcon::new(
                     TextAndIconAlignment::IconFirst,
-                    "Add alias",
+                    tr("workflows.alias_bar.add_alias"),
                     Icon::Plus.to_warpui_icon(
                         appearance
                             .theme()

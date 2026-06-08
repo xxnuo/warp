@@ -52,6 +52,7 @@ use warp_completer::completer::Description;
 use warp_core::semantic_selection::SemanticSelection;
 use warp_core::{safe_error, send_telemetry_from_ctx};
 use warp_editor::editor::NavigationKey;
+use warp_i18n::{tr, tr_with};
 use warp_util::path::ShellFamily;
 use warp_util::user_input::UserInput;
 use warpui::accessibility::{AccessibilityContent, ActionAccessibilityContent, WarpA11yRole};
@@ -136,9 +137,6 @@ const CURSOR_BLINK_INTERVAL: Duration = Duration::from_millis(500);
 const DEFAULT_TAB_SIZE: usize = 4;
 
 pub const ACCEPT_AUTOSUGGESTION_KEYBINDING_NAME: &str = "editor_view:insert_autosuggestion";
-pub const VOICE_LIMIT_HIT_TOAST_TEXT: &str = "You have hit the limit for Voice requests. Your limit will be refreshed as a part of your next cycle.";
-pub const VOICE_ERROR_TOAST_TEXT: &str = "An error occurred while processing your voice input.";
-
 pub const MAX_IMAGES_PER_CONVERSATION: usize = 200;
 
 use warpui::clipboard_utils::CLIPBOARD_IMAGE_MIME_TYPES;
@@ -235,20 +233,20 @@ pub fn init(ctx: &mut AppContext) {
         FixedBinding::custom(
             CustomAction::Copy,
             EditorAction::Copy,
-            "Copy",
+            tr("common.copy"),
             id!("EditorView") & !id!("IMEOpen"),
         ),
         FixedBinding::custom(
             CustomAction::Cut,
             EditorAction::Cut,
-            "Cut",
+            tr("common.cut"),
             id!("EditorView") & !id!("IMEOpen"),
         ),
         // Bindings for paste require the StandardAction and CustomAction binding to work on all platforms.
         FixedBinding::custom(
             CustomAction::Paste,
             EditorAction::Paste,
-            "Paste",
+            tr("common.paste"),
             id!("EditorView") & !id!("IMEOpen"),
         ),
         FixedBinding::standard(
@@ -260,7 +258,7 @@ pub fn init(ctx: &mut AppContext) {
         FixedBinding::custom(
             CustomAction::WindowsPaste,
             EditorAction::Paste,
-            "Paste",
+            tr("common.paste"),
             id!("EditorView") & !id!("IMEOpen"),
         ),
         FixedBinding::new(
@@ -398,13 +396,13 @@ pub fn init(ctx: &mut AppContext) {
         FixedBinding::custom(
             CustomAction::Undo,
             EditorAction::Undo,
-            "Undo",
+            tr("common.undo"),
             id!("EditorView") & !id!("IMEOpen"),
         ),
         FixedBinding::custom(
             CustomAction::Redo,
             EditorAction::Redo,
-            "Redo",
+            tr("common.redo"),
             id!("EditorView") & !id!("IMEOpen"),
         ),
         // This might seem like a no-op since `ctrl-right` changes desktops on Mac by default.
@@ -519,21 +517,21 @@ pub fn init(ctx: &mut AppContext) {
         // Selections
         EditableBinding::new(
             "editor_view:select_left_by_word",
-            "Select one word to the left",
+            tr("editor.binding.select_one_word_left"),
             EditorAction::SelectLeftByWord,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("shift-meta-B"),
         EditableBinding::new(
             "editor_view:select_right_by_word",
-            "Select one word to the right",
+            tr("editor.binding.select_one_word_right"),
             EditorAction::SelectRightByWord,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("shift-meta-F"),
         EditableBinding::new(
             "editor_view:select_left",
-            "Select one character to the left",
+            tr("editor.binding.select_one_character_left"),
             EditorAction::SelectLeft,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -544,54 +542,58 @@ pub fn init(ctx: &mut AppContext) {
         // NOTE "shift-right" exists a cross-platform keybinding for this action.
         EditableBinding::new(
             "editor_view:select_right",
-            "Select one character to the right",
+            tr("editor.binding.select_one_character_right"),
             EditorAction::SelectRight,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_mac_key_binding("shift-ctrl-F"),
-        EditableBinding::new(SELECT_UP_ACTION_NAME, "Select up", EditorAction::SelectUp)
-            .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
-            // Set this to Mac only since otherwise it could conflict with opening the command
-            // palette. NOTE `shift-up` still exists as a cross platform keybinding for this action.
-            .with_mac_key_binding("shift-ctrl-P"),
+        EditableBinding::new(
+            SELECT_UP_ACTION_NAME,
+            tr("editor.binding.select_up"),
+            EditorAction::SelectUp,
+        )
+        .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
+        // Set this to Mac only since otherwise it could conflict with opening the command
+        // palette. NOTE `shift-up` still exists as a cross platform keybinding for this action.
+        .with_mac_key_binding("shift-ctrl-P"),
         EditableBinding::new(
             SELECT_DOWN_ACTION_NAME,
-            "Select down",
+            tr("editor.binding.select_down"),
             EditorAction::SelectDown,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_mac_key_binding("shift-ctrl-N"),
         EditableBinding::new(
             "editor_view:select_all",
-            "Select all",
+            tr("editor.binding.select_all"),
             EditorAction::SelectAll,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_custom_action(CustomAction::SelectAll),
         EditableBinding::new(
             "editor:select_to_line_start",
-            "Select to start of line",
+            tr("editor.binding.select_to_line_start"),
             EditorAction::SelectToLineStart,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_mac_key_binding("shift-ctrl-A"),
         EditableBinding::new(
             "editor:select_to_line_end",
-            "Select to end of line",
+            tr("editor.binding.select_to_line_end"),
             EditorAction::SelectToLineEnd,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_mac_key_binding("shift-ctrl-E"),
         EditableBinding::new(
             "editor_view:clear_and_copy_lines",
-            "Copy and clear selected lines",
+            tr("editor.binding.copy_and_clear_selected_lines"),
             EditorAction::ClearAndCopyLines,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("ctrl-u"),
         EditableBinding::new(
             "editor_view:add_next_occurrence",
-            "Add selection for next occurrence",
+            tr("editor.binding.add_selection_next_occurrence"),
             EditorAction::AddNextOccurrence,
         )
         .with_custom_action(CustomAction::AddNextOccurrence)
@@ -601,7 +603,7 @@ pub fn init(ctx: &mut AppContext) {
         // `shift-end` is registered on all platforms for this action.
         EditableBinding::new(
             "editor_view:select_to_line_end",
-            "Select To Line End",
+            tr("editor.binding.select_to_line_end"),
             EditorAction::SelectToLineEnd,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -609,31 +611,43 @@ pub fn init(ctx: &mut AppContext) {
         // `end` is registered on all platforms for this action.
         EditableBinding::new(
             "editor_view:select_to_line_start",
-            "Select To Line Start",
+            tr("editor.binding.select_to_line_start"),
             EditorAction::SelectToLineStart,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_mac_key_binding("cmd-shift-left"),
         // Navigation
-        EditableBinding::new("editor_view:up", "Move cursor up", EditorAction::Up)
-            .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
-            .with_key_binding("ctrl-p"),
-        EditableBinding::new("editor_view:down", "Move cursor down", EditorAction::Down)
-            .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
-            .with_key_binding("ctrl-n"),
-        EditableBinding::new("editor_view:left", "Move cursor left", EditorAction::Left)
-            .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
-            .with_key_binding("ctrl-b"),
+        EditableBinding::new(
+            "editor_view:up",
+            tr("editor.binding.move_cursor_up"),
+            EditorAction::Up,
+        )
+        .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
+        .with_key_binding("ctrl-p"),
+        EditableBinding::new(
+            "editor_view:down",
+            tr("editor.binding.move_cursor_down"),
+            EditorAction::Down,
+        )
+        .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
+        .with_key_binding("ctrl-n"),
+        EditableBinding::new(
+            "editor_view:left",
+            tr("editor.binding.move_cursor_left"),
+            EditorAction::Left,
+        )
+        .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
+        .with_key_binding("ctrl-b"),
         EditableBinding::new(
             "editor_view:right",
-            "Move cursor right",
+            tr("editor.binding.move_cursor_right"),
             EditorAction::Right,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("ctrl-f"),
         EditableBinding::new(
             "editor_view:move_to_line_start",
-            "Move to start of line",
+            tr("editor.binding.move_to_line_start"),
             EditorAction::MoveToLineStart,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -642,7 +656,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_mac_key_binding("ctrl-a"),
         EditableBinding::new(
             "editor_view:move_to_line_end",
-            "Move to end of line",
+            tr("editor.binding.move_to_line_end"),
             EditorAction::MoveToLineEnd,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -652,17 +666,25 @@ pub fn init(ctx: &mut AppContext) {
         .with_mac_key_binding("ctrl-e"),
         // Match the behavior of both VSCode and Intellij by using `cmd-left/right` on Mac and
         // `home/end` on Windows and Linux. See https://www.jetbrains.com/help/idea/reference-keymap-win-default.html#caret_navigation.
-        EditableBinding::new("editor_view:home", "Home", EditorAction::Home)
-            .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
-            .with_mac_key_binding("cmd-left")
-            .with_linux_or_windows_key_binding("home"),
-        EditableBinding::new("editor_view:end", "End", EditorAction::End)
-            .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
-            .with_mac_key_binding("cmd-right")
-            .with_linux_or_windows_key_binding("end"),
+        EditableBinding::new(
+            "editor_view:home",
+            tr("editor.binding.home"),
+            EditorAction::Home,
+        )
+        .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
+        .with_mac_key_binding("cmd-left")
+        .with_linux_or_windows_key_binding("home"),
+        EditableBinding::new(
+            "editor_view:end",
+            tr("editor.binding.end"),
+            EditorAction::End,
+        )
+        .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
+        .with_mac_key_binding("cmd-right")
+        .with_linux_or_windows_key_binding("end"),
         EditableBinding::new(
             "editor_view:cmd_down",
-            "Move cursor to the bottom",
+            tr("editor.binding.move_cursor_bottom"),
             EditorAction::CmdDown,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -671,7 +693,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_linux_or_windows_key_binding("ctrl-end"),
         EditableBinding::new(
             "editor_view:cmd_up",
-            "Move cursor to the top",
+            tr("editor.binding.move_cursor_top"),
             EditorAction::CmdUp,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -680,7 +702,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_linux_or_windows_key_binding("ctrl-home"),
         EditableBinding::new(
             "editor_view:move_to_and_select_buffer_start",
-            "Select and move to the top",
+            tr("editor.binding.select_and_move_top"),
             EditorAction::MoveToAndSelectBufferStart,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -688,7 +710,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_linux_or_windows_key_binding("ctrl-shift-home"),
         EditableBinding::new(
             "editor_view:move_to_and_select_buffer_end",
-            "Select and move to the bottom",
+            tr("editor.binding.select_and_move_bottom"),
             EditorAction::MoveToAndSelectBufferEnd,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -696,42 +718,42 @@ pub fn init(ctx: &mut AppContext) {
         .with_linux_or_windows_key_binding("ctrl-shift-end"),
         EditableBinding::new(
             "editor_view:move_forward_one_word",
-            "Move forward one word",
+            tr("editor.binding.move_forward_one_word"),
             EditorAction::MoveForwardOneWord,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("meta-f"),
         EditableBinding::new(
             "editor_view:move_backward_one_word",
-            "Move backward one word",
+            tr("editor.binding.move_backward_one_word"),
             EditorAction::MoveBackwardOneWord,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("meta-b"),
         EditableBinding::new(
             "editor_view:move_to_paragraph_start",
-            "Move to the start of the paragraph",
+            tr("editor.binding.move_to_paragraph_start"),
             EditorAction::MoveToParagraphStart,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("meta-a"),
         EditableBinding::new(
             "editor_view:move_to_paragraph_end",
-            "Move to the end of the paragraph",
+            tr("editor.binding.move_to_paragraph_end"),
             EditorAction::MoveToParagraphEnd,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("meta-e"),
         EditableBinding::new(
             "editor_view:move_to_buffer_start",
-            "Move to the start of the buffer",
+            tr("editor.binding.move_to_buffer_start"),
             EditorAction::MoveToBufferStart,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("meta-shift-<"),
         EditableBinding::new(
             "editor_view:move_to_buffer_end",
-            "Move to the end of the buffer",
+            tr("editor.binding.move_to_buffer_end"),
             EditorAction::MoveToBufferEnd,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -739,21 +761,21 @@ pub fn init(ctx: &mut AppContext) {
         // Buffer modifications
         EditableBinding::new(
             "editor_view:backspace",
-            "Remove the previous character",
+            tr("editor.binding.remove_previous_character"),
             EditorAction::Backspace,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("ctrl-h"),
         EditableBinding::new(
             "editor_view:cut_word_left",
-            "Cut word left",
+            tr("editor.binding.cut_word_left"),
             EditorAction::CutWordLeft,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("ctrl-w"),
         EditableBinding::new(
             "editor:delete_word_left",
-            "Delete word left",
+            tr("editor.binding.delete_word_left"),
             EditorAction::DeleteWordLeft,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -761,17 +783,21 @@ pub fn init(ctx: &mut AppContext) {
         .with_linux_or_windows_key_binding("ctrl-backspace"),
         EditableBinding::new(
             "editor_view:cut_word_right",
-            "Cut word right",
+            tr("editor.binding.cut_word_right"),
             EditorAction::CutWordRight,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("alt-d"),
-        EditableBinding::new("editor_view:delete", "Delete", EditorAction::Delete)
-            .with_context_predicate(id!("EditorView") & !id!("EditorView_SingleCursorBufferEnd"))
-            .with_key_binding("ctrl-d"),
+        EditableBinding::new(
+            "editor_view:delete",
+            tr("common.delete"),
+            EditorAction::Delete,
+        )
+        .with_context_predicate(id!("EditorView") & !id!("EditorView_SingleCursorBufferEnd"))
+        .with_key_binding("ctrl-d"),
         EditableBinding::new(
             "editor:delete_word_right",
-            "Delete word right",
+            tr("editor.binding.delete_word_right"),
             EditorAction::DeleteWordRight,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -779,7 +805,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_linux_or_windows_key_binding("ctrl-delete"),
         EditableBinding::new(
             "editor_view:clear_lines",
-            "Clear selected lines",
+            tr("editor.binding.clear_selected_lines"),
             EditorAction::ClearAndCopyLines,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen") & !id!("Vim"))
@@ -788,14 +814,14 @@ pub fn init(ctx: &mut AppContext) {
         .with_mac_key_binding("cmd-shift-K"),
         EditableBinding::new(
             "editor_view:cut_all_right",
-            "Cut all right",
+            tr("editor.binding.cut_all_right"),
             EditorAction::CutAllRight,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("ctrl-k"),
         EditableBinding::new(
             "editor_view:delete_all_right",
-            "Delete all right",
+            tr("editor.binding.delete_all_right"),
             EditorAction::DeleteAllRight,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -803,7 +829,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_mac_key_binding("cmd-delete"),
         EditableBinding::new(
             "editor_view:delete_all_left",
-            "Delete all left",
+            tr("editor.binding.delete_all_left"),
             EditorAction::DeleteAllLeft,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -814,35 +840,43 @@ pub fn init(ctx: &mut AppContext) {
         .with_linux_or_windows_key_binding("ctrl-y"),
         EditableBinding::new(
             "editor_view:insert_newline",
-            "Insert newline",
+            tr("editor.binding.insert_newline"),
             EditorAction::Newline,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("ctrl-j"),
         // Folds
-        EditableBinding::new("editor_view:fold", "Fold", EditorAction::Fold)
-            .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
-            .with_key_binding("alt-cmdorctrl-["),
-        EditableBinding::new("editor_view:unfold", "Unfold", EditorAction::Unfold)
-            .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
-            .with_key_binding("alt-cmdorctrl-]"),
+        EditableBinding::new(
+            "editor_view:fold",
+            tr("editor.binding.fold"),
+            EditorAction::Fold,
+        )
+        .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
+        .with_key_binding("alt-cmdorctrl-["),
+        EditableBinding::new(
+            "editor_view:unfold",
+            tr("editor.binding.unfold"),
+            EditorAction::Unfold,
+        )
+        .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
+        .with_key_binding("alt-cmdorctrl-]"),
         EditableBinding::new(
             "editor_view:fold_selected_ranges",
-            "Fold selected ranges",
+            tr("editor.binding.fold_selected_ranges"),
             EditorAction::FoldSelectedRanges,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("alt-cmdorctrl-f"),
         EditableBinding::new(
             "editor:insert_last_word_previous_command",
-            "Insert last word of previous command",
+            tr("editor.binding.insert_last_word_previous_command"),
             EditorAction::InsertLastWordPrevCommand,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_key_binding("meta-."),
         EditableBinding::new(
             "editor_view:move_backward_one_word",
-            "Move Backward One Word",
+            tr("editor.binding.move_backward_one_word"),
             EditorAction::MoveBackwardOneWord,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -850,7 +884,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_linux_or_windows_key_binding("ctrl-left"),
         EditableBinding::new(
             "editor_view:move_forward_one_word",
-            "Move Forward One Word",
+            tr("editor.binding.move_forward_one_word"),
             EditorAction::MoveForwardOneWord,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -858,7 +892,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_linux_or_windows_key_binding("ctrl-right"),
         EditableBinding::new(
             "editor_view:move_backward_one_subword",
-            "Move Backward One Subword",
+            tr("editor.binding.move_backward_one_subword"),
             EditorAction::MoveBackwardOneSubword,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -867,7 +901,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_mac_key_binding("ctrl-alt-left"),
         EditableBinding::new(
             "editor_view:move_forward_one_subword",
-            "Move Forward One Subword",
+            tr("editor.binding.move_forward_one_subword"),
             EditorAction::MoveForwardOneSubword,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -876,7 +910,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_mac_key_binding("ctrl-alt-right"),
         EditableBinding::new(
             "editor_view:select_left_by_subword",
-            "Select one subword to the left",
+            tr("editor.binding.select_one_subword_left"),
             EditorAction::SelectLeftBySubword,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -885,7 +919,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_mac_key_binding("ctrl-alt-shift-left"),
         EditableBinding::new(
             "editor_view:select_right_by_subword",
-            "Select one subword to the right",
+            tr("editor.binding.select_one_subword_right"),
             EditorAction::SelectRightBySubword,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -894,7 +928,7 @@ pub fn init(ctx: &mut AppContext) {
         .with_mac_key_binding("ctrl-alt-shift-right"),
         EditableBinding::new(
             ACCEPT_AUTOSUGGESTION_KEYBINDING_NAME,
-            "Accept autosuggestion",
+            tr("editor.binding.accept_autosuggestion"),
             EditorAction::InsertAutosuggestion,
         )
         .with_context_predicate(
@@ -910,14 +944,14 @@ pub fn init(ctx: &mut AppContext) {
         // reassign command x ray to something else.
         EditableBinding::new(
             "editor_view:inspect_command",
-            "Inspect Command",
+            tr("editor.binding.inspect_command"),
             EditorAction::InspectCommand,
         )
         .with_enabled(|| FeatureFlag::AgentMode.is_enabled())
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen")),
         EditableBinding::new(
             "editor_view:inspect_command",
-            "Inspect Command",
+            tr("editor.binding.inspect_command"),
             EditorAction::InspectCommand,
         )
         .with_enabled(|| !FeatureFlag::AgentMode.is_enabled())
@@ -927,7 +961,7 @@ pub fn init(ctx: &mut AppContext) {
 
     ctx.register_editable_bindings([EditableBinding::new(
         "editor_view:clear_buffer",
-        "Clear command editor",
+        tr("editor.binding.clear_command_editor"),
         EditorAction::CtrlC,
     )
     .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -936,14 +970,14 @@ pub fn init(ctx: &mut AppContext) {
     ctx.register_editable_bindings([
         EditableBinding::new(
             "editor_view:add_cursor_above",
-            "Add cursor above",
+            tr("editor.binding.add_cursor_above"),
             EditorAction::AddCursorAbove,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
         .with_custom_action(CustomAction::AddCursorAbove),
         EditableBinding::new(
             "editor_view:add_cursor_below",
-            "Add cursor below",
+            tr("editor.binding.add_cursor_below"),
             EditorAction::AddCursorBelow,
         )
         .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -952,7 +986,7 @@ pub fn init(ctx: &mut AppContext) {
 
     ctx.register_editable_bindings([EditableBinding::new(
         "editor_view:insert_nonexpanding_space",
-        "Insert non-expanding space",
+        tr("editor.binding.insert_nonexpanding_space"),
         EditorAction::InsertNonExpandingSpace,
     )
     .with_context_predicate(id!("EditorView") & !id!("IMEOpen"))
@@ -960,7 +994,7 @@ pub fn init(ctx: &mut AppContext) {
 
     ctx.register_editable_bindings([EditableBinding::new(
         "editor_view:vim_exit_insert_mode",
-        "Exit Vim insert mode",
+        tr("editor.binding.exit_vim_insert_mode"),
         EditorAction::VimEscape,
     )
     .with_context_predicate(id!("EditorView") & !id!("IMEOpen") & id!("Vim"))
@@ -5084,9 +5118,7 @@ impl EditorView {
                 let window_id = ctx.window_id();
                 ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                     toast_stack.add_ephemeral_toast(
-                        DismissibleToast::error(
-                            "The selected model does not support images as context".to_owned(),
-                        ),
+                        DismissibleToast::error(tr("editor.image_context.unsupported_model")),
                         window_id,
                         ctx,
                     );
@@ -5143,11 +5175,14 @@ impl EditorView {
             move |this, (images, num_unsupported_images, num_read_errors), ctx| {
                 if num_unsupported_images > 0 {
                     let message = if num_unsupported_images == 1 && num_images_user_attached == 1 {
-                        "Image cannot be attached - supported types are PNG, JPG, GIF, WEBP.".into()
+                        tr("editor.image_context.unsupported_single")
                     } else if num_unsupported_images == 1 {
-                        "1 image wasn't attached - supported types are PNG, JPG, GIF, WEBP.".into()
+                        tr("editor.image_context.unsupported_one_of_many")
                     } else {
-                        format!("{num_unsupported_images} images weren't attached - supported types are PNG, JPG, GIF, WEBP.")
+                        tr_with(
+                            "editor.image_context.unsupported_many",
+                            &[("count", &num_unsupported_images.to_string())],
+                        )
                     };
 
                     ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
@@ -5161,11 +5196,14 @@ impl EditorView {
 
                 if num_read_errors > 0 {
                     let message = if num_read_errors == 1 && num_images_user_attached == 1 {
-                        "Image cannot be attached - failed to read file.".into()
+                        tr("editor.image_context.read_error_single")
                     } else if num_read_errors == 1 {
-                        "1 image wasn't attached - failed to read file.".into()
+                        tr("editor.image_context.read_error_one_of_many")
                     } else {
-                        format!("{num_read_errors} images weren't attached - failed to read files.")
+                        tr_with(
+                            "editor.image_context.read_error_many",
+                            &[("count", &num_read_errors.to_string())],
+                        )
                     };
 
                     ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
@@ -5178,7 +5216,11 @@ impl EditorView {
                 }
 
                 if !images.is_empty() {
-                    this.process_and_attach_images_as_ai_context(num_images_user_attached, images, ctx);
+                    this.process_and_attach_images_as_ai_context(
+                        num_images_user_attached,
+                        images,
+                        ctx,
+                    );
                 }
             },
         );
@@ -5199,9 +5241,7 @@ impl EditorView {
                 let window_id = ctx.window_id();
                 ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                     toast_stack.add_ephemeral_toast(
-                        DismissibleToast::error(
-                            "The selected model does not support images as context".to_owned(),
-                        ),
+                        DismissibleToast::error(tr("editor.image_context.unsupported_model")),
                         window_id,
                         ctx,
                     );
@@ -8057,19 +8097,18 @@ impl EditorView {
             padding: Some(Coords::uniform(icon_size / 10.)),
             ..Default::default()
         });
-        let button =
-            button
-                .with_tooltip_position(ButtonTooltipPosition::Above)
-                .with_tooltip(self.render_menu_button_tooltip(
-                    "Search files and directories".to_string(),
-                    appearance,
-                ))
-                .build()
-                .with_cursor(Cursor::PointingHand)
-                .on_click(move |ctx, _, _| {
-                    ctx.dispatch_typed_action(EditorAction::SetAIContextMenuOpen(true));
-                })
-                .finish();
+        let button = button
+            .with_tooltip_position(ButtonTooltipPosition::Above)
+            .with_tooltip(self.render_menu_button_tooltip(
+                tr("editor.image_context.search_files_and_directories"),
+                appearance,
+            ))
+            .build()
+            .with_cursor(Cursor::PointingHand)
+            .on_click(move |ctx, _, _| {
+                ctx.dispatch_typed_action(EditorAction::SetAIContextMenuOpen(true));
+            })
+            .finish();
 
         Some(button)
     }

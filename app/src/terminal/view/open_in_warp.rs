@@ -10,6 +10,7 @@ use warp_completer::parsers::classify_command;
 use warp_completer::parsers::hir::{Command, Expression};
 use warp_completer::parsers::simple::all_parsed_commands;
 use warp_completer::signatures::CommandRegistry;
+use warp_i18n::{tr, tr_with};
 use warp_util::path::EscapeChar;
 use warpui::accessibility::{AccessibilityContent, ActionAccessibilityContent, WarpA11yRole};
 use warpui::{SingletonEntity, ViewContext};
@@ -223,8 +224,12 @@ impl TerminalView {
             OpenInWarpBannerAction::OpenFile => {
                 match &self.inline_banners_state.open_in_warp_banner {
                     Some(banner_state) => {
+                        let path = banner_state.target.path.display().to_string();
                         ActionAccessibilityContent::Custom(AccessibilityContent::new_without_help(
-                            format!("Open {} in Warp", banner_state.target.path.display()),
+                            tr_with(
+                                "terminal.open_in_warp.open_path",
+                                &[("path", path.as_str())],
+                            ),
                             WarpA11yRole::UserAction,
                         ))
                     }
@@ -233,14 +238,14 @@ impl TerminalView {
             }
             OpenInWarpBannerAction::Close => {
                 ActionAccessibilityContent::Custom(AccessibilityContent::new_without_help(
-                    "Close View in Warp banner",
+                    tr("terminal.open_in_warp.close_banner"),
                     WarpA11yRole::UserAction,
                 ))
             }
             OpenInWarpBannerAction::LearnMore => {
                 ActionAccessibilityContent::Custom(AccessibilityContent::new(
-                    "Learn more",
-                    "Learn more about opening Markdown files in Warp",
+                    tr("common.learn_more"),
+                    tr("terminal.open_in_warp.learn_more_help"),
                     WarpA11yRole::UserAction,
                 ))
             }

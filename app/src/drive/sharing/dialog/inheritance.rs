@@ -1,6 +1,7 @@
 //! Support for displaying inherited ACLs.
 
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::elements::{CrossAxisAlignment, Flex, MouseStateHandle, ParentElement as _};
 use warpui::ui_components::components::UiComponent as _;
 use warpui::{AppContext, Element, SingletonEntity as _};
@@ -74,14 +75,17 @@ impl InheritanceState {
                         .with_children([prefix, folder_link])
                         .with_cross_axis_alignment(CrossAxisAlignment::Center)
                         .finish(),
-                    tooltip_text: "Edit inherited permissions on the parent folder",
+                    tooltip_text: tr("drive.sharing.inheritance.edit_parent_permissions"),
                 }
             }
             None => InheritanceDetails {
-                source_label: style::detail_text("Inherited permission", appearance)
-                    .build()
-                    .finish(),
-                tooltip_text: "Cannot edit inherited permissions",
+                source_label: style::detail_text(
+                    tr("drive.sharing.inheritance.inherited_permission"),
+                    appearance,
+                )
+                .build()
+                .finish(),
+                tooltip_text: tr("drive.sharing.inheritance.cannot_edit"),
             },
         }
     }
@@ -93,5 +97,5 @@ pub struct InheritanceDetails {
     /// permissions directly.
     pub source_label: Box<dyn Element>,
     /// A tooltip to show on disabled permission-editing controls.
-    pub tooltip_text: &'static str,
+    pub tooltip_text: String,
 }

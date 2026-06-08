@@ -6,6 +6,7 @@ use itertools::Itertools;
 use pathfinder_color::ColorU;
 use warp_core::features::FeatureFlag;
 use warp_core::ui::Icon;
+use warp_i18n::tr;
 use warp_util::path::LineAndColumnArg;
 use warpui::elements::{
     resizable_state_handle, ChildAnchor, ChildView, Clipped, ConstrainedBox, Container,
@@ -299,7 +300,7 @@ impl CodeReviewState {
                 .map(|repo_path| {
                     let display_name = self
                         .get_repo_display_name(repo_path, ctx)
-                        .unwrap_or_else(|| "Unknown".to_string());
+                        .unwrap_or_else(|| tr("common.unknown"));
                     DropdownItem::new(
                         display_name,
                         RightPanelAction::SelectRepo {
@@ -385,7 +386,7 @@ impl RightPanelView {
 
         app.register_editable_bindings([EditableBinding::new(
             "workspace:toggle_maximize_code_review_panel",
-            "Toggle Maximize Code Review Panel",
+            tr("code_review.toggle_maximize_panel"),
             RightPanelAction::ToggleMaximize,
         )
         .with_enabled(|| cfg!(feature = "local_fs"))
@@ -435,7 +436,7 @@ impl RightPanelView {
         let maximize_button = ctx.add_typed_action_view(|ctx| {
             let mut button = ActionButton::new("", PaneHeaderTheme)
                 .with_icon(Icon::Maximize)
-                .with_tooltip("Maximize")
+                .with_tooltip(tr("workspace.right_panel.maximize"))
                 .with_tooltip_positioning_provider(Arc::new(MenuPositioning::BelowInputBox))
                 .on_click(|ctx| ctx.dispatch_typed_action(RightPanelAction::ToggleMaximize));
 
@@ -451,9 +452,9 @@ impl RightPanelView {
 
         #[cfg(feature = "local_fs")]
         let open_repository_button = ctx.add_typed_action_view(|_| {
-            ActionButton::new("Open repository", NakedTheme)
+            ActionButton::new(tr("workspace.right_panel.open_repository"), NakedTheme)
                 .with_size(crate::view_components::action_button::ButtonSize::Small)
-                .with_tooltip("Navigate to a repo and initialize it for coding")
+                .with_tooltip(tr("workspace.right_panel.open_repository_tooltip"))
                 .with_tooltip_alignment(TooltipAlignment::Center)
                 .on_click(|ctx| ctx.dispatch_typed_action(RightPanelAction::OpenRepository))
         });
@@ -762,12 +763,12 @@ impl RightPanelView {
 
         let tooltip = if let Some(keybinding) = tooltip_keybinding {
             ui_builder
-                .tool_tip_with_sublabel("Close panel".to_string(), keybinding)
+                .tool_tip_with_sublabel(tr("workspace.close_panel"), keybinding)
                 .build()
                 .finish()
         } else {
             ui_builder
-                .tool_tip("Close panel".to_string())
+                .tool_tip(tr("workspace.close_panel"))
                 .build()
                 .finish()
         };
@@ -841,7 +842,7 @@ impl RightPanelView {
                     || Some(ChildView::new(&self.open_repository_button).finish());
                 if let Some(env) = &self.code_review_session_env {
                     if env.is_remote {
-                        // No "Open repository" CTA when the session is remote — the
+                        // No tr("code.open_repository") CTA when the session is remote — the
                         // button navigates to a local folder, which is not meaningful
                         // in a remote session.
                         CodeReviewView::render_remote_state(appearance, None)
@@ -1035,10 +1036,14 @@ impl RightPanelView {
 
         let title = Shrinkable::new(
             1.0,
-            Text::new_inline("Code review".to_string(), appearance.ui_font_family(), 12.)
-                .with_style(Properties::default().weight(Weight::Bold))
-                .with_color(sub_text_color.into())
-                .finish(),
+            Text::new_inline(
+                warp_i18n::tr("workspace.code_review"),
+                appearance.ui_font_family(),
+                12.,
+            )
+            .with_style(Properties::default().weight(Weight::Bold))
+            .with_color(sub_text_color.into())
+            .finish(),
         )
         .finish();
 

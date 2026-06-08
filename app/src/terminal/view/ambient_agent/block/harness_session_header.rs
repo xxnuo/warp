@@ -1,4 +1,5 @@
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::{tr, tr_with};
 use warp_terminal::model::BlockId;
 use warpui::elements::{
     ConstrainedBox, CrossAxisAlignment, Flex, Hoverable, MainAxisSize, ParentElement, Shrinkable,
@@ -32,7 +33,7 @@ impl HarnessSessionHeader {
     pub fn new(block_id: BlockId, cli_agent: Option<CLIAgent>) -> Self {
         let cli_name = cli_agent
             .map(|agent| agent.display_name().to_owned())
-            .unwrap_or_else(|| "Agent".to_owned());
+            .unwrap_or_else(|| tr("ambient_agent.harness_session.agent"));
 
         Self {
             block_id,
@@ -63,7 +64,10 @@ impl View for HarnessSessionHeader {
             Icon::ChevronRight
         };
 
-        let label = format!("Running {}...", self.cli_name);
+        let label = tr_with(
+            "ambient_agent.harness_session.running",
+            &[("agent", &self.cli_name)],
+        );
 
         let row = Flex::row()
             .with_cross_axis_alignment(CrossAxisAlignment::Center)

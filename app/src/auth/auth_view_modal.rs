@@ -6,6 +6,7 @@ use pathfinder_geometry::vector::vec2f;
 use url::Url;
 use warp_core::errors::ErrorExt;
 use warp_core::features::FeatureFlag;
+use warp_i18n::tr;
 use warpui::actions::StandardAction;
 use warpui::elements::{
     ChildAnchor, ChildView, Container, Fill, HighlightedHyperlink, MouseStateHandle,
@@ -38,7 +39,7 @@ pub fn init(app: &mut AppContext) {
         FixedBinding::custom(
             CustomAction::Paste,
             AuthViewAction::PasteAuthUrl,
-            "Paste",
+            tr("common.paste"),
             id!(AuthView::ui_name()),
         ),
         FixedBinding::standard(

@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 use fuzzy_match::FuzzyMatchResult;
 use ordered_float::OrderedFloat;
+use warp_i18n::{tr, tr_with};
 use warp_util::path::LineAndColumnArg;
 use warpui::elements::{Align, ConstrainedBox, Container, Flex, Icon, ParentElement, Text};
 use warpui::fonts::{Properties, Weight};
@@ -96,18 +97,19 @@ impl SearchItem for FileSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
+        let path = self.path.display().to_string();
         if self.is_directory {
-            format!("Directory: {}", self.path.display())
+            tr_with("command_palette.files.a11y.directory", &[("path", &path)])
         } else {
-            format!("File: {}", self.path.display())
+            tr_with("command_palette.files.a11y.file", &[("path", &path)])
         }
     }
 
     fn accessibility_help_message(&self) -> Option<String> {
         Some(if self.is_directory {
-            "Press Enter to navigate to this directory".to_string()
+            tr("command_palette.files.a11y.navigate_to_directory")
         } else {
-            "Press Enter to open this file".to_string()
+            tr("command_palette.files.a11y.open_file")
         })
     }
 
@@ -161,7 +163,10 @@ impl SearchItem for CreateFileSearchItem {
         let text_color = highlight_state.sub_text_fill(appearance).into_solid();
 
         let label = Text::new_inline(
-            format!("Create a file named {}…", &self.file_name),
+            tr_with(
+                "search.create_file_named",
+                &[("filename", self.file_name.as_str())],
+            ),
             appearance.ui_font_family(),
             appearance.monospace_font_size(),
         )
@@ -195,13 +200,16 @@ impl SearchItem for CreateFileSearchItem {
     }
 
     fn accessibility_label(&self) -> String {
-        format!("Create file: {}", self.file_name)
+        tr_with(
+            "command_palette.files.a11y.create_file",
+            &[("file_name", &self.file_name)],
+        )
     }
 
     fn accessibility_help_message(&self) -> Option<String> {
-        Some(format!(
-            "Press Enter to create {} in the current directory",
-            self.file_name
+        Some(tr_with(
+            "command_palette.files.a11y.create_file_in_current_directory",
+            &[("file_name", &self.file_name)],
         ))
     }
 

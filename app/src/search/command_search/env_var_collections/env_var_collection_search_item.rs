@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use ordered_float::OrderedFloat;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, Highlight, Icon, MainAxisAlignment,
     MainAxisSize, ParentElement, Text,
@@ -34,7 +35,7 @@ impl EnvVarCollectionSearchItem {
                 env_var_collection
                     .title
                     .clone()
-                    .unwrap_or("Untitled".to_owned()),
+                    .unwrap_or_else(|| tr("drive.untitled")),
                 true,
             )
             .with_style(UiComponentStyles {
@@ -92,7 +93,7 @@ impl SearchItem for EnvVarCollectionSearchItem {
             env_var_collection
                 .title
                 .clone()
-                .unwrap_or("Untitled".to_owned()),
+                .unwrap_or_else(|| tr("drive.untitled")),
             appearance.ui_font_family(),
             appearance.monospace_font_size(),
         )
@@ -214,14 +215,12 @@ impl SearchItem for EnvVarCollectionSearchItem {
 
     fn accessibility_label(&self) -> String {
         let env_var_collection = self.env_var_collection.model().string_model.clone();
+        let name = env_var_collection
+            .title
+            .clone()
+            .unwrap_or_else(|| tr("drive.untitled"));
 
-        format!(
-            "Environment Variables: {}",
-            env_var_collection
-                .title
-                .clone()
-                .unwrap_or("Untitled".to_owned())
-        )
+        tr_with("search.env_var_collection.a11y", &[("name", &name)])
     }
 }
 

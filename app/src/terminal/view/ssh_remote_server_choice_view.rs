@@ -18,6 +18,7 @@
 //! deregistered) is the parent's responsibility.
 use settings::Setting;
 use warp_core::ui::theme::color::internal_colors;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildView, Container, CornerRadius, CrossAxisAlignment, Flex, Hoverable,
     MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement, Radius, Text,
@@ -74,23 +75,17 @@ impl SshRemoteServerChoiceView {
         let buttons = ctx.add_typed_action_view(|_| {
             KeyboardNavigableButtons::new(vec![
                 rich_navigation_button(
-                    "Install Warp's SSH extension".to_string(),
-                    Some(
-                        "Install Warp's extension to enable agent features like file browsing, \
-                         code review, and intelligent command completions in this session."
-                            .to_string(),
-                    ),
+                    tr("terminal.ssh_remote.install_extension"),
+                    Some(tr("terminal.ssh_remote.install_extension_description")),
                     /* recommended */ true,
                     MouseStateHandle::default(),
                     SshRemoteServerChoiceViewAction::Install,
                 ),
                 rich_navigation_button(
-                    "Continue without installing".to_string(),
-                    Some(
-                        "You'll still get a Warpified experience just without the coding \
-                         features."
-                            .to_string(),
-                    ),
+                    tr("terminal.ssh_remote.continue_without_installing"),
+                    Some(tr(
+                        "terminal.ssh_remote.continue_without_installing_description",
+                    )),
                     /* recommended */ false,
                     MouseStateHandle::default(),
                     SshRemoteServerChoiceViewAction::Skip,
@@ -120,7 +115,7 @@ impl SshRemoteServerChoiceView {
         // Match the Figma design: a plain title row, no icon / chevron /
         // action buttons. `HeaderConfig` without an `interaction_mode` set
         // renders exactly that.
-        HeaderConfig::new("Choose your experience for this remote session:", app)
+        HeaderConfig::new(tr("terminal.ssh_remote.choose_experience"), app)
             .with_corner_radius_override(CornerRadius::with_top(Radius::Pixels(
                 PROMPT_BORDER_RADIUS,
             )))
@@ -155,9 +150,13 @@ impl SshRemoteServerChoiceView {
 
         let checkbox_label =
             Hoverable::new(self.do_not_ask_again_label_mouse_state.clone(), move |_| {
-                Text::new("Don't ask me this again", ui_font_family, footer_font_size)
-                    .with_color(muted_color)
-                    .finish()
+                Text::new(
+                    tr("terminal.ssh.do_not_ask_again"),
+                    ui_font_family,
+                    footer_font_size,
+                )
+                .with_color(muted_color)
+                .finish()
             })
             .with_cursor(Cursor::PointingHand)
             .on_click(|ctx, _, _| {
@@ -171,11 +170,10 @@ impl SshRemoteServerChoiceView {
             .with_child(Container::new(checkbox_label).with_margin_left(4.).finish())
             .finish();
 
-        // Right: "Manage Warpify settings" link.
         let manage_settings_link = appearance
             .ui_builder()
             .link(
-                "Manage Warpify settings".into(),
+                tr("terminal.ssh_remote.manage_warpify_settings"),
                 None,
                 Some(Box::new(|ctx| {
                     ctx.dispatch_typed_action(SshRemoteServerChoiceViewAction::OpenWarpifySettings);

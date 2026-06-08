@@ -1,4 +1,5 @@
 use markdown_parser::{FormattedText, FormattedTextFragment, FormattedTextLine};
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ConstrainedBox, Container, CrossAxisAlignment, Flex, FormattedTextElement,
     HighlightedHyperlink, Icon, MouseStateHandle, ParentElement, Shrinkable,
@@ -27,9 +28,9 @@ impl LoginFailureReason {
             mut fragments: Vec<FormattedTextFragment>,
         ) -> Vec<FormattedTextFragment> {
             fragments.extend([
-                FormattedTextFragment::plain_text(" Not the first time? See our "),
+                FormattedTextFragment::plain_text(tr("auth.login_failure.troubleshooting_prefix")),
                 FormattedTextFragment::hyperlink(
-                    "troubleshooting docs",
+                    tr("auth.login_failure.troubleshooting_docs"),
                     LOGIN_TROUBLESHOOTING_DOCS_URL,
                 ),
                 FormattedTextFragment::plain_text("."),
@@ -39,27 +40,27 @@ impl LoginFailureReason {
         let fragments = match self {
             LoginFailureReason::InvalidRedirectUrl { was_pasted } => {
                 let text = if *was_pasted {
-                    "An invalid auth token was entered into the modal."
+                    tr("auth.login_failure.invalid_auth_token")
                 } else {
-                    "Failed to log in. Try manually copying the auth token from the \
-                        authentication web page and pasting into the modal."
+                    tr("auth.login_failure.manual_token_retry")
                 };
                 with_troubleshooting_text(vec![FormattedTextFragment::plain_text(text)])
             }
             LoginFailureReason::FailedUserAuthentication => {
-                with_troubleshooting_text(vec![FormattedTextFragment::plain_text(
-                    "Request to log in failed.",
-                )])
+                with_troubleshooting_text(vec![FormattedTextFragment::plain_text(tr(
+                    "auth.login_failure.login_request_failed",
+                ))])
             }
             LoginFailureReason::FailedMintCustomToken => {
-                with_troubleshooting_text(vec![FormattedTextFragment::plain_text(
-                    "Request to sign up failed.",
-                )])
+                with_troubleshooting_text(vec![FormattedTextFragment::plain_text(tr(
+                    "auth.login_failure.sign_up_request_failed",
+                ))])
             }
-            LoginFailureReason::InvalidStateParameter | LoginFailureReason::MissingStateParameter => {
-                with_troubleshooting_text(vec![FormattedTextFragment::plain_text(
-                    "The redirect URL pasted did not originate from this app. Please click the button below to try again.",
-                )])
+            LoginFailureReason::InvalidStateParameter
+            | LoginFailureReason::MissingStateParameter => {
+                with_troubleshooting_text(vec![FormattedTextFragment::plain_text(tr(
+                    "auth.login_failure.invalid_redirect_origin",
+                ))])
             }
         };
         FormattedText::new([FormattedTextLine::Line(fragments)])

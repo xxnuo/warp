@@ -9,6 +9,7 @@ use warp_editor::content::anchor::Anchor;
 use warp_editor::content::buffer::Buffer;
 use warp_editor::content::selection_model::BufferSelectionModel;
 use warp_editor::editor::EmbeddedItemModel;
+use warp_i18n::tr;
 use warp_util::user_input::UserInput;
 use warpui::elements::{
     Align, Border, Container, CrossAxisAlignment, Empty, Flex, MainAxisAlignment, MouseStateHandle,
@@ -318,7 +319,7 @@ impl EmbeddedItemModel for NotebookEmbed {
                             .remove_embedding_button_state
                             .clone(),
                     )
-                    .with_text_label("Remove".to_string())
+                    .with_text_label(tr("common.remove"))
                     .build()
                     .with_cursor(Cursor::Arrow)
                     .on_click(move |ctx, _, _| {

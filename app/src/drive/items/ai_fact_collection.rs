@@ -1,3 +1,4 @@
+use warp_i18n::tr;
 use warpui::elements::MouseStateHandle;
 use warpui::{AppContext, Element};
 
@@ -26,7 +27,7 @@ impl WarpDriveAIFactCollection {
 
 impl WarpDriveItem for WarpDriveAIFactCollection {
     fn display_name(&self) -> Option<String> {
-        Some("Rules".to_string())
+        Some(tr("drive.object_type.rules"))
     }
 
     fn metadata(&self) -> Option<&CloudObjectMetadata> {

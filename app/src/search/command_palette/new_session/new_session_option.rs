@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 use std::fmt;
 
+use warp_i18n::{tr, tr_with};
 use warpui::Action;
 
 use crate::server::telemetry::AddTabWithShellSource;
@@ -55,6 +56,18 @@ impl NewSessionConfig {
             NewSessionConfig::Split(_, shell) => shell,
         }
     }
+
+    fn search_description(&self) -> String {
+        match self {
+            NewSessionConfig::NewTab(shell) => format!("Create New Tab {}", shell.short_name()),
+            NewSessionConfig::NewWindow(shell) => {
+                format!("Create New Window {}", shell.short_name())
+            }
+            NewSessionConfig::Split(direction, shell) => {
+                format!("Split Pane {direction} {}", shell.short_name())
+            }
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -78,17 +91,39 @@ impl NewSessionOption {
     pub fn description(&self) -> &str {
         self.description.as_str()
     }
+
+    pub fn search_text(&self) -> String {
+        let mut text = self.description.clone();
+        text.push(' ');
+        text.push_str(&self.config.search_description());
+        text
+    }
 }
 
 impl NewSessionOption {
     pub(super) fn new(id: NewSessionOptionId, config: NewSessionConfig) -> Self {
         let description = match &config {
-            NewSessionConfig::NewTab(shell) => format!("Create New Tab: {}", shell.short_name()),
+            NewSessionConfig::NewTab(shell) => {
+                let shell_name = shell.short_name();
+                tr_with(
+                    "command_palette.new_session.create_new_tab",
+                    &[("shell", shell_name.as_ref())],
+                )
+            }
             NewSessionConfig::NewWindow(shell) => {
-                format!("Create New Window: {}", shell.short_name())
+                let shell_name = shell.short_name();
+                tr_with(
+                    "command_palette.new_session.create_new_window",
+                    &[("shell", shell_name.as_ref())],
+                )
             }
             NewSessionConfig::Split(direction, shell) => {
-                format!("Split Pane {direction}: {}", shell.short_name())
+                let direction = direction.localized_name();
+                let shell_name = shell.short_name();
+                tr_with(
+                    "command_palette.new_session.split_pane",
+                    &[("direction", &direction), ("shell", shell_name.as_ref())],
+                )
             }
         };
         Self {
@@ -126,5 +161,16 @@ impl NewSessionOption {
     /// Returns the details (a.k.a. the second line in the command palette entry)
     pub fn details(&self) -> Cow<'_, str> {
         self.config.shell().details()
+    }
+}
+
+impl Direction {
+    fn localized_name(&self) -> String {
+        match self {
+            Direction::Down => tr("command_palette.new_session.direction.down"),
+            Direction::Right => tr("command_palette.new_session.direction.right"),
+            Direction::Up => tr("command_palette.new_session.direction.up"),
+            Direction::Left => tr("command_palette.new_session.direction.left"),
+        }
     }
 }

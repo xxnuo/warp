@@ -9,6 +9,7 @@ use futures::TryFutureExt;
 use inquire::{InquireError, Select};
 use warp_cli::agent::Harness;
 use warp_cli::environment::{EnvironmentCreateArgs, EnvironmentUpdateArgs};
+use warp_i18n::{tr, tr_with};
 use warpui::r#async::FutureExt;
 use warpui::{AppContext, GetSingletonModelHandle, SingletonEntity as _, UpdateModel};
 
@@ -253,26 +254,25 @@ impl EnvironmentChoice {
             // If there are no synced environments, require the user to create one or use --no-environment.
             if options.len() == 1 {
                 let cli_name = warp_cli::binary_name().unwrap_or_else(|| "warp".to_string());
-                return Err(ResolveConfigurationError::Other(anyhow::anyhow!(
-                    "No environments are configured for this account.\n\
-You can create an environment with `{cli_name} environment create`.\n\
-Or, re-run this command with `--no-environment` to not use an environment.\n\
-Without an environment, the agent will not be able to access private repositories or create pull requests.",
-                )));
+                return Err(ResolveConfigurationError::Other(anyhow::anyhow!(tr_with(
+                    "ai.agent_sdk.environment.none_configured_help",
+                    &[("cli_name", &cli_name)]
+                ))));
             }
 
-            let prompt = "Select an environment to run the agent in (or 'No environment'):";
+            let prompt = tr("ai.agent_sdk.environment.select_environment");
 
-            let choice = Select::new(prompt, options).prompt();
+            let choice = Select::new(prompt.as_str(), options).prompt();
 
             match choice {
                 Ok(choice) => Ok(choice),
                 Err(InquireError::OperationCanceled | InquireError::OperationInterrupted) => {
                     Err(ResolveConfigurationError::Canceled)
                 }
-                Err(err) => Err(ResolveConfigurationError::Other(anyhow::anyhow!(
-                    "Error selecting environment: {err}"
-                ))),
+                Err(err) => Err(ResolveConfigurationError::Other(anyhow::anyhow!(tr_with(
+                    "ai.agent_sdk.environment.error_selecting_environment",
+                    &[("error", &err.to_string())]
+                )))),
             }
         }
     }

@@ -2,6 +2,7 @@ use std::ops::Range;
 
 use ai::diff_validation::DiffType;
 use warp_editor::render::element::VerticalExpansionBehavior;
+use warp_i18n::tr;
 use warpui::elements::new_scrollable::ScrollableAppearance;
 use warpui::elements::ScrollbarWidth;
 use warpui::{AppContext, View, ViewContext, ViewHandle};
@@ -89,9 +90,9 @@ impl DisplayMode {
         !matches!(self, DisplayMode::InlineBanner { .. })
     }
 
-    pub fn title(&self) -> Option<&str> {
+    pub fn title(&self) -> Option<String> {
         match self {
-            DisplayMode::InlineBanner { .. } => Some("Suggested fixes based on your last command:"),
+            DisplayMode::InlineBanner { .. } => Some(tr("code.diff.suggested_fixes_title")),
             _ => None,
         }
     }

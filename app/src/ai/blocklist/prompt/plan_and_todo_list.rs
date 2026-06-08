@@ -5,6 +5,7 @@ use warp_core::features::FeatureFlag;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::Icon;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
     Empty, Fill, Flex, Hoverable, MouseStateHandle, OffsetPositioning, ParentAnchor, ParentElement,
@@ -254,9 +255,9 @@ impl PlanAndTodoListView {
                 chip_content.finish(),
                 self.plan_button_mouse_state.clone(),
                 if is_agent_unaware_of_plan_edits {
-                    "Agent is unaware of recent plan edits".to_string()
+                    tr("ai_block.plan_and_todo.agent_unaware_plan_edits")
                 } else {
-                    "View plan".to_string()
+                    tr("ai_block.plan_and_todo.view_plan")
                 },
                 corner_radius,
                 appearance,
@@ -411,7 +412,7 @@ impl PlanAndTodoListView {
             .render_chip_button(
                 content,
                 self.todo_button_mouse_state.clone(),
-                "View todo list".to_string(),
+                tr("ai_block.plan_and_todo.view_todo_list"),
                 corner_radius,
                 appearance,
             )

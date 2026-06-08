@@ -1,5 +1,6 @@
 use ai::agent::action_result::{AnyFileContent, FileContext};
 use futures::future::{BoxFuture, FutureExt};
+use warp_i18n::tr_with;
 use warpui::{Entity, ModelContext, SingletonEntity};
 
 use super::{ActionExecution, AnyActionExecution, ExecuteActionInput, PreprocessActionInput};
@@ -65,8 +66,13 @@ impl ReadSkillExecutor {
                     },
                     ctx
                 );
+                let skill = format!("{:?}", skill_ref);
                 ActionExecution::Sync(
-                    ReadSkillResult::Error(format!("Skill not found: {:?}", skill_ref)).into(),
+                    ReadSkillResult::Error(tr_with(
+                        "ai_block.read_skill.not_found",
+                        &[("skill", skill.as_str())],
+                    ))
+                    .into(),
                 )
             }
         }

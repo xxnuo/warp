@@ -1,3 +1,4 @@
+use warp_i18n::{tr, tr_with};
 use warpui::AppContext;
 
 use super::{CloudObject, GenericStringObjectFormat, JsonObjectType, ObjectType};
@@ -19,87 +20,133 @@ impl CloudObjectToastMessage {
 
         match (object.object_type(), operation, success_type) {
             // We should only show toasts for creates initiated by the user, not by the system
-            (_, ObjectOperation::Create { initiated_by: InitiatedBy::User }, OperationSuccessType::Success) => {
+            (
+                _,
+                ObjectOperation::Create {
+                    initiated_by: InitiatedBy::User,
+                },
+                OperationSuccessType::Success,
+            ) => {
                 let containing_object_name = object.containing_object_name(app);
-                Some(format!("{object_name} saved to {containing_object_name}"))
+                Some(tr_with(
+                    "cloud_object.toast.saved_to",
+                    &[
+                        ("object", &object_name),
+                        ("container", &containing_object_name),
+                    ],
+                ))
             }
             // notebooks intentionally do not have an update message, as they are updated
             // as the user types and so toasts would be VERY noisy
-            (
-                ObjectType::Notebook,
-                ObjectOperation::Update,
-                OperationSuccessType::Success,
-            ) => None,
-            (_, ObjectOperation::Update, OperationSuccessType::Success) => {
-                Some(format!("{object_name} updated"))
-            }
-            (_, ObjectOperation::MoveToFolder, OperationSuccessType::Success) | (_, ObjectOperation::MoveToDrive, OperationSuccessType::Success) => {
+            (ObjectType::Notebook, ObjectOperation::Update, OperationSuccessType::Success) => None,
+            (_, ObjectOperation::Update, OperationSuccessType::Success) => Some(tr_with(
+                "cloud_object.toast.updated",
+                &[("object", &object_name)],
+            )),
+            (_, ObjectOperation::MoveToFolder, OperationSuccessType::Success)
+            | (_, ObjectOperation::MoveToDrive, OperationSuccessType::Success) => {
                 let containing_object_name = object.containing_object_name(app);
-                Some(format!("{object_name} moved to {containing_object_name}"))
+                Some(tr_with(
+                    "cloud_object.toast.moved_to",
+                    &[
+                        ("object", &object_name),
+                        ("container", &containing_object_name),
+                    ],
+                ))
             }
-            (_, ObjectOperation::Trash, OperationSuccessType::Success) => {
-                Some(format!("{object_name} trashed"))
-            }
-            (_, ObjectOperation::Untrash, OperationSuccessType::Success) => {
-                Some(format!("{object_name} restored"))
-            }
-            (_, ObjectOperation::Leave, OperationSuccessType::Success) => {
-                Some(format!("Left {object_name}"))
-            }
-            (_, ObjectOperation::Create { initiated_by: InitiatedBy::User }, OperationSuccessType::Failure) => {
-                Some(format!("Failed to create {object_name_lowercase}"))
-            }
-            (_, ObjectOperation::Create { initiated_by: InitiatedBy::User }, OperationSuccessType::Denied(message)) => {
-                Some(message.to_string())
-            }
-            (_, ObjectOperation::Update, OperationSuccessType::Failure) => {
-                Some(format!("Failed to update {object_name_lowercase}"))
-            }
-            (_, ObjectOperation::MoveToFolder, OperationSuccessType::Failure) | (_, ObjectOperation::MoveToDrive, OperationSuccessType::Failure) => {
-                Some(format!("Failed to move {object_name_lowercase}"))
-            }
-            (_, ObjectOperation::Trash, OperationSuccessType::Failure) => {
-                Some(format!("Failed to trash {object_name_lowercase}"))
-            }
-            (_, ObjectOperation::Untrash, OperationSuccessType::Failure) => {
-                Some(format!("Failed to restore {object_name_lowercase}"))
-            }
+            (_, ObjectOperation::Trash, OperationSuccessType::Success) => Some(tr_with(
+                "cloud_object.toast.trashed",
+                &[("object", &object_name)],
+            )),
+            (_, ObjectOperation::Untrash, OperationSuccessType::Success) => Some(tr_with(
+                "cloud_object.toast.restored",
+                &[("object", &object_name)],
+            )),
+            (_, ObjectOperation::Leave, OperationSuccessType::Success) => Some(tr_with(
+                "cloud_object.toast.left",
+                &[("object", &object_name)],
+            )),
+            (
+                _,
+                ObjectOperation::Create {
+                    initiated_by: InitiatedBy::User,
+                },
+                OperationSuccessType::Failure,
+            ) => Some(tr_with(
+                "cloud_object.toast.failed_create",
+                &[("object", &object_name_lowercase)],
+            )),
+            (
+                _,
+                ObjectOperation::Create {
+                    initiated_by: InitiatedBy::User,
+                },
+                OperationSuccessType::Denied(message),
+            ) => Some(message.to_string()),
+            (_, ObjectOperation::Update, OperationSuccessType::Failure) => Some(tr_with(
+                "cloud_object.toast.failed_update",
+                &[("object", &object_name_lowercase)],
+            )),
+            (_, ObjectOperation::MoveToFolder, OperationSuccessType::Failure)
+            | (_, ObjectOperation::MoveToDrive, OperationSuccessType::Failure) => Some(tr_with(
+                "cloud_object.toast.failed_move",
+                &[("object", &object_name_lowercase)],
+            )),
+            (_, ObjectOperation::Trash, OperationSuccessType::Failure) => Some(tr_with(
+                "cloud_object.toast.failed_trash",
+                &[("object", &object_name_lowercase)],
+            )),
+            (_, ObjectOperation::Untrash, OperationSuccessType::Failure) => Some(tr_with(
+                "cloud_object.toast.failed_restore",
+                &[("object", &object_name_lowercase)],
+            )),
             // We should only show deletion failure toasts for user-initiated deletions.
-            (_, ObjectOperation::Delete { initiated_by: InitiatedBy::User }, OperationSuccessType::Failure) => {
-                Some(format!("Failed to delete {object_name_lowercase}"))
-            }
-            (_, ObjectOperation::Leave, OperationSuccessType::Failure) => {
-                Some(format!("Failed to leave {object_name}"))
+            (
+                _,
+                ObjectOperation::Delete {
+                    initiated_by: InitiatedBy::User,
+                },
+                OperationSuccessType::Failure,
+            ) => Some(tr_with(
+                "cloud_object.toast.failed_delete",
+                &[("object", &object_name_lowercase)],
+            )),
+            (_, ObjectOperation::Leave, OperationSuccessType::Failure) => Some(tr_with(
+                "cloud_object.toast.failed_leave",
+                &[("object", &object_name)],
+            )),
+            (ObjectType::Workflow, ObjectOperation::Update, OperationSuccessType::Rejection) => {
+                Some(tr("cloud_object.toast.rejected.workflow"))
             }
             (
-                ObjectType::Workflow,
+                ObjectType::GenericStringObject(GenericStringObjectFormat::Json(
+                    JsonObjectType::EnvVarCollection,
+                )),
                 ObjectOperation::Update,
                 OperationSuccessType::Rejection,
-            ) => {
-                Some("This workflow could not be saved because changes were made while you were editing.".to_string())
-            }
+            ) => Some(tr("cloud_object.toast.rejected.env_vars")),
             (
-                ObjectType::GenericStringObject(GenericStringObjectFormat::Json(JsonObjectType::EnvVarCollection)),
+                ObjectType::GenericStringObject(GenericStringObjectFormat::Json(
+                    JsonObjectType::AIFact,
+                )),
                 ObjectOperation::Update,
                 OperationSuccessType::Rejection,
-            ) => {
-                Some("Environment variables could not be saved because changes were made while you were editing.".to_string())
-            }
-            (
-                ObjectType::GenericStringObject(GenericStringObjectFormat::Json(JsonObjectType::AIFact)),
-                ObjectOperation::Update,
-                OperationSuccessType::Rejection,
-            ) => {
-                Some("Rule could not be saved because changes were made while you were editing.".to_string())
-            }
-            (_, ObjectOperation::TakeEditAccess, OperationSuccessType::Failure) => {
-                Some(format!("Failed to start editing {object_name_lowercase}"))
-            }
+            ) => Some(tr("cloud_object.toast.rejected.rule")),
+            (_, ObjectOperation::TakeEditAccess, OperationSuccessType::Failure) => Some(tr_with(
+                "cloud_object.toast.failed_start_editing",
+                &[("object", &object_name_lowercase)],
+            )),
             (_, ObjectOperation::UpdatePermissions, OperationSuccessType::Success) => {
-                Some(format!("Successfully updated permissions for {object_name_lowercase}"))
+                Some(tr_with(
+                    "cloud_object.toast.updated_permissions",
+                    &[("object", &object_name_lowercase)],
+                ))
             }
             (_, ObjectOperation::UpdatePermissions, OperationSuccessType::Failure) => {
-                Some(format!("Failed to update permissions for {object_name_lowercase}"))
+                Some(tr_with(
+                    "cloud_object.toast.failed_update_permissions",
+                    &[("object", &object_name_lowercase)],
+                ))
             }
             _ => None,
         }
@@ -111,10 +158,11 @@ impl CloudObjectToastMessage {
         success_type: &OperationSuccessType,
     ) -> Option<String> {
         let count_objects_message = match num_objects {
-            1 => "1 object".to_string(),
-            n => {
-                format!("{n} objects")
-            }
+            1 => tr("cloud_object.toast.count_one"),
+            n => tr_with(
+                "cloud_object.toast.count_many",
+                &[("count", &n.to_string())],
+            ),
         };
         match (operation, success_type) {
             // We should only show deletion failure toasts for user-initiated deletions.
@@ -123,15 +171,19 @@ impl CloudObjectToastMessage {
                     initiated_by: InitiatedBy::User,
                 },
                 OperationSuccessType::Success,
-            ) => Some(format!("{count_objects_message} deleted forever")),
-            (ObjectOperation::EmptyTrash, OperationSuccessType::Success) => Some(format!(
-                "Trash emptied: {count_objects_message} deleted forever"
+            ) => Some(tr_with(
+                "cloud_object.toast.objects_deleted_forever",
+                &[("count_objects", &count_objects_message)],
+            )),
+            (ObjectOperation::EmptyTrash, OperationSuccessType::Success) => Some(tr_with(
+                "cloud_object.toast.trash_emptied",
+                &[("count_objects", &count_objects_message)],
             )),
             (ObjectOperation::EmptyTrash, OperationSuccessType::Failure) => {
-                Some("Failed to empty trash".to_string())
+                Some(tr("cloud_object.toast.failed_empty_trash"))
             }
             (ObjectOperation::EmptyTrash, OperationSuccessType::Rejection) => {
-                Some("No objects in trash to empty".to_string())
+                Some(tr("cloud_object.toast.no_objects_in_trash"))
             }
             _ => None,
         }

@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use async_broadcast::InactiveReceiver;
+use warp_i18n::{tr, tr_with};
 use warpui::r#async::SpawnedFutureHandle;
 use warpui::{Entity, ModelContext, SingletonEntity, WindowId};
 
@@ -103,7 +104,10 @@ impl PtyRecorder {
                 let display_path = warp_core::paths::home_relative_path(path);
                 let file_path = path.to_owned();
                 self.show_toast(
-                    format!("PTY recording started: {display_path}"),
+                    tr_with(
+                        "terminal.recorder.started",
+                        &[("path", display_path.as_str())],
+                    ),
                     Some(file_path),
                     ctx,
                 );
@@ -112,7 +116,10 @@ impl PtyRecorder {
             let display_path = warp_core::paths::home_relative_path(&self.path);
             self.stop_recording();
             self.show_toast(
-                format!("PTY recording stopped: {display_path}"),
+                tr_with(
+                    "terminal.recorder.stopped",
+                    &[("path", display_path.as_str())],
+                ),
                 Some(self.path.clone()),
                 ctx,
             );
@@ -150,7 +157,7 @@ impl PtyRecorder {
 
     /// Shows a toast with the given message. If `recording_path` is provided,
     /// clicking the toast body copies the path to the clipboard, and an
-    /// "Open" link is shown that opens the file in the system file explorer.
+    /// tr("common.open") link is shown that opens the file in the system file explorer.
     fn show_toast(
         &self,
         message: String,
@@ -164,7 +171,7 @@ impl PtyRecorder {
                 let path_str = path.to_string_lossy().into_owned();
                 toast = toast
                     .with_link(
-                        ToastLink::new("Open".to_string())
+                        ToastLink::new(tr("common.open").to_string())
                             .with_onclick_action(WorkspaceAction::OpenInExplorer { path }),
                     )
                     .with_on_body_click(move |ctx| {

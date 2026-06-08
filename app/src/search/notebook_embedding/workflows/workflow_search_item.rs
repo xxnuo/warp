@@ -1,4 +1,5 @@
 use ordered_float::OrderedFloat;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Clipped, ConstrainedBox, Container, CrossAxisAlignment, Flex, Highlight, MainAxisAlignment,
     MainAxisSize, ParentElement, Shrinkable, Text,
@@ -102,7 +103,7 @@ impl SearchItem for WorkflowSearchItem {
             let warning_font_size = appearance.ui_font_size() - 4.;
             let warning_text = appearance
                 .ui_builder()
-                .span("Not visible to other users")
+                .span(tr("search.notebook_embedding.not_visible_to_other_users"))
                 .with_style(UiComponentStyles {
                     font_size: Some(warning_font_size),
                     margin: Some(Coords::uniform(0.).left(4.)),
@@ -179,7 +180,7 @@ impl SearchItem for WorkflowSearchItem {
     fn accessibility_label(&self) -> String {
         let workflow = &self.cloud_workflow.model().data;
 
-        format!("Workflow: {}", workflow.name())
+        tr_with("search.a11y.workflow", &[("name", workflow.name())])
     }
 }
 

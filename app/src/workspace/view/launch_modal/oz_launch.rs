@@ -1,6 +1,7 @@
 use asset_macro::bundled_or_fetched_asset;
 use markdown_parser::{FormattedTextFragment, FormattedTextLine};
 use warp_core::send_telemetry_from_ctx;
+use warp_i18n::{tr, tr_with};
 use warpui::assets::asset_cache::AssetSource;
 use warpui::{AppContext, SingletonEntity};
 
@@ -23,14 +24,12 @@ pub enum OzLaunchSlide {
 
 impl Slide for OzLaunchSlide {
     fn modal_title(&self) -> String {
-        "Introducing Oz".to_string()
+        tr("workspace.oz_launch.modal_title")
     }
 
     fn modal_subtext_paragraphs(&self) -> Vec<FormattedTextLine> {
         vec![FormattedTextLine::Line(vec![
-            FormattedTextFragment::plain_text(
-                "Infinitely scalable coding agent — run in local sessions or in the cloud.",
-            ),
+            FormattedTextFragment::plain_text(tr("workspace.oz_launch.modal_subtext")),
         ])]
     }
 
@@ -56,34 +55,34 @@ impl Slide for OzLaunchSlide {
         }
     }
 
-    fn display_text(&self) -> Option<&'static str> {
+    fn display_text(&self) -> Option<String> {
         Some(match self {
-            OzLaunchSlide::CloudAgents => "Cloud agents",
-            OzLaunchSlide::AgentAutomations => "Agent automations",
-            OzLaunchSlide::AgentManagement => "Agent management",
-            OzLaunchSlide::LaunchCredits => "A little gift",
+            OzLaunchSlide::CloudAgents => tr("workspace.oz_launch.cloud_agents.display"),
+            OzLaunchSlide::AgentAutomations => tr("workspace.oz_launch.agent_automations.display"),
+            OzLaunchSlide::AgentManagement => tr("workspace.oz_launch.agent_management.display"),
+            OzLaunchSlide::LaunchCredits => tr("workspace.oz_launch.launch_credits.display"),
         })
     }
 
-    fn short_label(&self) -> &'static str {
+    fn short_label(&self) -> String {
         match self {
-            OzLaunchSlide::CloudAgents => "Cloud agents",
-            OzLaunchSlide::AgentAutomations => "Agent automations",
-            OzLaunchSlide::AgentManagement => "Agent management",
-            OzLaunchSlide::LaunchCredits => "Launch credits",
+            OzLaunchSlide::CloudAgents => tr("workspace.oz_launch.cloud_agents.short_label"),
+            OzLaunchSlide::AgentAutomations => {
+                tr("workspace.oz_launch.agent_automations.short_label")
+            }
+            OzLaunchSlide::AgentManagement => {
+                tr("workspace.oz_launch.agent_management.short_label")
+            }
+            OzLaunchSlide::LaunchCredits => tr("workspace.oz_launch.launch_credits.short_label"),
         }
     }
 
-    fn title(&self) -> &'static str {
+    fn title(&self) -> String {
         match self {
-            OzLaunchSlide::CloudAgents => "Break out of your laptop with cloud agents",
-            OzLaunchSlide::AgentAutomations => {
-                "Orchestrate agents, turning Skills into automations"
-            }
-            OzLaunchSlide::AgentManagement => "Track local and cloud agents seamlessly",
-            OzLaunchSlide::LaunchCredits => {
-                "1,000 free cloud agent credits when you upgrade to Warp Build"
-            }
+            OzLaunchSlide::CloudAgents => tr("workspace.oz_launch.cloud_agents.title"),
+            OzLaunchSlide::AgentAutomations => tr("workspace.oz_launch.agent_automations.title"),
+            OzLaunchSlide::AgentManagement => tr("workspace.oz_launch.agent_management.title"),
+            OzLaunchSlide::LaunchCredits => tr("workspace.oz_launch.launch_credits.title"),
         }
     }
 
@@ -91,20 +90,12 @@ impl Slide for OzLaunchSlide {
         None
     }
 
-    fn content(&self) -> &'static str {
+    fn content(&self) -> String {
         match self {
-            OzLaunchSlide::CloudAgents => {
-                "Use cloud agents to run many agents in parallel, keep agents working when you close your laptop, or start agents programmatically. Plus, you can check on their work through the web."
-            }
-            OzLaunchSlide::AgentAutomations => {
-                "Oz agents can be defined using the standard Skills format. You can use the built in scheduler to setup agents to run autonomously at set intervals, or use the Oz SDK or API to programmatically start and manage Oz agents."
-            }
-            OzLaunchSlide::AgentManagement => {
-                "View all of your agents across local and cloud sessions in the Warp app or at [oz.warp.dev](https://oz.warp.dev). Join live agent sessions, continue tasks locally, and steer agents with one click."
-            }
-            OzLaunchSlide::LaunchCredits => {
-                "Upgrade to Build this month and receive 1,000 extra credits to try using Oz. Credits are only eligible for Oz runs in Warp-hosted cloud environments."
-            }
+            OzLaunchSlide::CloudAgents => tr("workspace.oz_launch.cloud_agents.content"),
+            OzLaunchSlide::AgentAutomations => tr("workspace.oz_launch.agent_automations.content"),
+            OzLaunchSlide::AgentManagement => tr("workspace.oz_launch.agent_management.content"),
+            OzLaunchSlide::LaunchCredits => tr("workspace.oz_launch.launch_credits.content"),
         }
     }
 
@@ -141,29 +132,38 @@ impl Slide for OzLaunchSlide {
             | OzLaunchSlide::AgentAutomations
             | OzLaunchSlide::AgentManagement => {
                 let next = self.next().expect("Non-final slides should have a next");
-                CTAButton::next_slide(next, format!("Next: {}", next.short_label()))
+                let slide = next.short_label();
+                CTAButton::next_slide(
+                    next,
+                    tr_with(
+                        "workspace.oz_launch.next_slide",
+                        &[("slide", slide.as_str())],
+                    ),
+                )
             }
-            OzLaunchSlide::LaunchCredits => CTAButton::custom("Try it out", |ctx| {
-                send_telemetry_from_ctx!(
-                    CloudAgentTelemetryEvent::EnteredCloudMode {
-                        entry_point: CloudModeEntryPoint::OzLaunchModal,
-                    },
-                    ctx
-                );
-                ctx.emit(LaunchModalEvent::Close);
-                ctx.dispatch_typed_action(&WorkspaceAction::StartAgentOnboardingTutorial(
-                    OnboardingTutorial::NoProject {
-                        intention: OnboardingIntention::AgentDrivenDevelopment,
-                    },
-                ));
-                ctx.dispatch_typed_action(&WorkspaceAction::AddAmbientAgentTab);
-            }),
+            OzLaunchSlide::LaunchCredits => {
+                CTAButton::custom(tr("workspace.oz_launch.try_it_out"), |ctx| {
+                    send_telemetry_from_ctx!(
+                        CloudAgentTelemetryEvent::EnteredCloudMode {
+                            entry_point: CloudModeEntryPoint::OzLaunchModal,
+                        },
+                        ctx
+                    );
+                    ctx.emit(LaunchModalEvent::Close);
+                    ctx.dispatch_typed_action(&WorkspaceAction::StartAgentOnboardingTutorial(
+                        OnboardingTutorial::NoProject {
+                            intention: OnboardingIntention::AgentDrivenDevelopment,
+                        },
+                    ));
+                    ctx.dispatch_typed_action(&WorkspaceAction::AddAmbientAgentTab);
+                })
+            }
         }
     }
 
     fn secondary_cta_button(&self) -> Option<CTAButton<Self>> {
         match self {
-            OzLaunchSlide::LaunchCredits => Some(CTAButton::close("Skip for now")),
+            OzLaunchSlide::LaunchCredits => Some(CTAButton::close(tr("common.skip_for_now"))),
             OzLaunchSlide::CloudAgents
             | OzLaunchSlide::AgentAutomations
             | OzLaunchSlide::AgentManagement => None,
@@ -172,8 +172,8 @@ impl Slide for OzLaunchSlide {
 
     fn checkbox_config(&self) -> Option<CheckboxConfig> {
         Some(CheckboxConfig {
-            label: "Sync conversations to cloud",
-            description: "Agent conversations stored in the cloud can be shared with anyone with one click, and allow conversations to be continued across devices and on logout.",
+            label: tr("workspace.oz_launch.sync_conversations_label"),
+            description: tr("workspace.oz_launch.sync_conversations_description"),
         })
     }
 

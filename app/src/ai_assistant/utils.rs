@@ -260,7 +260,9 @@ pub fn render_prepared_response_button(
     mouse_state_handle: MouseStateHandle,
     width: Option<f32>,
     right_left_padding: Option<f32>,
-    prompt: &'static str,
+    label: String,
+    prompt: String,
+    telemetry_prompt: &'static str,
 ) -> Box<dyn Element> {
     let theme = appearance.theme();
     let default_button_styles = UiComponentStyles {
@@ -299,11 +301,14 @@ pub fn render_prepared_response_button(
             Some(hovered_and_clicked_styles),
             Some(hovered_and_clicked_styles),
         )
-        .with_centered_text_label(prompt.to_string())
+        .with_centered_text_label(label)
         .build()
         .with_cursor(Cursor::PointingHand)
         .on_click(move |ctx, _, _| {
-            ctx.dispatch_typed_action(AIAssistantAction::PreparedPrompt(prompt))
+            ctx.dispatch_typed_action(AIAssistantAction::PreparedPrompt {
+                prompt: prompt.clone(),
+                telemetry_prompt,
+            })
         })
         .finish()
 }

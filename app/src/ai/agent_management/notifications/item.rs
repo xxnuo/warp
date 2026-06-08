@@ -1,6 +1,7 @@
 use enum_iterator::Sequence;
 use instant::Instant;
 use uuid::Uuid;
+use warp_i18n::tr;
 use warpui::EntityId;
 
 use crate::ai::agent::conversation::AIConversationId;
@@ -33,11 +34,11 @@ pub enum NotificationFilter {
 }
 
 impl NotificationFilter {
-    pub(crate) fn label(&self) -> &'static str {
+    pub(crate) fn label(&self) -> String {
         match self {
-            NotificationFilter::All => "All tabs",
-            NotificationFilter::Unread => "Unread",
-            NotificationFilter::Errors => "Errors",
+            NotificationFilter::All => tr("ai.agent_management.notifications.all_tabs"),
+            NotificationFilter::Unread => tr("ai.agent_management.notifications.unread"),
+            NotificationFilter::Errors => tr("ai.agent_management.notifications.errors"),
         }
     }
 }

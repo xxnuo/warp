@@ -15,6 +15,7 @@ use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::{AnsiColorIdentifier, Fill as ThemeFill};
 use warp_core::ui::Icon;
 use warp_editor::editor::NavigationKey;
+use warp_i18n::{tr, tr_with};
 use warp_ripgrep::search::{Match as RipgrepMatch, Submatch};
 use warpui::elements::{
     Border, ChildAnchor, ChildView, Clipped, ConstrainedBox, Container, CornerRadius,
@@ -650,7 +651,8 @@ impl GlobalSearchView {
             };
 
             let mut editor = EditorView::new(options, ctx);
-            editor.set_placeholder_text("Search in files", ctx);
+            let placeholder = tr("workspace.global_search.search_in_files");
+            editor.set_placeholder_text(&placeholder, ctx);
             editor
         });
 
@@ -664,7 +666,7 @@ impl GlobalSearchView {
         let case_sensitivity_button = ctx.add_typed_action_view(|_ctx| {
             ActionButton::new_with_boxed_theme(String::new(), Arc::new(NakedTheme))
                 .with_icon(UiIcon::CaseSensitivity)
-                .with_tooltip("Toggle Case Sensitivity")
+                .with_tooltip(tr("workspace.global_search.toggle_case_sensitivity"))
                 .with_size(ButtonSize::Small)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(GlobalSearchAction::ToggleCaseSensitivity);
@@ -674,7 +676,7 @@ impl GlobalSearchView {
         let regex_button = ctx.add_typed_action_view(|_ctx| {
             ActionButton::new_with_boxed_theme(String::new(), Arc::new(NakedTheme))
                 .with_icon(UiIcon::Regex)
-                .with_tooltip("Toggle Regex")
+                .with_tooltip(tr("workspace.global_search.toggle_regex"))
                 .with_size(ButtonSize::Small)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(GlobalSearchAction::ToggleRegexSearch);
@@ -2010,7 +2012,7 @@ impl View for GlobalSearchView {
         let appearance = Appearance::as_ref(app);
         let theme = appearance.theme();
 
-        let search_label = Text::new_inline("Search", appearance.ui_font_family(), 14.)
+        let search_label = Text::new_inline(tr("common.search"), appearance.ui_font_family(), 14.)
             .with_color(blended_colors::text_sub(theme, theme.background()))
             .finish();
 
@@ -2064,16 +2066,37 @@ impl View for GlobalSearchView {
             .with_child(query_row);
 
         let files = self.unique_match_count();
-        let file_word = if files == 1 { "file" } else { "files" };
+        let files_text = files.to_string();
+        let file_word = if files == 1 {
+            tr("workspace.global_search.file")
+        } else {
+            tr("workspace.global_search.files")
+        };
 
         let message = if self.is_search_in_progress && self.total_match_count == 0 {
             "".to_string()
         } else if !self.is_search_in_progress && self.total_match_count == 0 {
-            "No results found. Review your gitignore files.".to_string()
+            tr("workspace.global_search.no_results_review_gitignore")
         } else {
             match self.total_match_count {
-                1 => format!("1 result in {files} {file_word}"),
-                n => format!("{n} results in {files} {file_word}"),
+                1 => tr_with(
+                    "workspace.global_search.one_result",
+                    &[
+                        ("files", files_text.as_str()),
+                        ("file_word", file_word.as_str()),
+                    ],
+                ),
+                n => {
+                    let count = n.to_string();
+                    tr_with(
+                        "workspace.global_search.many_results",
+                        &[
+                            ("count", count.as_str()),
+                            ("files", files_text.as_str()),
+                            ("file_word", file_word.as_str()),
+                        ],
+                    )
+                }
             }
         };
 
@@ -2095,7 +2118,7 @@ impl View for GlobalSearchView {
             font_color: Some(blended_colors::text_sub(theme, theme.background())),
             ..Default::default()
         };
-        let capped_message = "The result set only contains a subset of all matches. Be more specific in your search to narrow down results.".to_string();
+        let capped_message = tr("workspace.global_search.capped_matches");
         let capped_text = Span::new(capped_message, capped_text_styles)
             .with_soft_wrap()
             .build()
@@ -2246,8 +2269,8 @@ impl GlobalSearchView {
     fn render_pre_search_state(&self, app: &AppContext) -> Box<dyn Element> {
         self.render_zero_state(
             Icon::Search,
-            "Global search",
-            "Search in files across your current directories.",
+            tr("workspace.global_search.title"),
+            tr("workspace.global_search.pre_search_description"),
             app,
         )
     }
@@ -2255,8 +2278,8 @@ impl GlobalSearchView {
     fn render_unavailable_state(&self, app: &AppContext) -> Box<dyn Element> {
         self.render_zero_state(
             Icon::AlertTriangle,
-            "Global search unavailable",
-            "Global search requires access to your local workspace. Open a new session or navigate to an active session to view.",
+            tr("workspace.global_search.unavailable_title"),
+            tr("workspace.global_search.unavailable_description"),
             app,
         )
     }
@@ -2264,8 +2287,8 @@ impl GlobalSearchView {
     fn render_remote_state(&self, app: &AppContext) -> Box<dyn Element> {
         self.render_zero_state(
             Icon::AlertTriangle,
-            "Global search unavailable",
-            "Global search requires access to your local workspace, which isn't supported in remote sessions",
+            tr("workspace.global_search.unavailable_title"),
+            tr("workspace.global_search.remote_description"),
             app,
         )
     }
@@ -2273,8 +2296,8 @@ impl GlobalSearchView {
     fn render_unsupported_session_state(&self, app: &AppContext) -> Box<dyn Element> {
         self.render_zero_state(
             Icon::AlertTriangle,
-            "Global search unavailable",
-            "Global search doesn't currently work in Git Bash or WSL.",
+            tr("workspace.global_search.unavailable_title"),
+            tr("workspace.global_search.unsupported_session_description"),
             app,
         )
     }

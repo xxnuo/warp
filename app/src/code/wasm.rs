@@ -16,7 +16,7 @@ use crate::pane_group::{BackingView, CodePane, PaneConfiguration, PaneEvent};
 
 // Keybinding constants - exported so AI document view can reuse
 pub const SAVE_FILE_BINDING_NAME: &str = "code_view:save";
-pub const SAVE_FILE_BINDING_DESCRIPTION: &str = "Save file";
+pub const SAVE_FILE_BINDING_DESCRIPTION: &str = "code.binding.save_file";
 
 #[cfg_attr(not(feature = "local_fs"), allow(dead_code))]
 pub fn is_supported_code_file(_path: impl AsRef<Path>) -> bool {

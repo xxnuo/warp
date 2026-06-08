@@ -29,6 +29,7 @@ use warp_core::features::FeatureFlag;
 use warp_core::ui::color::{coloru_with_opacity, Opacity};
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 
 use crate::ai::blocklist::prompt::PromptIconButtonTheme;
 use crate::ai::blocklist::{
@@ -81,10 +82,6 @@ const MAX_PROFILE_NAME_WIDTH_SCALE_FACTOR: f32 = 10.0;
 
 const PROFILE_SELECTOR_POSITION_ID: &str = "profile_selector";
 
-const PROFILE_PICKER_TOOLTIP: &str = "Choose an AI execution profile";
-const MODEL_PICKER_TOOLTIP: &str = "Choose an agent model";
-const MODEL_LOCKED_FOR_FOLLOWUP_TOOLTIP: &str = "Follow-ups use the original run's model";
-const MODEL_REQUIRES_EDIT_ACCESS_TOOLTIP: &str = "Request edit access to change model";
 const HARNESS_DEFAULT_MODEL_LABEL: &str = "default";
 
 pub fn calculate_scaled_font_size(appearance: &warp_core::ui::appearance::Appearance) -> f32 {
@@ -267,7 +264,7 @@ impl ProfileModelSelector {
                 ),
                 is_blurred: false,
             })
-            .with_tooltip(PROFILE_PICKER_TOOLTIP)
+            .with_tooltip(tr("terminal.profile_selector.choose_profile"))
             .with_size(ButtonSize::UDIButton)
             .with_icon(Icon::Psychology)
         });
@@ -295,14 +292,14 @@ impl ProfileModelSelector {
                 ),
                 is_blurred: false,
             })
-            .with_tooltip(MODEL_PICKER_TOOLTIP)
+            .with_tooltip(tr("terminal.profile_selector.choose_model"))
             .with_size(ButtonSize::UDIButton)
         });
 
         let profile_compact_button = ctx.add_typed_action_view(|_| {
             ActionButton::new("", PromptIconButtonTheme::new(false))
                 .with_icon(Icon::Psychology)
-                .with_tooltip(PROFILE_PICKER_TOOLTIP)
+                .with_tooltip(tr("terminal.profile_selector.choose_profile"))
                 .with_size(ButtonSize::UDIButton)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(ProfileModelSelectorAction::ToggleProfileMenu);
@@ -312,7 +309,7 @@ impl ProfileModelSelector {
         let model_compact_button = ctx.add_typed_action_view(|_| {
             ActionButton::new("", PromptIconButtonTheme::new(false))
                 .with_icon(Icon::Neurology)
-                .with_tooltip(MODEL_PICKER_TOOLTIP)
+                .with_tooltip(tr("terminal.profile_selector.choose_model"))
                 .with_size(ButtonSize::UDIButton)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(ProfileModelSelectorAction::ToggleModelMenu);
@@ -349,9 +346,9 @@ impl ProfileModelSelector {
                         .iter()
                         .map(|name| {
                             if *name == "auto" {
-                                "auto-select the best model for the task"
+                                tr("terminal.profile_selector.auto_best_model")
                             } else {
-                                name
+                                name.to_string()
                             }
                         })
                         .collect::<Vec<_>>()
@@ -361,7 +358,7 @@ impl ProfileModelSelector {
                     }
                     label
                 } else {
-                    "New models available".to_string()
+                    tr("terminal.profile_selector.new_models_available")
                 }
             })))
         });
@@ -540,8 +537,8 @@ impl ProfileModelSelector {
         );
 
         let manage_api_key_button = ctx.add_typed_action_view(|_ctx| {
-            ActionButton::new("Manage", SecondaryTheme)
-                .with_tooltip("Manage API keys")
+            ActionButton::new(tr("common.manage"), SecondaryTheme)
+                .with_tooltip(tr("terminal.profile_selector.manage_api_keys"))
                 .with_size(ButtonSize::XSmall)
                 .on_click(|ctx| {
                     ctx.dispatch_typed_action(WorkspaceAction::ShowSettingsPageWithSearch {
@@ -704,27 +701,25 @@ impl ProfileModelSelector {
             }
         };
 
-        // Non-Oz runs lock silently: the harness owns model selection, and the
-        // user already knows that, so no tooltip is shown.
-        let model_tooltip: Option<&str> = if self.is_locked_for_cloud_followup(ctx) {
-            Some(MODEL_LOCKED_FOR_FOLLOWUP_TOOLTIP)
+        let model_tooltip: Option<String> = if self.is_locked_for_cloud_followup(ctx) {
+            Some(tr("terminal.profile_selector.model_locked_for_followup"))
         } else if self.is_locked_for_non_oz_run(ctx) {
             None
         } else {
-            Some(MODEL_PICKER_TOOLTIP)
+            Some(tr("terminal.profile_selector.choose_model"))
         };
         let locked = self.is_model_locked(ctx);
         self.model_button.update(ctx, |button, ctx| {
             button.set_label(model_name, ctx);
             button.set_disabled(locked, ctx);
-            match model_tooltip {
+            match model_tooltip.as_deref() {
                 Some(t) => button.set_tooltip(Some(t), ctx),
                 None => button.clear_tooltip(ctx),
             }
         });
         self.model_compact_button.update(ctx, |button, ctx| {
             button.set_disabled(locked, ctx);
-            match model_tooltip {
+            match model_tooltip.as_deref() {
                 Some(t) => button.set_tooltip(Some(t), ctx),
                 None => button.clear_tooltip(ctx),
             }
@@ -813,12 +808,13 @@ impl ProfileModelSelector {
         let appearance = Appearance::as_ref(ctx);
         let mut menu_items = vec![
             MenuItem::Header {
-                fields: MenuItemFields::new("Profiles").with_override_text_color(
-                    appearance
-                        .theme()
-                        .sub_text_color(appearance.theme().background())
-                        .into_solid(),
-                ),
+                fields: MenuItemFields::new(tr("terminal.profile_selector.profiles"))
+                    .with_override_text_color(
+                        appearance
+                            .theme()
+                            .sub_text_color(appearance.theme().background())
+                            .into_solid(),
+                    ),
                 clickable: false,
                 right_side_fields: None,
             },
@@ -844,7 +840,7 @@ impl ProfileModelSelector {
 
         menu_items.push(MenuItem::Separator);
         menu_items.push(MenuItem::Item(
-            MenuItemFields::new("Manage profiles")
+            MenuItemFields::new(tr("terminal.profile_selector.manage_profiles"))
                 .with_icon(Icon::Gear)
                 .with_on_select_action(ProfileModelSelectorAction::ManageProfiles),
         ));
@@ -1055,12 +1051,13 @@ impl ProfileModelSelector {
                 items.push(MenuItem::Separator);
             }
             items.push(MenuItem::Header {
-                fields: MenuItemFields::new("Custom models").with_override_text_color(
-                    appearance
-                        .theme()
-                        .sub_text_color(appearance.theme().background())
-                        .into_solid(),
-                ),
+                fields: MenuItemFields::new(tr("terminal.profile_selector.custom_models"))
+                    .with_override_text_color(
+                        appearance
+                            .theme()
+                            .sub_text_color(appearance.theme().background())
+                            .into_solid(),
+                    ),
                 clickable: false,
                 right_side_fields: None,
             });
@@ -1601,7 +1598,7 @@ impl ProfileModelSelector {
 
                 let tooltip = appearance
                     .ui_builder()
-                    .tool_tip(PROFILE_PICKER_TOOLTIP.to_owned());
+                    .tool_tip(tr("terminal.profile_selector.choose_profile"));
                 let mut stack = Stack::new();
                 stack.add_child(button_with_hover);
                 stack.add_positioned_overlay_child(
@@ -1749,7 +1746,7 @@ impl ProfileModelSelector {
 
                 let tooltip = appearance
                     .ui_builder()
-                    .tool_tip(MODEL_PICKER_TOOLTIP.to_owned());
+                    .tool_tip(tr("terminal.profile_selector.choose_model"));
                 let mut stack = Stack::new();
                 stack.add_child(button_with_hover);
                 stack.add_positioned_overlay_child(
@@ -1763,17 +1760,16 @@ impl ProfileModelSelector {
                 );
                 stack.finish()
             } else if state.is_hovered() {
-                // Non-Oz runs lock silently — skip the tooltip entirely.
-                let tooltip_text: Option<&str> = if is_locked_for_followup {
-                    Some(MODEL_LOCKED_FOR_FOLLOWUP_TOOLTIP)
+                let tooltip_text: Option<String> = if is_locked_for_followup {
+                    Some(tr("terminal.profile_selector.model_locked_for_followup"))
                 } else if is_locked_for_non_oz {
                     None
                 } else {
-                    Some(MODEL_REQUIRES_EDIT_ACCESS_TOOLTIP)
+                    Some(tr("terminal.profile_selector.model_requires_edit_access"))
                 };
 
                 if let Some(text) = tooltip_text {
-                    let tooltip = appearance.ui_builder().tool_tip(text.to_owned());
+                    let tooltip = appearance.ui_builder().tool_tip(text);
                     let mut stack = Stack::new();
                     stack.add_child(button_with_save_position);
                     stack.add_positioned_overlay_child(
@@ -1933,7 +1929,10 @@ impl ProfileModelSelector {
             Flex::row()
                 .with_main_axis_size(MainAxisSize::Max)
                 .with_cross_axis_alignment(CrossAxisAlignment::Center)
-                .with_child(self.render_model_spec_value_label("Cost".to_string(), app))
+                .with_child(self.render_model_spec_value_label(
+                    tr("terminal.input_models.model_specs.cost"),
+                    app,
+                ))
                 .with_child(
                     Expanded::new(
                         1.,
@@ -1944,7 +1943,7 @@ impl ProfileModelSelector {
                             .with_child(
                                 Container::new(
                                     Text::new(
-                                        "Billed to API".to_string(),
+                                        tr("terminal.profile_selector.billed_to_api"),
                                         appearance.ui_font_family(),
                                         14.,
                                     )
@@ -1974,18 +1973,23 @@ impl ProfileModelSelector {
     ) -> Box<dyn Element> {
         let mut spec_values = vec![
             self.render_model_spec_value(
-                "Intelligence".to_string(),
+                tr("terminal.input_models.model_specs.intelligence"),
                 spec.quality,
                 bg_bar_color,
                 app,
             ),
-            self.render_model_spec_value("Speed".to_string(), spec.speed, bg_bar_color, app),
+            self.render_model_spec_value(
+                tr("terminal.input_models.model_specs.speed"),
+                spec.speed,
+                bg_bar_color,
+                app,
+            ),
         ];
         if is_using_api_key {
             spec_values.push(self.render_model_spec_api_key(app));
         } else {
             spec_values.push(self.render_model_spec_value(
-                "Cost".to_string(),
+                tr("terminal.input_models.model_specs.cost"),
                 spec.cost,
                 bg_bar_color,
                 app,
@@ -2004,8 +2008,8 @@ impl ProfileModelSelector {
         let appearance = Appearance::as_ref(app);
         let theme = appearance.theme();
         let header = self.render_model_spec_header(
-            "Model Specs".to_string(),
-            "Warp’s benchmarks for how well a model performs in our harness, the rate at which it consumes credits, and task speed.".to_string(),
+            tr("terminal.input_models.model_specs.title"),
+            tr("terminal.input_models.model_specs.description"),
             app,
         );
         let spec = self.render_all_model_spec_values(
@@ -2044,16 +2048,16 @@ impl ProfileModelSelector {
 
         let (title, description) = match kind {
             ModelSpecSidecarKind::Auto => (
-                "Auto mode",
-                "Auto will select the best model for the task. Cost-efficiency optimizes for cost, Responsiveness optimizes for response speed.",
+                tr("terminal.profile_selector.auto_mode"),
+                tr("terminal.profile_selector.auto_mode_description"),
             ),
             ModelSpecSidecarKind::Reasoning => (
-                "Reasoning level",
-                "Increased reasoning levels consume more credits and have higher latency, but higher performance for complicated tasks.",
+                tr("terminal.input_models.reasoning_level.title"),
+                tr("terminal.input_models.reasoning_level.description"),
             ),
         };
 
-        let header = self.render_model_spec_header(title.to_string(), description.to_string(), app);
+        let header = self.render_model_spec_header(title, description, app);
         let sidecar_menu = ChildView::new(&self.model_spec_sidecar.dropdown).finish();
         let spec_values = self.render_all_model_spec_values(
             &spec.clone().unwrap_or_default(),

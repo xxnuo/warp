@@ -3,6 +3,7 @@ use std::num::NonZeroUsize;
 
 use settings::Setting as _;
 use warp_core::semantic_selection::SemanticSelection;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Container, DispatchEventResult, Element, EventHandler, SavePosition, SelectableArea,
     SelectionHandle, Text,
@@ -248,31 +249,45 @@ impl PromptRenderHelper {
         if let Some(pending_session_id) = model.pending_session_id() {
             if let Some(state) = sessions.remote_server_setup_state(pending_session_id) {
                 return match state {
-                    RemoteServerSetupState::Checking => "Starting shell...".to_string(),
+                    RemoteServerSetupState::Checking => tr("terminal.remote_server.starting_shell"),
                     RemoteServerSetupState::Installing {
                         progress_percent: Some(p),
-                    } => format!("Installing Warp SSH Extension... ({p}%)"),
+                    } => {
+                        let progress = p.to_string();
+                        tr_with(
+                            "terminal.remote_server.installing_ssh_extension_with_progress",
+                            &[("progress", &progress)],
+                        )
+                    }
                     RemoteServerSetupState::Installing {
                         progress_percent: None,
-                    } => "Installing Warp SSH Extension...".to_string(),
+                    } => tr("terminal.remote_server.installing_ssh_extension"),
                     RemoteServerSetupState::Updating => {
-                        "Updating Warp SSH Extension...".to_string()
+                        tr("terminal.remote_server.updating_ssh_extension")
                     }
-                    RemoteServerSetupState::Initializing => "Initializing...".to_string(),
-                    RemoteServerSetupState::Ready => "Starting shell...".to_string(),
+                    RemoteServerSetupState::Initializing => {
+                        tr("terminal.remote_server.initializing")
+                    }
+                    RemoteServerSetupState::Ready => tr("terminal.remote_server.starting_shell"),
                     // Failed and Unsupported both fall back to the legacy SSH
                     // flow, so we render the same generic prompt as a normal
                     // SSH session that doesn't have the remote-server extension.
                     RemoteServerSetupState::Failed { .. }
-                    | RemoteServerSetupState::Unsupported { .. } => "Starting shell...".to_string(),
+                    | RemoteServerSetupState::Unsupported { .. } => {
+                        tr("terminal.remote_server.starting_shell")
+                    }
                 };
             }
         }
 
         if !sessions.is_empty() {
-            "Starting shell...".to_string()
+            tr("terminal.remote_server.starting_shell")
         } else {
-            format!("Starting {}...", model.shell_launch_state().display_name())
+            let shell = model.shell_launch_state().display_name();
+            tr_with(
+                "terminal.remote_server.starting_named_shell",
+                &[("shell", shell)],
+            )
         }
     }
 
@@ -431,7 +446,7 @@ impl PromptRenderHelper {
             let prompt = PromptAndPadding {
                 element: PromptAndPaddingElement::Text(Box::new(
                     Text::new_inline(
-                        "Loading prompt...",
+                        tr("terminal.prompt.loading"),
                         appearance.monospace_font_family(),
                         appearance.monospace_font_size(),
                     )

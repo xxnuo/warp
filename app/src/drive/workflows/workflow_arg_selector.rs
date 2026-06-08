@@ -3,10 +3,11 @@ use std::rc::Rc;
 
 use itertools::Itertools;
 use strum::IntoEnumIterator;
-use strum_macros::{EnumIter, IntoStaticStr};
+use strum_macros::EnumIter;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::Fill;
 use warp_editor::editor::NavigationKey;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ChildAnchor, ChildView, ClippedScrollStateHandle, ClippedScrollable,
     ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Dismiss, Empty, EventHandler,
@@ -34,7 +35,6 @@ use crate::ui_components::buttons::{highlight, icon_button};
 use crate::ui_components::icons::{self, Icon};
 use crate::workflows::workflow::ArgumentType;
 
-const ARGUMENT_DEFAULT_VALUE_PLACEHOLDER_TEXT: &str = "Default value (optional)";
 const ARGUMENT_EDITOR_FONT_SIZE: f32 = 14.;
 const DROPDOWN_PADDING: f32 = 8.;
 const DROPDOWN_BORDER_RADIUS: f32 = 6.;
@@ -128,11 +128,20 @@ struct ArgTypeHandles {
     arg_type_mouse_states: Vec<MouseStateHandle>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, IntoStaticStr, EnumIter, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, EnumIter, Default)]
 pub enum ArgumentSelectType {
     #[default]
     Text,
     Enum,
+}
+
+impl ArgumentSelectType {
+    fn label(self) -> String {
+        match self {
+            ArgumentSelectType::Text => tr("drive.workflow.argument_type.text"),
+            ArgumentSelectType::Enum => tr("drive.workflow.argument_type.enum"),
+        }
+    }
 }
 
 impl From<ArgumentType> for ArgumentSelectType {
@@ -494,7 +503,7 @@ impl WorkflowArgSelector {
         let should_show_placeholder = self.text_editor.as_ref(app).is_empty(app);
 
         let text_label = match should_show_placeholder {
-            true => ARGUMENT_DEFAULT_VALUE_PLACEHOLDER_TEXT.to_string(),
+            true => tr("drive.workflow.argument_default_value_placeholder"),
             false => self.text_editor.as_ref(app).buffer_text(app),
         };
 
@@ -651,10 +660,7 @@ impl WorkflowArgSelector {
                         self.arg_type_handles.arg_type_mouse_states.clone(),
                         self.arg_type_options
                             .iter()
-                            .map(|arg_type| {
-                                let label: &'static str = arg_type.into();
-                                ToggleMenuItem::new(label)
-                            })
+                            .map(|arg_type| ToggleMenuItem::new((*arg_type).label()))
                             .collect(),
                         self.arg_type_handles.arg_type_state_handle.clone(),
                         toggle_default,
@@ -796,7 +802,7 @@ impl WorkflowArgSelector {
 
         let mut menu = Hoverable::new(self.enum_menu_mouse_state.clone(), |state| {
             let button = Text::new_inline(
-                "New".to_string(),
+                tr("drive.workflow.new_enum_short"),
                 appearance.ui_font_family(),
                 ARGUMENT_EDITOR_FONT_SIZE,
             )

@@ -7,6 +7,7 @@ use pathfinder_geometry::vector::{vec2f, Vector2F};
 use warp_core::features::FeatureFlag;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::Fill;
+use warp_i18n::tr;
 use warpui::elements::{
     Border, ChildAnchor, ChildView, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
     Empty, Flex, Hoverable, MouseStateHandle, OffsetPositioning, ParentAnchor, ParentElement,
@@ -37,7 +38,7 @@ use crate::ai::blocklist::{BlocklistAIContextModel, BlocklistAIInputModel};
 use crate::ai::document::ai_document_model::{AIDocumentId, AIDocumentVersion};
 use crate::appearance::Appearance;
 use crate::code::editor::{add_color, remove_color};
-use crate::code_review::code_review_view::CODE_REVIEW_TOOLTIP_TEXT;
+use crate::code_review::code_review_view::code_review_tooltip_text;
 use crate::code_review::diff_state::DiffStats;
 use crate::completer::SessionContext;
 use crate::context_chips::git_branch_on_click::{
@@ -786,10 +787,9 @@ impl DisplayChip {
                             // nvm-windows has documented issues when installed alongside an existing Node.js installation.
                             // https://github.com/coreybutler/nvm-windows?tab=readme-ov-file#star-star-uninstall-any-pre-existing-node-installations-star-star
                             // Prompt the agent to remove this first.
-                            "Uninstall existing Node.js installation and install nvm for me"
-                                .to_string()
+                            tr("context_chips.install_nvm_windows_prompt")
                         } else {
-                            "Install nvm for me".to_string()
+                            tr("context_chips.install_nvm_prompt")
                         }));
                         me.close_node_version_popup(ctx);
                     }
@@ -810,9 +810,9 @@ impl DisplayChip {
         };
 
         let quota_reset_popup = ctx.add_typed_action_view(|_| {
-            FeaturePopup::alert_icon(NewFeaturePopupLabel::FromString(
-                "Monthly AI credits reset!".to_string(),
-            ))
+            FeaturePopup::alert_icon(NewFeaturePopupLabel::FromString(tr(
+                "context_chips.monthly_ai_credits_reset",
+            )))
         });
 
         ctx.subscribe_to_view(&quota_reset_popup, |_, _, event, ctx| match event {
@@ -1092,7 +1092,7 @@ impl DisplayChip {
             if state.is_hovered() && is_interactive && !menu_open {
                 let tool_tip = appearance
                     .ui_builder()
-                    .tool_tip("Change git branch".to_string())
+                    .tool_tip(tr("context_chips.change_git_branch"))
                     .build()
                     .finish();
                 stack.add_positioned_overlay_child(tool_tip, udi_tooltip_positioning());
@@ -1159,7 +1159,7 @@ impl DisplayChip {
             if state.is_hovered() {
                 let tool_tip = appearance
                     .ui_builder()
-                    .tool_tip("View pull request".to_string())
+                    .tool_tip(tr("context_chips.view_pull_request"))
                     .build()
                     .finish();
                 stack.add_positioned_overlay_child(tool_tip, udi_tooltip_positioning());
@@ -1251,7 +1251,7 @@ impl DisplayChip {
                     let tool_tip = appearance
                         .ui_builder()
                         .tool_tip_with_sublabel(
-                            CODE_REVIEW_TOOLTIP_TEXT.to_string(),
+                            code_review_tooltip_text(),
                             code_review_keybinding.clone(),
                         )
                         .build()
@@ -1339,7 +1339,7 @@ impl DisplayChip {
                 if state.is_hovered() {
                     let tool_tip = appearance
                         .ui_builder()
-                        .tool_tip("Change working directory".to_string())
+                        .tool_tip(tr("context_chips.change_working_directory"))
                         .build()
                         .finish();
 
@@ -1386,7 +1386,7 @@ impl DisplayChip {
                 if state.is_hovered() && !is_cli_agent_active {
                     let tool_tip = appearance
                         .ui_builder()
-                        .tool_tip("Working directory".to_string())
+                        .tool_tip(tr("context_chips.working_directory"))
                         .build()
                         .finish();
 

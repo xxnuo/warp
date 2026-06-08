@@ -3,6 +3,7 @@ use pathfinder_geometry::vector::Vector2F;
 use settings::Setting;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::Icon;
+use warp_i18n::tr;
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Empty, Expanded, Flex, Hoverable, MainAxisSize,
     MouseStateHandle, ParentElement, SavePosition, Shrinkable, Text,
@@ -216,7 +217,7 @@ fn render_deleted_state(
         .with_main_axis_size(MainAxisSize::Max)
         .with_child(
             Text::new(
-                cached_title.unwrap_or_else(|| "Deleted conversation".to_string()),
+                cached_title.unwrap_or_else(|| tr("agent_view.entry_block.deleted_conversation")),
                 appearance.ui_font_family(),
                 appearance.monospace_font_size(),
             )
@@ -227,7 +228,10 @@ fn render_deleted_state(
             })
             .finish(),
         )
-        .with_child(render_subtext("Deleted".to_string(), appearance))
+        .with_child(render_subtext(
+            tr("agent_view.entry_block.deleted"),
+            appearance,
+        ))
         .finish();
 
     render_block_container(
@@ -292,9 +296,9 @@ impl View for AgentViewEntryBlock {
         let is_open_elsewhere = is_active && !is_active_in_this_pane;
 
         let subtext = if is_open_elsewhere {
-            Some("Open in different pane")
+            Some(tr("agent_view.entry_block.open_in_different_pane"))
         } else if self.is_restored {
-            Some("Restored")
+            Some(tr("agent_view.entry_block.restored"))
         } else if !self.is_new
             && !matches!(
                 self.origin,
@@ -302,7 +306,7 @@ impl View for AgentViewEntryBlock {
                     | AgentViewEntryOrigin::AgentRequestedNewConversation
             )
         {
-            Some("Continued")
+            Some(tr("agent_view.entry_block.continued"))
         } else {
             None
         };
@@ -316,7 +320,7 @@ impl View for AgentViewEntryBlock {
                     Text::new(
                         conversation
                             .title()
-                            .unwrap_or("Untitled conversation".to_string()),
+                            .unwrap_or_else(|| tr("agent_view.entry_block.untitled_conversation")),
                         appearance.ui_font_family(),
                         appearance.monospace_font_size(),
                     )
@@ -485,9 +489,9 @@ impl TypedActionView for AgentViewEntryBlock {
                         let window_id = ctx.window_id();
                         ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
                             toast_stack.add_ephemeral_toast(
-                                DismissibleToast::error(
-                                    "Couldn't navigate to conversation.".to_string(),
-                                ),
+                                DismissibleToast::error(tr(
+                                    "agent_view.entry_block.navigation_error",
+                                )),
                                 window_id,
                                 ctx,
                             );

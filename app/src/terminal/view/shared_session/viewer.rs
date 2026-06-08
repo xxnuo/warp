@@ -1,4 +1,5 @@
 use session_sharing_protocol::common::{Role, WindowSize};
+use warp_i18n::tr;
 use warpui::elements::MouseStateHandle;
 use warpui::{ViewContext, ViewHandle};
 
@@ -61,11 +62,11 @@ impl Viewer {
         match current_role {
             Role::Reader => items.extend([
                 // TODO: this should still dispatch an action that eventually no-ops
-                MenuItemFields::new("View")
+                MenuItemFields::new(tr("shared_session.role.view"))
                     .with_icon(Icon::Check)
                     .with_disabled(is_reconnecting)
                     .into_item(),
-                MenuItemFields::new("Edit")
+                MenuItemFields::new(tr("shared_session.role.edit"))
                     .with_indent()
                     .with_disabled(is_reconnecting)
                     .with_on_select_action(
@@ -76,12 +77,12 @@ impl Viewer {
                     .into_item(),
             ]),
             Role::Executor | Role::Full => items.extend([
-                MenuItemFields::new("View")
+                MenuItemFields::new(tr("shared_session.role.view"))
                     .with_indent()
                     .with_disabled(true)
                     .into_item(),
                 // TODO: this should still dispatch an action that eventually no-ops
-                MenuItemFields::new("Edit")
+                MenuItemFields::new(tr("shared_session.role.edit"))
                     .with_icon(Icon::Check)
                     .with_disabled(is_reconnecting)
                     .into_item(),

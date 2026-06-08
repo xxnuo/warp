@@ -7,6 +7,7 @@ mod tests;
 
 use futures::future::BoxFuture;
 use futures::FutureExt;
+use warp_i18n::tr_with;
 #[cfg(not(target_family = "wasm"))]
 use warpui::SingletonEntity;
 use warpui::{Entity, EntityId, ModelContext, ModelHandle};
@@ -29,7 +30,10 @@ fn format_upload_artifact_error(err: &anyhow::Error) -> String {
     let error_chain = format!("{err:#}");
 
     if error_chain != err.to_string() {
-        format!("Artifact upload failed: {error_chain}")
+        tr_with(
+            "ai_block.upload_artifact.failed",
+            &[("error", error_chain.as_str())],
+        )
     } else {
         error_chain
     }

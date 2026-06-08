@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use session_sharing_protocol::common::SessionId;
 use warp_graphql::ai::{AgentTaskState, PlatformErrorCode};
+use warp_i18n::{tr, tr_with};
 use warpui::{Entity, EntityId, ModelContext, SingletonEntity};
 
 use super::history_model::{
@@ -337,18 +338,23 @@ fn map_conversation_status(
                 Some(error) => classify_renderable_error(error),
                 None => (
                     AgentTaskState::Error,
-                    Some(TaskStatusUpdate::message("Agent encountered an error")),
+                    Some(TaskStatusUpdate::message(tr(
+                        "ai.task_status.agent_encountered_error",
+                    ))),
                 ),
             }
         }
         ConversationStatus::Cancelled => (
             AgentTaskState::Cancelled,
-            Some(TaskStatusUpdate::message("Cancelled by user")),
+            Some(TaskStatusUpdate::message(tr(
+                "ai.task_status.cancelled_by_user",
+            ))),
         ),
         ConversationStatus::Blocked { blocked_action } => (
             AgentTaskState::Blocked,
-            Some(TaskStatusUpdate::message(format!(
-                "The agent got stuck waiting for user confirmation on the action: {blocked_action}"
+            Some(TaskStatusUpdate::message(tr_with(
+                "ai.task_status.blocked_waiting_for_confirmation",
+                &[("blocked_action", blocked_action)],
             ))),
         ),
     }
@@ -362,47 +368,56 @@ pub(crate) fn classify_renderable_error(
     match error {
         RenderableAIError::QuotaLimit {
             user_display_message,
-        } => (
-            AgentTaskState::Failed,
-            Some(TaskStatusUpdate::with_error_code(
-                user_display_message.as_deref().unwrap_or(
-                    "Your team has run out of credits. Purchase more credits to continue.",
-                ),
-                PlatformErrorCode::InsufficientCredits,
-            )),
-        ),
+        } => {
+            let message = user_display_message
+                .clone()
+                .unwrap_or_else(|| tr("ai.task_status.team_out_of_credits"));
+            (
+                AgentTaskState::Failed,
+                Some(TaskStatusUpdate::with_error_code(
+                    message,
+                    PlatformErrorCode::InsufficientCredits,
+                )),
+            )
+        }
         RenderableAIError::ServerOverloaded => (
             AgentTaskState::Error,
             Some(TaskStatusUpdate::with_error_code(
-                "Warp is temporarily overloaded. Please try again shortly.",
+                tr("ai.task_status.server_overloaded"),
                 PlatformErrorCode::ResourceUnavailable,
             )),
         ),
         RenderableAIError::InternalWarpError => (
             AgentTaskState::Error,
             Some(TaskStatusUpdate::with_error_code(
-                "An internal error occurred during the conversation. Please try again.",
+                tr("ai.task_status.internal_conversation_error"),
                 PlatformErrorCode::InternalError,
             )),
         ),
         RenderableAIError::ContextWindowExceeded(msg) => (
             AgentTaskState::Failed,
             Some(TaskStatusUpdate::with_error_code(
-                format!("Context window exceeded: {msg}"),
+                tr_with(
+                    "ai.task_status.context_window_exceeded",
+                    &[("message", msg)],
+                ),
                 PlatformErrorCode::InternalError,
             )),
         ),
         RenderableAIError::InvalidApiKey { provider, .. } => (
             AgentTaskState::Failed,
             Some(TaskStatusUpdate::with_error_code(
-                format!("Invalid API key for {provider}. Update your API key in settings."),
+                tr_with("ai.task_status.invalid_api_key", &[("provider", provider)]),
                 PlatformErrorCode::AuthenticationRequired,
             )),
         ),
         RenderableAIError::AwsBedrockCredentialsExpiredOrInvalid { model_name } => (
             AgentTaskState::Failed,
             Some(TaskStatusUpdate::with_error_code(
-                format!("AWS Bedrock credentials expired or invalid for {model_name}."),
+                tr_with(
+                    "ai.task_status.aws_bedrock_credentials_invalid",
+                    &[("model_name", model_name)],
+                ),
                 PlatformErrorCode::AuthenticationRequired,
             )),
         ),

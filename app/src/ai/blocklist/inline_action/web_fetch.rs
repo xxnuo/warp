@@ -1,4 +1,5 @@
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{Container, CrossAxisAlignment, Element, Flex, ParentElement, Text};
 use warpui::{AppContext, Entity, SingletonEntity, TypedActionView, View, ViewContext};
 
@@ -37,7 +38,8 @@ impl WebFetchView {
         let appearance = Appearance::as_ref(app);
         let loading_icon = yellow_running_icon(appearance);
 
-        let text = format!("Fetching {} web pages...", urls.len());
+        let count = urls.len().to_string();
+        let text = tr_with("ai_block.web_fetch.fetching_pages", &[("count", &count)]);
 
         super::search_results_common::render_loading_header(text, loading_icon, app)
     }
@@ -49,9 +51,15 @@ impl WebFetchView {
     ) -> Box<dyn Element> {
         let successful_count = pages.iter().filter(|(_, _, success)| *success).count();
         let title_text = if successful_count == pages.len() {
-            format!("Fetched {} web pages", pages.len())
+            let count = pages.len().to_string();
+            tr_with("ai_block.web_fetch.fetched_pages", &[("count", &count)])
         } else {
-            format!("Fetched {} of {} web pages", successful_count, pages.len())
+            let successful_count = successful_count.to_string();
+            let total_count = pages.len().to_string();
+            tr_with(
+                "ai_block.web_fetch.fetched_pages_partial",
+                &[("successful", &successful_count), ("total", &total_count)],
+            )
         };
 
         let body = if self.collapsible.is_expanded {
@@ -63,7 +71,7 @@ impl WebFetchView {
         render_collapsible_search_results(
             title_text,
             pages.len(),
-            "URLs",
+            &tr("ai_block.search_results.urls_label"),
             &self.collapsible,
             body,
             |ctx| {
@@ -118,7 +126,7 @@ impl WebFetchView {
 
         if pages.is_empty() {
             let no_results = Text::new_inline(
-                "No URLs fetched".to_string(),
+                tr("ai_block.web_fetch.no_urls_fetched"),
                 appearance.ui_font_family(),
                 appearance.monospace_font_size(),
             )

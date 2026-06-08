@@ -17,6 +17,7 @@ use warp_core::ui::color::coloru_with_opacity;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::ui::theme::{AnsiColorIdentifier, Fill as WarpThemeFill, WarpTheme};
 use warp_core::ui::Icon as WarpIcon;
+use warp_i18n::tr;
 use warpui::elements::{
     resizable_state_handle, Border, ChildAnchor, Clipped, ClippedScrollStateHandle,
     ClippedScrollable, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
@@ -39,7 +40,7 @@ use super::select_unique_pane_kinds;
 use crate::ai::agent::conversation::{ConversationStatus, StatusColorStyle};
 use crate::ai::agent_management::AgentNotificationsModel;
 use crate::ai::cloud_environments::CloudAmbientAgentEnvironment;
-use crate::ai::conversation_status_ui::render_status_element;
+use crate::ai::conversation_status_ui::{conversation_status_label, render_status_element};
 use crate::appearance::Appearance;
 use crate::cloud_object::model::generic_string_model::StringModel;
 use crate::cloud_object::CloudObjectLookup as _;
@@ -1420,7 +1421,7 @@ fn render_settings_button(
 
             if hover_state.is_hovered() && !is_popup_open {
                 let tooltip = ui_builder
-                    .tool_tip("View options".to_string())
+                    .tool_tip(tr("vertical_tabs.view_options"))
                     .build()
                     .finish();
                 let mut stack = Stack::new().with_child(button_container);
@@ -1500,12 +1501,12 @@ fn render_new_tab_button(
         let contents = if hover_state.is_hovered() {
             let tooltip = if let Some(sublabel) = tab_configs_keybinding.clone() {
                 ui_builder
-                    .tool_tip_with_sublabel("Tab configs".to_string(), sublabel)
+                    .tool_tip_with_sublabel(tr("vertical_tabs.tab_configs"), sublabel)
                     .build()
                     .finish()
             } else {
                 ui_builder
-                    .tool_tip("Tab configs".to_string())
+                    .tool_tip(tr("vertical_tabs.tab_configs"))
                     .build()
                     .finish()
             };
@@ -1622,9 +1623,13 @@ fn render_groups(
 
     if workspace.tabs.is_empty() {
         return Container::new(
-            Text::new_inline("No tabs open", appearance.ui_font_family(), 12.)
-                .with_color(theme.sub_text_color(theme.background()).into())
-                .finish(),
+            Text::new_inline(
+                tr("workspace.vertical_tabs.no_tabs_open"),
+                appearance.ui_font_family(),
+                12.,
+            )
+            .with_color(theme.sub_text_color(theme.background()).into())
+            .finish(),
         )
         .with_padding(Padding::uniform(12.))
         .finish();
@@ -1754,7 +1759,7 @@ fn render_groups(
         } else {
             return Container::new(
                 Text::new_inline(
-                    "No tabs match your search.",
+                    tr("vertical_tabs.no_search_results"),
                     appearance.ui_font_family(),
                     12.,
                 )
@@ -2557,7 +2562,7 @@ fn render_grouped_tabs_header(
             let title_text = group
                 .name
                 .clone()
-                .unwrap_or_else(|| "New Group".to_string());
+                .unwrap_or_else(|| tr("workspace.new_group"));
             Text::new_inline(title_text, font_family, 12.)
                 .with_clip(ClipConfig::ellipsis())
                 .with_color(main_text_color.into())
@@ -2851,7 +2856,7 @@ fn render_group_header(props: GroupHeaderProps<'_>, app: &AppContext) -> Box<dyn
     let theme = appearance.theme();
     let title = pane_group.display_title(app);
     let title = if title.is_empty() {
-        "Untitled tab".to_string()
+        tr("vertical_tabs.untitled_tab")
     } else {
         title
     };
@@ -3166,21 +3171,21 @@ impl TypedPane<'_> {
         matches!(self, TypedPane::Terminal(_) | TypedPane::Code(_))
             || self.warp_drive_object_type().is_some()
     }
-    fn kind_label(&self) -> &'static str {
+    fn kind_label(&self) -> String {
         match self {
-            TypedPane::Terminal(_) => "Terminal",
-            TypedPane::Code(_) => "Code",
-            TypedPane::CodeDiff => "Code Diff",
-            TypedPane::File => "File",
-            TypedPane::Notebook { .. } => "Notebook",
-            TypedPane::Workflow { .. } => "Workflow",
-            TypedPane::Settings => "Settings",
-            TypedPane::EnvVarCollection => "Environment Variables",
-            TypedPane::EnvironmentManagement => "Environments",
-            TypedPane::AIFact => "Rules",
-            TypedPane::AIDocument => "Plan",
-            TypedPane::ExecutionProfileEditor => "Execution Profile",
-            TypedPane::Other => "Other",
+            TypedPane::Terminal(_) => tr("vertical_tabs.pane.terminal"),
+            TypedPane::Code(_) => tr("vertical_tabs.pane.code"),
+            TypedPane::CodeDiff => tr("vertical_tabs.pane.code_diff"),
+            TypedPane::File => tr("vertical_tabs.pane.file"),
+            TypedPane::Notebook { .. } => tr("drive.object_type.notebooks"),
+            TypedPane::Workflow { .. } => tr("drive.object_type.workflows"),
+            TypedPane::Settings => tr("settings.title"),
+            TypedPane::EnvVarCollection => tr("drive.object_type.env_var_collections"),
+            TypedPane::EnvironmentManagement => tr("settings.section.cloud_environments"),
+            TypedPane::AIFact => tr("drive.object_type.rules"),
+            TypedPane::AIDocument => tr("vertical_tabs.pane.plan"),
+            TypedPane::ExecutionProfileEditor => tr("vertical_tabs.pane.execution_profile"),
+            TypedPane::Other => tr("vertical_tabs.pane.other"),
         }
     }
 
@@ -3190,7 +3195,7 @@ impl TypedPane<'_> {
                 .file_view(app)
                 .as_ref(app)
                 .contains_unsaved_changes(app)
-                .then(|| "Unsaved".to_string()),
+                .then(|| tr("vertical_tabs.unsaved")),
             TypedPane::Terminal(_)
             | TypedPane::CodeDiff
             | TypedPane::File
@@ -3657,7 +3662,7 @@ fn terminal_primary_line_data(
     }
 
     TerminalPrimaryLineData::Text {
-        text: "New session".to_string(),
+        text: tr("vertical_tabs.new_session"),
         font: TerminalPrimaryLineFont::Ui,
     }
 }
@@ -3668,7 +3673,7 @@ fn terminal_kind_badge_label(is_oz_agent: bool, cli_agent: Option<CLIAgent>) -> 
     } else if is_oz_agent {
         "Oz".to_string()
     } else {
-        "Terminal".to_string()
+        tr("vertical_tabs.pane.terminal")
     }
 }
 
@@ -3872,13 +3877,13 @@ fn cloud_agent_working_directory_and_env(
         .and_then(|id| CloudAmbientAgentEnvironment::get_by_id(id, app))
         .map(|env| env.model().string_model.display_name());
 
-    let setup_status: Option<&str> = model_ref.agent_progress().map(|p| p.setup_status_text());
+    let setup_status: Option<String> = model_ref.agent_progress().map(|p| p.setup_status_text());
 
     match (env_name, setup_status, working_directory) {
         (Some(env), Some(status), _) => Some(format!("{env} · {status}")),
         (Some(env), None, Some(wd)) => Some(format!("{env} · {wd}")),
         (Some(env), None, None) => Some(env),
-        (None, Some(status), _) => Some(status.to_string()),
+        (None, Some(status), _) => Some(status),
         (None, None, _) => None,
     }
 }
@@ -5175,30 +5180,36 @@ fn default_compact_subtitle(primary: VerticalTabsPrimaryInfo) -> VerticalTabsCom
 
 fn subtitle_options_for_primary(
     primary: VerticalTabsPrimaryInfo,
-) -> [(VerticalTabsCompactSubtitle, &'static str); 2] {
+) -> [(VerticalTabsCompactSubtitle, String); 2] {
     match primary {
         VerticalTabsPrimaryInfo::Command => [
-            (VerticalTabsCompactSubtitle::Branch, "Branch"),
+            (
+                VerticalTabsCompactSubtitle::Branch,
+                tr("vertical_tabs.branch"),
+            ),
             (
                 VerticalTabsCompactSubtitle::WorkingDirectory,
-                "Working Directory",
+                tr("vertical_tabs.working_directory"),
             ),
         ],
         VerticalTabsPrimaryInfo::WorkingDirectory => [
-            (VerticalTabsCompactSubtitle::Branch, "Branch"),
+            (
+                VerticalTabsCompactSubtitle::Branch,
+                tr("vertical_tabs.branch"),
+            ),
             (
                 VerticalTabsCompactSubtitle::Command,
-                "Command / Conversation",
+                tr("vertical_tabs.command_conversation"),
             ),
         ],
         VerticalTabsPrimaryInfo::Branch => [
             (
                 VerticalTabsCompactSubtitle::Command,
-                "Command / Conversation",
+                tr("vertical_tabs.command_conversation"),
             ),
             (
                 VerticalTabsCompactSubtitle::WorkingDirectory,
-                "Working Directory",
+                tr("vertical_tabs.working_directory"),
             ),
         ],
     }
@@ -5241,7 +5252,7 @@ pub(super) fn render_settings_popup(
     let sub_text = theme.sub_text_color(theme.background());
     let view_as_header = Container::new(
         Text::new_inline(
-            "View as".to_string(),
+            tr("vertical_tabs.view_as"),
             appearance.ui_font_family(),
             SETTINGS_POPUP_MENU_ITEM_FONT_SIZE,
         )
@@ -5260,7 +5271,7 @@ pub(super) fn render_settings_popup(
                 Expanded::new(
                     1.,
                     render_popup_text_segment(
-                        "Panes",
+                        tr("vertical_tabs.panes"),
                         matches!(current_granularity, VerticalTabsDisplayGranularity::Panes),
                         state.panes_segment_mouse_state.clone(),
                         VerticalTabsDisplayGranularity::Panes,
@@ -5274,7 +5285,7 @@ pub(super) fn render_settings_popup(
                 Expanded::new(
                     1.,
                     render_popup_text_segment(
-                        "Tabs",
+                        tr("vertical_tabs.tabs"),
                         matches!(current_granularity, VerticalTabsDisplayGranularity::Tabs),
                         state.tabs_segment_mouse_state.clone(),
                         VerticalTabsDisplayGranularity::Tabs,
@@ -5300,7 +5311,7 @@ pub(super) fn render_settings_popup(
 
     let tab_item_header = Container::new(
         Text::new_inline(
-            "Tab item".to_string(),
+            tr("vertical_tabs.tab_item"),
             appearance.ui_font_family(),
             SETTINGS_POPUP_MENU_ITEM_FONT_SIZE,
         )
@@ -5312,7 +5323,7 @@ pub(super) fn render_settings_popup(
     .finish();
 
     let focused_session_option = render_tab_item_mode_option(
-        "Focused session",
+        tr("vertical_tabs.focused_session"),
         matches!(
             current_tab_item_mode,
             VerticalTabsTabItemMode::FocusedSession
@@ -5325,7 +5336,7 @@ pub(super) fn render_settings_popup(
 
     let summary_option = if FeatureFlag::VerticalTabsSummaryMode.is_enabled() {
         Some(render_tab_item_mode_option(
-            "Summary",
+            tr("vertical_tabs.summary"),
             matches!(current_tab_item_mode, VerticalTabsTabItemMode::Summary),
             state.summary_option_mouse_state.clone(),
             VerticalTabsTabItemMode::Summary,
@@ -5338,7 +5349,7 @@ pub(super) fn render_settings_popup(
 
     let density_header = Container::new(
         Text::new_inline(
-            "Density".to_string(),
+            tr("vertical_tabs.density"),
             appearance.ui_font_family(),
             SETTINGS_POPUP_MENU_ITEM_FONT_SIZE,
         )
@@ -5415,7 +5426,7 @@ pub(super) fn render_settings_popup(
 
     let pane_title_header = Container::new(
         Text::new_inline(
-            "Pane title as".to_string(),
+            tr("vertical_tabs.pane_title_as"),
             appearance.ui_font_family(),
             SETTINGS_POPUP_MENU_ITEM_FONT_SIZE,
         )
@@ -5427,7 +5438,7 @@ pub(super) fn render_settings_popup(
     .finish();
 
     let command_option = render_primary_info_option(
-        "Command / Conversation",
+        tr("vertical_tabs.command_conversation"),
         matches!(current_primary_info, VerticalTabsPrimaryInfo::Command),
         state.command_option_mouse_state.clone(),
         VerticalTabsPrimaryInfo::Command,
@@ -5436,7 +5447,7 @@ pub(super) fn render_settings_popup(
     );
 
     let directory_option = render_primary_info_option(
-        "Working Directory",
+        tr("vertical_tabs.working_directory"),
         matches!(
             current_primary_info,
             VerticalTabsPrimaryInfo::WorkingDirectory
@@ -5448,7 +5459,7 @@ pub(super) fn render_settings_popup(
     );
 
     let branch_option = render_primary_info_option(
-        "Branch",
+        tr("vertical_tabs.branch"),
         matches!(current_primary_info, VerticalTabsPrimaryInfo::Branch),
         state.branch_option_mouse_state.clone(),
         VerticalTabsPrimaryInfo::Branch,
@@ -5486,7 +5497,7 @@ pub(super) fn render_settings_popup(
 
             let subtitle_header = Container::new(
                 Text::new_inline(
-                    "Additional metadata".to_string(),
+                    tr("vertical_tabs.additional_metadata"),
                     appearance.ui_font_family(),
                     SETTINGS_POPUP_MENU_ITEM_FONT_SIZE,
                 )
@@ -5505,7 +5516,7 @@ pub(super) fn render_settings_popup(
             ];
             for (i, (value, label)) in options.iter().enumerate() {
                 popup_col.add_child(render_compact_subtitle_option(
-                    label,
+                    label.clone(),
                     current_subtitle == *value,
                     mouse_states[i].clone(),
                     *value,
@@ -5520,7 +5531,7 @@ pub(super) fn render_settings_popup(
 
             let show_header = Container::new(
                 Text::new_inline(
-                    "Show".to_string(),
+                    tr("vertical_tabs.show"),
                     appearance.ui_font_family(),
                     SETTINGS_POPUP_MENU_ITEM_FONT_SIZE,
                 )
@@ -5537,14 +5548,14 @@ pub(super) fn render_settings_popup(
             let pr_link_info_tooltip = if show_pr_link && pr_validation_suppressed {
                 Some(ShowToggleInfoTooltip {
                     mouse_state: state.show_pr_link_info_tooltip_mouse_state.clone(),
-                    tooltip_text: "Requires the GitHub CLI to be installed and authenticated",
+                    tooltip_text: tr("vertical_tabs.github_cli_required"),
                 })
             } else {
                 None
             };
 
             popup_col.add_child(render_show_toggle_option(
-                "PR link",
+                tr("vertical_tabs.pr_link"),
                 show_pr_link,
                 state.show_pr_link_mouse_state.clone(),
                 WorkspaceAction::ToggleVerticalTabsShowPrLink,
@@ -5553,7 +5564,7 @@ pub(super) fn render_settings_popup(
                 theme,
             ));
             popup_col.add_child(render_show_toggle_option(
-                "Diff stats",
+                tr("vertical_tabs.diff_stats"),
                 show_diff_stats,
                 state.show_diff_stats_mouse_state.clone(),
                 WorkspaceAction::ToggleVerticalTabsShowDiffStats,
@@ -5566,7 +5577,7 @@ pub(super) fn render_settings_popup(
     popup_col.add_child(make_divider(theme));
 
     popup_col.add_child(render_show_toggle_option(
-        "Show details on hover",
+        tr("vertical_tabs.show_details_on_hover"),
         show_details_on_hover,
         state.show_details_on_hover_mouse_state.clone(),
         WorkspaceAction::ToggleVerticalTabsShowDetailsOnHover,
@@ -5594,7 +5605,7 @@ pub(super) fn render_settings_popup(
 }
 
 fn render_compact_subtitle_option(
-    label: &str,
+    label: impl Into<String>,
     is_selected: bool,
     mouse_state: MouseStateHandle,
     value: VerticalTabsCompactSubtitle,
@@ -5605,7 +5616,7 @@ fn render_compact_subtitle_option(
     const FONT_SIZE: f32 = 12.;
     const GAP: f32 = 8.;
 
-    let label = label.to_string();
+    let label = label.into();
     let main_text = theme.main_text_color(theme.background());
     Hoverable::new(mouse_state, move |hover_state| {
         let check_icon: Box<dyn Element> = if is_selected {
@@ -5647,7 +5658,7 @@ fn render_compact_subtitle_option(
 }
 
 fn render_tab_item_mode_option(
-    label: &str,
+    label: impl Into<String>,
     is_selected: bool,
     mouse_state: MouseStateHandle,
     value: VerticalTabsTabItemMode,
@@ -5658,7 +5669,7 @@ fn render_tab_item_mode_option(
     const FONT_SIZE: f32 = 12.;
     const GAP: f32 = 8.;
 
-    let label = label.to_string();
+    let label = label.into();
     let main_text = theme.main_text_color(theme.background());
     Hoverable::new(mouse_state, move |hover_state| {
         let check_icon: Box<dyn Element> = if is_selected {
@@ -5700,7 +5711,7 @@ fn render_tab_item_mode_option(
 }
 
 fn render_primary_info_option(
-    label: &str,
+    label: impl Into<String>,
     is_selected: bool,
     mouse_state: MouseStateHandle,
     value: VerticalTabsPrimaryInfo,
@@ -5711,7 +5722,7 @@ fn render_primary_info_option(
     const FONT_SIZE: f32 = 12.;
     const GAP: f32 = 8.;
 
-    let label = label.to_string();
+    let label = label.into();
     let main_text = theme.main_text_color(theme.background());
     Hoverable::new(mouse_state, move |hover_state| {
         let check_icon: Box<dyn Element> = if is_selected {
@@ -5754,11 +5765,11 @@ fn render_primary_info_option(
 
 struct ShowToggleInfoTooltip {
     mouse_state: MouseStateHandle,
-    tooltip_text: &'static str,
+    tooltip_text: String,
 }
 
 fn render_show_toggle_option(
-    label: &str,
+    label: impl Into<String>,
     is_enabled: bool,
     mouse_state: MouseStateHandle,
     action: WorkspaceAction,
@@ -5772,13 +5783,13 @@ fn render_show_toggle_option(
     const INFO_ICON_SIZE: f32 = 12.;
     const INFO_GAP: f32 = 4.;
 
-    let label = label.to_string();
+    let label = label.into();
     let main_text = theme.main_text_color(theme.background());
     let info_color = theme.sub_text_color(theme.background());
     let ui_builder = appearance.ui_builder().clone();
 
     let info_mouse_state = info_tooltip.as_ref().map(|t| t.mouse_state.clone());
-    let info_tooltip_text = info_tooltip.as_ref().map(|t| t.tooltip_text.to_string());
+    let info_tooltip_text = info_tooltip.as_ref().map(|t| t.tooltip_text.clone());
 
     Hoverable::new(mouse_state, move |hover_state| {
         let check_icon: Box<dyn Element> = if is_enabled {
@@ -5890,14 +5901,14 @@ fn render_popup_segment(
 }
 
 fn render_popup_text_segment(
-    label: &str,
+    label: impl Into<String>,
     is_selected: bool,
     mouse_state: MouseStateHandle,
     granularity: VerticalTabsDisplayGranularity,
     appearance: &Appearance,
     theme: &WarpTheme,
 ) -> Box<dyn Element> {
-    let label = label.to_string();
+    let label = label.into();
     let main_text = theme.main_text_color(theme.background());
     let sub_text = theme.sub_text_color(theme.background());
     Hoverable::new(mouse_state, move |hover_state| {
@@ -6143,9 +6154,13 @@ fn render_detail_status_pill(
                     .finish(),
             )
             .with_child(
-                Text::new_inline(status.to_string(), appearance.ui_font_family(), 10.)
-                    .with_color(WarpThemeFill::Solid(color).into())
-                    .finish(),
+                Text::new_inline(
+                    conversation_status_label(status),
+                    appearance.ui_font_family(),
+                    10.,
+                )
+                .with_color(WarpThemeFill::Solid(color).into())
+                .finish(),
             )
             .finish(),
     )

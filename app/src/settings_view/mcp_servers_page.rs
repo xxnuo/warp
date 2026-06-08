@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use uuid::Uuid;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{ChildView, Container};
 use warpui::ui_components::components::{Coords, UiComponentStyles};
 use warpui::{
@@ -50,7 +51,6 @@ pub enum InstallOrigin {
     Deeplink,
 }
 
-const PAGE_TITLE_TEXT: &str = "MCP Servers";
 #[derive(Debug, Default, Copy, Clone)]
 pub enum MCPServersSettingsPage {
     #[default]
@@ -102,7 +102,7 @@ impl MCPServersSettingsPageView {
         Self {
             page: PageType::new_monolith(
                 MCPServersSettingsWidget::default(),
-                Some(PAGE_TITLE_TEXT),
+                Some(tr("settings.section.mcp_servers")),
                 true,
             ),
             current_page: MCPServersSettingsPage::default(),
@@ -130,14 +130,11 @@ impl MCPServersSettingsPageView {
         }
     }
 
-    fn add_toast(&mut self, message: &str, ctx: &mut ViewContext<Self>) {
+    fn add_toast(&mut self, message: impl Into<String>, ctx: &mut ViewContext<Self>) {
         let window_id = ctx.window_id();
+        let message = message.into();
         ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
-            toast_stack.add_ephemeral_toast(
-                DismissibleToast::default(message.to_string()),
-                window_id,
-                ctx,
-            );
+            toast_stack.add_ephemeral_toast(DismissibleToast::default(message), window_id, ctx);
         });
     }
 
@@ -148,8 +145,8 @@ impl MCPServersSettingsPageView {
         ctx: &mut ViewContext<Self>,
     ) {
         let message = match server_name {
-            Some(name) => format!("Successfully logged out of {name} MCP server"),
-            None => "Successfully logged out of MCP server".to_string(),
+            Some(name) => tr_with("settings.mcp.toast.logged_out_named", &[("name", &name)]),
+            None => tr("settings.mcp.toast.logged_out"),
         };
         match item_id {
             ServerCardItemId::TemplatableMCP(_) => {
@@ -315,10 +312,7 @@ impl MCPServersSettingsPageView {
             log::warn!(
                 "Ignoring MCP deeplink autoinstall for '{autoinstall_param}': installation modal already open"
             );
-            self.add_error_toast(
-                "Finish the current MCP install before opening another install link.".to_string(),
-                ctx,
-            );
+            self.add_error_toast(tr("settings.mcp.toast.finish_current_install"), ctx);
             return;
         }
 
@@ -331,7 +325,13 @@ impl MCPServersSettingsPageView {
             log::warn!(
                 "Unrecognized autoinstall value '{autoinstall_param}': no matching gallery item found"
             );
-            self.add_error_toast(format!("Unknown MCP server '{autoinstall_param}'"), ctx);
+            self.add_error_toast(
+                tr_with(
+                    "settings.mcp.toast.unknown_server",
+                    &[("name", autoinstall_param)],
+                ),
+                ctx,
+            );
             return;
         };
 
@@ -359,7 +359,10 @@ impl MCPServersSettingsPageView {
             // gallery entry cannot be turned into a valid template. Surface the
             // failure to the user rather than silently returning.
             self.add_error_toast(
-                format!("MCP server '{gallery_title}' cannot be installed from this link."),
+                tr_with(
+                    "settings.mcp.toast.cannot_install_from_link",
+                    &[("name", &gallery_title)],
+                ),
                 ctx,
             );
             return;

@@ -6,6 +6,7 @@ use thousands::Separable;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::theme::Fill;
 use warp_graphql::billing::StripeSubscriptionPlan;
+use warp_i18n::{tr, tr_with};
 use warpui::elements::{
     Align, CacheOption, ChildAnchor, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment,
     DropShadow, Expanded, Flex, FormattedTextElement, HighlightedHyperlink, Image,
@@ -124,37 +125,32 @@ impl CloudAgentCapacityModal {
         let appearance = Appearance::handle(app).as_ref(app);
         let theme = appearance.theme();
         let neutral_bg = blended_colors::neutral_1(theme);
-        let (title_text, mut explanation_text) = match self.variant {
-            CloudAgentCapacityModalVariant::ConcurrentLimit => (
-                "Concurrent cloud agent limit reached",
-                "This cloud run is queued because your team has reached the maximum number of concurrent cloud agents. It will start automatically when another cloud run finishes.".to_string(),
+        let can_upgrade = Self::can_upgrade(customer_type, self.variant);
+        let show_cta = Self::should_show_cta(customer_type, self.variant);
+        let (title_text, explanation_text) = match (self.variant, can_upgrade) {
+            (CloudAgentCapacityModalVariant::ConcurrentLimit, true) => (
+                tr("workspace.cloud_agent_capacity.concurrent_title"),
+                tr("workspace.cloud_agent_capacity.concurrent_explanation_with_upgrade"),
             ),
-            CloudAgentCapacityModalVariant::OutOfCredits => (
-                "You're out of AI credits",
-                "This cloud run stopped because your team has used all available AI credits for the current billing period.".to_string(),
+            (CloudAgentCapacityModalVariant::ConcurrentLimit, false) => (
+                tr("workspace.cloud_agent_capacity.concurrent_title"),
+                tr("workspace.cloud_agent_capacity.concurrent_explanation"),
+            ),
+            (CloudAgentCapacityModalVariant::OutOfCredits, true) => (
+                tr("workspace.cloud_agent_capacity.out_of_credits_title"),
+                tr("workspace.cloud_agent_capacity.out_of_credits_explanation_with_upgrade"),
+            ),
+            (CloudAgentCapacityModalVariant::OutOfCredits, false) => (
+                tr("workspace.cloud_agent_capacity.out_of_credits_title"),
+                tr("workspace.cloud_agent_capacity.out_of_credits_explanation"),
             ),
         };
 
-        // Title
         let title = FormattedTextElement::from_str(title_text, appearance.ui_font_family(), 24.)
             .with_color(blended_colors::text_main(theme, neutral_bg))
             .with_weight(Weight::Bold)
             .finish();
 
-        // Explanation.
-        let can_upgrade = Self::can_upgrade(customer_type, self.variant);
-        let show_cta = Self::should_show_cta(customer_type, self.variant);
-        if can_upgrade {
-            let upgrade_suffix = match self.variant {
-                CloudAgentCapacityModalVariant::ConcurrentLimit => {
-                    " Upgrade your plan for more concurrent cloud agents."
-                }
-                CloudAgentCapacityModalVariant::OutOfCredits => {
-                    " Upgrade your plan to continue running cloud agents."
-                }
-            };
-            explanation_text.push_str(upgrade_suffix);
-        }
         let subtitle =
             FormattedTextElement::from_str(explanation_text, appearance.ui_font_family(), 14.)
                 .with_color(blended_colors::text_sub(theme, neutral_bg))
@@ -167,10 +163,11 @@ impl CloudAgentCapacityModal {
 
         if can_upgrade {
             let (target_plan, agent_multiplier, extra_benefits) = match customer_type {
-                CustomerType::Build | CustomerType::BuildMax => {
-                    (StripeSubscriptionPlan::BuildBusiness, "2x", vec!["SSO"])
-                }
-                // Free tier or a legacy plan.
+                CustomerType::Build | CustomerType::BuildMax => (
+                    StripeSubscriptionPlan::BuildBusiness,
+                    "2x",
+                    vec![tr("workspace.cloud_agent_capacity.sso")],
+                ),
                 _ => (StripeSubscriptionPlan::Build, "5x", vec![]),
             };
 
@@ -182,19 +179,23 @@ impl CloudAgentCapacityModal {
             let pricing_text = if customer_type == CustomerType::Free {
                 if let Some(pricing) = plan_pricing {
                     let price = pricing.yearly_plan_price_per_month_usd_cents / 100;
-                    format!(
-                        "Paid plans start at ${price}/month and include everything in your free trial plus:"
+                    let price = price.to_string();
+                    tr_with(
+                        "workspace.cloud_agent_capacity.paid_plans_start_with_price",
+                        &[("price", &price)],
                     )
                 } else {
-                    "Paid plans include everything in your free trial plus:".to_string()
+                    tr("workspace.cloud_agent_capacity.paid_plans_include")
                 }
             } else if let Some(pricing) = plan_pricing {
                 let price = pricing.yearly_plan_price_per_month_usd_cents / 100;
-                format!(
-                    "The Business plan starts at ${price}/month and includes everything on your current plan plus:"
+                let price = price.to_string();
+                tr_with(
+                    "workspace.cloud_agent_capacity.business_plan_with_price",
+                    &[("price", &price)],
                 )
             } else {
-                "The Business plan includes everything on your current plan plus:".to_string()
+                tr("workspace.cloud_agent_capacity.business_plan")
             };
 
             let pricing = FormattedTextElement::new(
@@ -212,19 +213,26 @@ impl CloudAgentCapacityModal {
             // Credits text from plan pricing
             let credits_text = if let Some(limit) = plan_pricing.and_then(|plan| plan.request_limit)
             {
-                format!("{} AI credits per month", limit.separate_with_commas())
+                let credits = limit.separate_with_commas();
+                tr_with(
+                    "workspace.cloud_agent_capacity.ai_credits_per_month",
+                    &[("credits", &credits)],
+                )
             } else {
-                "Extended AI credits per month".to_string()
+                tr("workspace.cloud_agent_capacity.extended_ai_credits_per_month")
             };
 
-            // Benefits list based on plan type
+            let multiplier = agent_multiplier.to_string();
             let mut benefits = vec![
-                format!("{} the number of concurrent cloud agents", agent_multiplier),
+                tr_with(
+                    "workspace.cloud_agent_capacity.concurrent_agents_multiplier",
+                    &[("multiplier", &multiplier)],
+                ),
                 credits_text,
-                "Bring your own API key".to_string(),
+                tr("workspace.cloud_agent_capacity.bring_api_key"),
             ];
             for extra in extra_benefits {
-                benefits.push(extra.to_string());
+                benefits.push(extra);
             }
 
             let mut benefits_column =
@@ -276,9 +284,9 @@ impl CloudAgentCapacityModal {
         let content = content.finish();
         let cta_button = if show_cta {
             let cta_button_label = if can_upgrade {
-                "Upgrade plan"
+                tr("settings.billing.upgrade_plan")
             } else {
-                "Open billing"
+                tr("settings.account.manage_billing")
             };
             Some(
                 appearance
@@ -293,7 +301,7 @@ impl CloudAgentCapacityModal {
                         width: Some(296.),
                         ..Default::default()
                     })
-                    .with_centered_text_label(cta_button_label.to_string())
+                    .with_centered_text_label(cta_button_label)
                     .build()
                     .with_cursor(Cursor::PointingHand)
                     .on_click(|ctx, _, _| {

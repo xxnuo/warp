@@ -2,6 +2,7 @@ use settings::Setting;
 use warp_core::send_telemetry_from_ctx;
 use warp_core::ui::appearance::Appearance;
 use warp_core::ui::Icon;
+use warp_i18n::tr;
 use warpui::elements::{
     ConstrainedBox, Container, CrossAxisAlignment, Flex, Hoverable, MainAxisSize, MouseStateHandle,
     ParentElement, Shrinkable, Text,
@@ -164,7 +165,7 @@ impl AmbientAgentEntryBlock {
             .and_then(|title| Self::meaningful_title(&title))
             .or_else(|| self.title_from_task_data(app))
             .or_else(|| self.title_from_spawn_request(app))
-            .unwrap_or_else(|| DEFAULT_CLOUD_AGENT_TITLE.to_owned())
+            .unwrap_or_else(|| tr("ambient_agent.new_cloud_agent"))
     }
 
     fn ambient_agent_view_model<'a>(
@@ -178,14 +179,14 @@ impl AmbientAgentEntryBlock {
     }
 
     /// Gets the detail text to display based on the ambient agent status.
-    fn detail_text(&self, app: &AppContext) -> Option<&'static str> {
+    fn detail_text(&self, app: &AppContext) -> Option<String> {
         match self.ambient_agent_view_model(app)?.status() {
             Status::Setup | Status::Composing => None,
-            Status::WaitingForSession { .. } => Some("Starting environment..."),
-            Status::AgentRunning => Some("Agent is working on task"),
-            Status::Failed { .. } => Some("Agent failed"),
-            Status::NeedsGithubAuth { .. } => Some("Authentication required"),
-            Status::Cancelled { .. } => Some("Cancelled"),
+            Status::WaitingForSession { .. } => Some(tr("ambient_agent.starting_environment")),
+            Status::AgentRunning => Some(tr("ambient_agent.agent_working_on_task")),
+            Status::Failed { .. } => Some(tr("ambient_agent.agent_failed")),
+            Status::NeedsGithubAuth { .. } => Some(tr("ambient_agent.authentication_required")),
+            Status::Cancelled { .. } => Some(tr("ambient_agent.cancelled")),
         }
     }
 
@@ -197,7 +198,7 @@ impl AmbientAgentEntryBlock {
             }
             Status::Failed { .. } => Some(ConversationStatus::Error),
             Status::NeedsGithubAuth { .. } => Some(ConversationStatus::Blocked {
-                blocked_action: "GitHub authentication required".to_owned(),
+                blocked_action: tr("ambient_agent.github_authentication_required"),
             }),
             Status::Cancelled { .. } => Some(ConversationStatus::Cancelled),
         }

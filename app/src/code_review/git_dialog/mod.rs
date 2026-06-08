@@ -15,6 +15,7 @@ use pathfinder_geometry::vector::vec2f;
 use warp_core::features::FeatureFlag;
 use warp_core::send_telemetry_from_ctx;
 use warp_core::ui::appearance::Appearance;
+use warp_i18n::tr;
 use warpui::elements::{
     Align, Border, ChildAnchor, ChildView, ClippedScrollStateHandle, ClippedScrollable,
     ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Element, Flex, Hoverable,
@@ -577,7 +578,7 @@ impl GitDialog {
             button.on_click(|ctx| ctx.dispatch_typed_action(GitDialogAction::Confirm))
         });
         let cancel_button = ctx.add_typed_action_view(|_ctx| {
-            ActionButton::new("Cancel", NakedTheme)
+            ActionButton::new(tr("common.cancel"), NakedTheme)
                 .with_size(ButtonSize::Small)
                 .with_height(32.)
                 .on_click(|ctx| ctx.dispatch_typed_action(GitDialogAction::Cancel))
@@ -614,7 +615,7 @@ impl GitDialog {
 
     /// Disables cancel/confirm/close and swaps the confirm label while the
     /// async op is running.
-    fn set_loading(&mut self, loading_label: &'static str, ctx: &mut ViewContext<Self>) {
+    fn set_loading(&mut self, loading_label: String, ctx: &mut ViewContext<Self>) {
         self.loading = true;
         self.confirm_button.update(ctx, |b, ctx| {
             b.set_label(loading_label, ctx);
@@ -641,8 +642,8 @@ impl GitDialog {
                 !commit::is_ready_to_confirm(state, ctx),
                 commit::confirm_tooltip(state, ctx),
             ),
-            GitDialogMode::Push(_) => (false, None),
-            GitDialogMode::CreatePr(state) => (!pr::is_ready_to_confirm(state), None),
+            GitDialogMode::Push(_) => (false, None::<String>),
+            GitDialogMode::CreatePr(state) => (!pr::is_ready_to_confirm(state), None::<String>),
         };
         self.confirm_button.update(ctx, |b, ctx| {
             b.set_disabled(disabled, ctx);

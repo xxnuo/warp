@@ -11,6 +11,7 @@ use session_sharing_protocol::common::SessionId;
 use url::Url;
 use warp_core::report_error;
 use warp_core::ui::theme::WarpTheme;
+use warp_i18n::{tr, tr_with};
 use warpui::color::ColorU;
 use warpui::{SingletonEntity, View, ViewContext};
 
@@ -465,16 +466,16 @@ impl AmbientAgentTaskState {
 impl std::fmt::Display for AmbientAgentTaskState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AmbientAgentTaskState::Queued => write!(f, "Queued"),
-            AmbientAgentTaskState::Pending => write!(f, "Pending"),
-            AmbientAgentTaskState::Claimed => write!(f, "Claimed"),
-            AmbientAgentTaskState::InProgress => write!(f, "In progress"),
-            AmbientAgentTaskState::Succeeded => write!(f, "Done"),
-            AmbientAgentTaskState::Failed => write!(f, "Failed"),
-            AmbientAgentTaskState::Error => write!(f, "Error"),
-            AmbientAgentTaskState::Blocked => write!(f, "Blocked"),
-            AmbientAgentTaskState::Cancelled => write!(f, "Cancelled"),
-            AmbientAgentTaskState::Unknown => write!(f, "Failed"),
+            AmbientAgentTaskState::Queued => write!(f, "{}", tr("agent_status.queued")),
+            AmbientAgentTaskState::Pending => write!(f, "{}", tr("agent_status.pending")),
+            AmbientAgentTaskState::Claimed => write!(f, "{}", tr("agent_status.claimed")),
+            AmbientAgentTaskState::InProgress => write!(f, "{}", tr("agent_status.in_progress")),
+            AmbientAgentTaskState::Succeeded => write!(f, "{}", tr("agent_status.done")),
+            AmbientAgentTaskState::Failed => write!(f, "{}", tr("agent_status.failed")),
+            AmbientAgentTaskState::Error => write!(f, "{}", tr("agent_status.error")),
+            AmbientAgentTaskState::Blocked => write!(f, "{}", tr("agent_status.blocked")),
+            AmbientAgentTaskState::Cancelled => write!(f, "{}", tr("agent_status.cancelled")),
+            AmbientAgentTaskState::Unknown => write!(f, "{}", tr("agent_status.failed")),
         }
     }
 }
@@ -532,10 +533,11 @@ pub fn cancel_task_with_toast<V: View>(task_id: AmbientAgentTaskId, ctx: &mut Vi
         async move { ai_client.cancel_ambient_agent_task(&task_id).await },
         move |_view, result, ctx| {
             let message = match result {
-                Ok(()) => "Task cancelled".to_string(),
+                Ok(()) => tr("ai.task_status.task_cancelled"),
                 Err(e) => {
                     log::error!("Failed to cancel task: {e}");
-                    format!("Failed to cancel task: {e}")
+                    let error = e.to_string();
+                    tr_with("ai.task_status.failed_to_cancel_task", &[("error", &error)])
                 }
             };
             ToastStack::handle(ctx).update(ctx, |toast_stack, ctx| {
